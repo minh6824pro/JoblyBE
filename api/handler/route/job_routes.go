@@ -1,14 +1,15 @@
 package route
 
 import (
-	"Jobly/api/handler/controller"
+	"Jobly/internal/modules"
 
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterJobRoutes(rg *gin.RouterGroup, jobCtrl *controller.JobController) {
+func RegisterJobRoutes(rg *gin.RouterGroup, jobModule *modules.JobModule) {
 	jobs := rg.Group("/jobs")
+	jobs.Use(jobModule.AuthMiddleware.GetAuthIfExists())
 	{
-		jobs.GET("", jobCtrl.GetJobList)
+		jobs.GET("", jobModule.JobController.GetJobList)
 	}
 }

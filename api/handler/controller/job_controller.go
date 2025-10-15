@@ -30,8 +30,13 @@ func (c *JobController) GetJobList(ctx *gin.Context) {
 	// Example: ?keywords=golang&keywords=backend or ?keywords=golang,backend
 	keywords := ctx.QueryArray("keywords")
 
+	userIDCtx, exists := ctx.Get("user_id")
+	userID := uint(0)
+	if exists {
+		userID = userIDCtx.(uint)
+	}
 	// Call service to get job list
-	jobs, err := c.jobService.ListJob(ctx.Request.Context(), page, keywords)
+	jobs, err := c.jobService.ListJob(ctx.Request.Context(), page, keywords, userID)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to fetch jobs",

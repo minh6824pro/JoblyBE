@@ -34,9 +34,9 @@ func main() {
 	api := r.Group("/api")
 
 	job := InitJobModule(db)
-
+	auth := InitAuthModule(db)
 	route.RegisterJobRoutes(api, job)
-
+	route.RegisterAuthRoutes(api, auth)
 	err := r.Run(":8080")
 	if err != nil {
 		log.Println(err)

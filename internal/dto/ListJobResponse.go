@@ -1,4 +1,4 @@
-package httpresponse
+package dto
 
 import (
 	"time"

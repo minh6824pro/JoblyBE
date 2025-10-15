@@ -1,7 +1,7 @@
 package database
 
 import (
-	entities "Jobly/internal/entity"
+	entities "Jobly/internal/entities"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
@@ -12,7 +12,7 @@ import (
 var DB *gorm.DB
 
 func ConnectDatabase() {
-	dsn := os.Getenv("MYSQL_URI")
+	dsn := os.Getenv("JOBLY_MYSQL_URI")
 	database, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
@@ -34,8 +34,10 @@ func ConnectDatabase() {
 
 func AutoMigrate() {
 	err := DB.AutoMigrate(
+		&entities.User{},
 		&entities.Job{},
 		&entities.Company{},
+		&entities.UserTracking{},
 	)
 
 	if err != nil {

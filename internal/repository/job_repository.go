@@ -1,8 +1,8 @@
 package repository
 
 import (
-	"Jobly/api/handler/controller/httpresponse"
-	entities "Jobly/internal/entity"
+	"Jobly/internal/dto"
+	entities "Jobly/internal/entities"
 	"context"
 
 	"gorm.io/gorm"
@@ -13,18 +13,18 @@ type JobGormRepository struct {
 }
 
 type JobRepository interface {
-	GetJobList(ctx context.Context, page int, keywords []string) (httpresponse.ListJobResponse, error)
+	GetJobList(ctx context.Context, page int, keywords []string) (dto.ListJobResponse, error)
 }
 
-func NewJobGormRepository(db *gorm.DB) JobRepository {
+func NewJobRepository(db *gorm.DB) JobRepository {
 	return &JobGormRepository{
 		db: db,
 	}
 }
 
-func (j JobGormRepository) GetJobList(ctx context.Context, page int, keywords []string) (httpresponse.ListJobResponse, error) {
+func (j JobGormRepository) GetJobList(ctx context.Context, page int, keywords []string) (dto.ListJobResponse, error) {
 	var jobs []entities.Job
-	var jobResponses []httpresponse.JobResponse
+	var jobResponses []dto.JobResponse
 	var totalItems int64
 
 	// Pagination settings
@@ -51,7 +51,7 @@ func (j JobGormRepository) GetJobList(ctx context.Context, page int, keywords []
 	err := query.Count(&totalItems).Error
 
 	if err != nil {
-		return httpresponse.ListJobResponse{}, err
+		return dto.ListJobResponse{}, err
 	}
 
 	// Calculate total pages
@@ -66,12 +66,12 @@ func (j JobGormRepository) GetJobList(ctx context.Context, page int, keywords []
 		Find(&jobs).Error
 
 	if err != nil {
-		return httpresponse.ListJobResponse{}, err
+		return dto.ListJobResponse{}, err
 	}
 
 	// Map entities to response
 	for _, job := range jobs {
-		jobResponse := httpresponse.JobResponse{
+		jobResponse := dto.JobResponse{
 			ID:                    job.ID,
 			Name:                  job.Company.Name,
 			LogoURL:               job.Company.LogoURL,
@@ -96,7 +96,7 @@ func (j JobGormRepository) GetJobList(ctx context.Context, page int, keywords []
 		jobResponses = append(jobResponses, jobResponse)
 	}
 
-	return httpresponse.ListJobResponse{
+	return dto.ListJobResponse{
 		Jobs:        jobResponses,
 		CurrentPage: page,
 		TotalPages:  totalPages,
