@@ -9,6 +9,7 @@ require (
 	github.com/go-kratos/swagger-api v1.0.1
 	github.com/google/wire v0.6.0
 	github.com/imroc/req/v3 v3.55.0
+	github.com/spf13/cast v1.10.0
 	go.mongodb.org/mongo-driver v1.17.6
 	go.uber.org/automaxprocs v1.5.1
 	go.uber.org/zap v1.27.0

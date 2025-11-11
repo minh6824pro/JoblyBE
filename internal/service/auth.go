@@ -2,6 +2,7 @@ package service
 
 import (
 	"JobblyBE/internal/biz"
+	"JobblyBE/pkg/configx"
 	"context"
 	"errors"
 
@@ -19,13 +20,14 @@ type AuthService struct {
 }
 
 func NewAuthService(authUC *biz.AuthUseCase, jwtSecret string, logger log.Logger) *AuthService {
+	jwtSecret = configx.GetEnvOrString("JWT_SECRET", jwtSecret)
 	if jwtSecret == "" {
 		panic("JWT secret cannot be empty")
 	}
-	
+
 	logHelper := log.NewHelper(logger)
 	logHelper.Infof("AuthService initialized with JWT secret length: %d", len(jwtSecret))
-	
+
 	return &AuthService{
 		authUC:    authUC,
 		jwtSecret: jwtSecret,
@@ -308,7 +310,7 @@ func (s *AuthService) Logout(ctx context.Context, req *pb.LogoutRequest) (*pb.Lo
 	// 1. Add the access token to a blacklist in Redis with TTL = token expiration time
 	// 2. Add the refresh token to the blacklist if provided
 	// 3. Check blacklist in JWT middleware before validating token
-	
+
 	// Example implementation:
 	// if req.RefreshToken != "" {
 	//     s.authUC.BlacklistToken(ctx, req.RefreshToken)

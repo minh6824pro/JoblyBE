@@ -46,7 +46,7 @@ func (r *userTrackingRepo) CreateUserTracking(ctx context.Context, userTracking 
 		Metadata:     userTracking.Metadata,
 		CreatedAt:    now,
 	}
-	result, err := r.data.db.Collection(CollectionCompanyTracking).InsertOne(ctx, ut)
+	result, err := r.data.db.Collection(CollectionUserTracking).InsertOne(ctx, ut)
 	if err != nil {
 		return nil, err
 	}

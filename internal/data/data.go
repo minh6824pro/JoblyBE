@@ -2,6 +2,7 @@ package data
 
 import (
 	"JobblyBE/internal/conf"
+	"JobblyBE/pkg/configx"
 	"context"
 	"time"
 
@@ -28,11 +29,10 @@ type Data struct {
 }
 
 const (
-	CollectionUser            = "user"
-	CollectionCompany         = "company"
-	CollectionJobPosting      = "job_posting"
-	CollectionUserTracking    = "user_tracking"
-	CollectionCompanyTracking = "company_tracking"
+	CollectionUser         = "user"
+	CollectionCompany      = "company"
+	CollectionJobPosting   = "job_posting"
+	CollectionUserTracking = "user_tracking"
 )
 
 // NewData .
@@ -44,7 +44,7 @@ func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(c.Database.Source))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(configx.GetEnvOrString("DATABASE_SOURCE", c.Database.Source)))
 	if err != nil {
 		helper.Errorf("failed to connect to mongodb: %v", err)
 		return nil, nil, err
@@ -59,7 +59,7 @@ func NewData(c *conf.Data, logger log.Logger) (*Data, func(), error) {
 	helper.Info("successfully connected to mongodb")
 
 	// Get database name from config or use default
-	dbName := c.Database.Name
+	dbName := configx.GetEnvOrString("DATABASE_NAME", c.Database.Name)
 
 	db := client.Database(dbName)
 

@@ -11,7 +11,7 @@ server:
 data:
   database:
     driver: mongodb
-    source: ${MONGO_DATABASE_SOURCE}
+    source: ${DATABASE_SOURCE}
     name: jobly
   redis:
     addr: 127.0.0.1:6379

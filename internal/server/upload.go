@@ -76,7 +76,6 @@ type UploadHandler struct {
 func NewUploadHandler(parserURL string, logger log.Logger, databaseSource string, databaseName string, jwtSecret string) (*UploadHandler, error) {
 
 	log := log.NewHelper(logger)
-
 	// Create MongoDB client
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

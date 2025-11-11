@@ -4,6 +4,7 @@ import (
 	authv1 "JobblyBE/api/auth/v1"
 	jobv1 "JobblyBE/api/job/v1"
 	resumev1 "JobblyBE/api/resume/v1"
+	"JobblyBE/pkg/configx"
 
 	"github.com/go-kratos/swagger-api/openapiv2"
 
@@ -29,7 +30,8 @@ func NewHTTPServer(
 	logger log.Logger,
 ) *http.Server {
 	// JWT secret from config
-	jwtSecret := c.JwtSecret
+	jwtSecret := configx.GetEnvOrString("JWT_SECRET", c.JwtSecret)
+
 	if jwtSecret == "" {
 		log.Fatal("JWT secret is not configured")
 	}
@@ -65,7 +67,7 @@ func NewHTTPServer(
 	resumeParserURL := c.ResumeParserUrl
 
 	// Create upload handler
-	uploadHandler, err := NewUploadHandler(resumeParserURL, logger, cData.Database.Source, cData.Database.Name, jwtSecret)
+	uploadHandler, err := NewUploadHandler(configx.GetEnvOrString("RESUME_PARSER_URL", resumeParserURL), logger, configx.GetEnvOrString("DATABASE_SOURCE", cData.Database.Source), configx.GetEnvOrString("DATABASE_NAME", cData.Database.Name), jwtSecret)
 	if err != nil {
 		panic(err)
 	}
