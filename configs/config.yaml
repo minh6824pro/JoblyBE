@@ -1,0 +1,19 @@
+server:
+  http:
+    addr: 0.0.0.0:8000
+    timeout: 30s
+  grpc:
+    addr: 0.0.0.0:9000
+    timeout: 1s
+  jwt_secret: ${JWT_SECRET}
+  # Resume parser service URL
+  resume_parser_url: ${RESUME_PARSER_URL}
+data:
+  database:
+    driver: mongodb
+    source: ${MONGO_DATABASE_SOURCE}
+    name: jobly
+  redis:
+    addr: 127.0.0.1:6379
+    read_timeout: 0.2s
+    write_timeout: 0.2s

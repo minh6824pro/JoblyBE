@@ -1,0 +1,119 @@
+syntax = "proto3";
+
+package api.resume.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "JobblyBE/api/resume/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.resume.v1";
+
+service Resume {
+	// Create a new resume
+	rpc CreateResume (CreateResumeRequest) returns (ResumeReply) {
+		option (google.api.http) = {
+			post: "/api/v1/resumes"
+			body: "*"
+		};
+	}
+	
+	// Update an existing resume
+	rpc UpdateResume (UpdateResumeRequest) returns (ResumeReply) {
+		option (google.api.http) = {
+			put: "/api/v1/resumes/{id}"
+			body: "*"
+		};
+	}
+	
+	// Get a resume by ID
+	rpc GetResume (GetResumeRequest) returns (ResumeReply) {
+		option (google.api.http) = {
+			get: "/api/v1/resumes/{id}"
+		};
+	}
+	
+	// List all resumes for the authenticated user
+	rpc ListResumes (ListResumesRequest) returns (ListResumesReply) {
+		option (google.api.http) = {
+			get: "/api/v1/resumes"
+		};
+	}
+	
+	// Delete a resume
+	rpc DeleteResume (DeleteResumeRequest) returns (DeleteResumeReply) {
+		option (google.api.http) = {
+			delete: "/api/v1/resumes/{id}"
+		};
+	}
+}
+
+// Resume messages
+message ResumeReply {
+	string id = 1;
+	string user_id = 2;
+	ResumeDetail resume_detail = 3;
+	int32 version = 4;
+	string created_at = 5;
+}
+
+message ResumeDetail {
+	string name = 1;
+	string email = 2;
+	string phone = 3;
+	string summary = 4;
+	repeated string skills = 5;
+	Education education = 6;
+	Experience experience = 7;
+	repeated string certifications = 8;
+	repeated string languages = 9;
+}
+
+message Education {
+	string degree = 1;
+	string institution = 2;
+	string graduation_year = 3;
+}
+
+message Experience {
+	string title = 1;
+	string company = 2;
+	string duration = 3;
+	repeated string responsibilities = 4;
+	repeated string achievements = 5;
+}
+
+// Request/Response messages
+message CreateResumeRequest {
+	ResumeDetail resume_detail = 1;
+}
+
+message UpdateResumeRequest {
+	string id = 1;
+	ResumeDetail resume_detail = 2;
+}
+
+message GetResumeRequest {
+	string id = 1;
+}
+
+message ListResumesRequest {
+	int32 page = 1;
+	int32 page_size = 2;
+}
+
+message ListResumesReply {
+	repeated ResumeReply resumes = 1;
+	int32 total = 2;
+	int32 page = 3;
+	int32 page_size = 4;
+}
+
+message DeleteResumeRequest {
+	string id = 1;
+}
+
+message DeleteResumeReply {
+	bool success = 1;
+	string message = 2;
+}
+
