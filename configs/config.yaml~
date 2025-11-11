@@ -1,0 +1,19 @@
+server:
+  http:
+    addr: 0.0.0.0:8000
+    timeout: 30s
+  grpc:
+    addr: 0.0.0.0:9000
+    timeout: 1s
+  jwt_secret: 8025412c901fbef9d38a9ba27ce906d62660928f3f7b18af54d728332992fd8f
+  # Resume parser service URL
+  resume_parser_url: https://flenvn.studio
+data:
+  database:
+    driver: mongodb
+    source: mongodb://localhost:27017
+    name: jobly
+  redis:
+    addr: 127.0.0.1:6379
+    read_timeout: 0.2s
+    write_timeout: 0.2s

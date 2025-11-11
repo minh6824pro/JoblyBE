@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package api.job.v1;
+
+import "errors/errors.proto";
+
+
+option go_package = "JobblyBE/api/job/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.job.v1";
+
+enum ErrorReason {
+  ERROR_REASON_UNSPECIFIED = 0 [(errors.code) = 500];
+  SYSTEM_ERROR = 1 [(errors.code) = 500];
+  AUTH_ERROR = 2 [(errors.code) = 401];
+  DATA_REQUEST_INVALID = 3 [(errors.code) = 400];
+  USER_NOT_FOUND = 4 [(errors.code) = 404];
+  NOTIFICATION_NOT_FOUND = 5 [(errors.code) = 404];
+  
+  // JWT Authentication Errors
+  JWT_TOKEN_MISSING = 10 [(errors.code) = 401];
+  JWT_TOKEN_INVALID = 11 [(errors.code) = 401];
+  JWT_TOKEN_EXPIRED = 12 [(errors.code) = 401];
+  JWT_TOKEN_NOT_ACTIVE = 13 [(errors.code) = 401];
+  JWT_TOKEN_MALFORMED = 14 [(errors.code) = 401];
+  JWT_CLAIMS_INVALID = 15 [(errors.code) = 401];
+  
+  // User Authentication Errors
+  INVALID_CREDENTIALS = 20 [(errors.code) = 401];
+  USER_ALREADY_EXISTS = 21 [(errors.code) = 409];
+  EMAIL_ALREADY_EXISTS = 22 [(errors.code) = 409];
+  PHONE_ALREADY_EXISTS = 23 [(errors.code) = 409];
+  WEAK_PASSWORD = 24 [(errors.code) = 400];
+  INVALID_EMAIL_FORMAT = 25 [(errors.code) = 400];
+  INVALID_PHONE_FORMAT = 26 [(errors.code) = 400];
+  
+  // Authorization Errors
+  UNAUTHORIZED = 30 [(errors.code) = 401];
+  FORBIDDEN = 31 [(errors.code) = 403];
+  PERMISSION_DENIED = 32 [(errors.code) = 403];
+  
+  // Job Posting Errors
+  JOB_NOT_FOUND = 40 [(errors.code) = 404];
+  JOB_ALREADY_EXISTS = 41 [(errors.code) = 409];
+  INVALID_JOB_DATA = 42 [(errors.code) = 400];
+  JOB_EXPIRED = 43 [(errors.code) = 400];
+  UNAUTHORIZED_JOB_ACTION = 44 [(errors.code) = 403];
+  
+  // Company Errors
+  COMPANY_NOT_FOUND = 50 [(errors.code) = 404];
+  COMPANY_ALREADY_EXISTS = 51 [(errors.code) = 409];
+  INVALID_COMPANY_DATA = 52 [(errors.code) = 400];
+  
+  // Validation Errors
+  INVALID_EMPLOYMENT_TYPE = 60 [(errors.code) = 400];
+  INVALID_EXPERIENCE_LEVEL = 61 [(errors.code) = 400];
+  INVALID_STATUS = 62 [(errors.code) = 400];
+  INVALID_PAGINATION = 63 [(errors.code) = 400];
+}

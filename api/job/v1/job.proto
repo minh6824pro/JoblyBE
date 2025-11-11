@@ -1,0 +1,254 @@
+syntax = "proto3";
+
+package api.job.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "JobblyBE/api/job/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.job.v1";
+
+// Job Posting Service
+service JobPosting {
+	// Create a new job posting
+	rpc CreateJobPosting (CreateJobPostingRequest) returns (JobPostingReply) {
+		option (google.api.http) = {
+			post: "/api/v1/jobs"
+			body: "*"
+		};
+	}
+	
+	// Update an existing job posting
+	rpc UpdateJobPosting (UpdateJobPostingRequest) returns (JobPostingReply) {
+		option (google.api.http) = {
+			put: "/api/v1/jobs/{id}"
+			body: "*"
+		};
+	}
+	
+	// Delete a job posting
+	rpc DeleteJobPosting (DeleteJobPostingRequest) returns (DeleteJobPostingReply) {
+		option (google.api.http) = {
+			delete: "/api/v1/jobs/{id}"
+		};
+	}
+	
+	// Get a single job posting by ID
+	rpc GetJobPosting (GetJobPostingRequest) returns (JobPostingReply) {
+		option (google.api.http) = {
+			get: "/api/v1/jobs/{id}"
+		};
+	}
+	
+	// List all job postings with pagination and filters
+	rpc ListJobPostings (ListJobPostingsRequest) returns (ListJobPostingsReply) {
+		option (google.api.http) = {
+			get: "/api/v1/jobs"
+		};
+	}
+}
+
+// Company Service
+service Company {
+	// Create a new company
+	rpc CreateCompany (CreateCompanyRequest) returns (CompanyReply) {
+		option (google.api.http) = {
+			post: "/api/v1/companies"
+			body: "*"
+		};
+	}
+	
+	// Update an existing company
+	rpc UpdateCompany (UpdateCompanyRequest) returns (CompanyReply) {
+		option (google.api.http) = {
+			put: "/api/v1/companies/{id}"
+			body: "*"
+		};
+	}
+	
+	// Delete a company
+	rpc DeleteCompany (DeleteCompanyRequest) returns (DeleteCompanyReply) {
+		option (google.api.http) = {
+			delete: "/api/v1/companies/{id}"
+		};
+	}
+	
+	// Get a single company by ID
+	rpc GetCompany (GetCompanyRequest) returns (CompanyReply) {
+		option (google.api.http) = {
+			get: "/api/v1/companies/{id}"
+		};
+	}
+	
+	// List all companies with pagination
+	rpc ListCompanies (ListCompaniesRequest) returns (ListCompaniesReply) {
+		option (google.api.http) = {
+			get: "/api/v1/companies"
+		};
+	}
+}
+
+// ==================== Job Posting Messages ====================
+
+message CompanyInfo {
+	string id = 1;
+	string name = 2;
+	string description = 3;
+	string website = 4;
+	string logo_url = 5;
+	string industry = 6;
+	string company_size = 7;
+	string location = 8;
+	string founded_year = 9;
+}
+
+message JobPostingReply {
+	string id = 1;
+	string company_id = 2;
+	CompanyInfo company = 3;
+	string title = 4;
+	string level = 5; // ENTRY, JUNIOR, MID, SENIOR, LEAD
+	string job_type = 6; // FULL_TIME, PART_TIME, CONTRACT, INTERNSHIP
+	double salary_min = 7;
+	double salary_max = 8;
+	string salary_currency = 9; // USD, VND, etc
+	string location = 10;
+	string posted_at = 11;
+	string experience_requirement = 12;
+	string description = 13;
+	string responsibilities = 14;
+	string requirements = 15;
+	string benefits = 16;
+	repeated string job_tech = 17; // Technologies/skills required
+	string created_at = 18;
+}
+
+message CreateJobPostingRequest {
+	string company_id = 1;
+	string title = 2;
+	string level = 3;
+	string job_type = 4;
+	double salary_min = 5;
+	double salary_max = 6;
+	string salary_currency = 7;
+	string location = 8;
+	string posted_at = 9; // ISO 8601 date string
+	string experience_requirement = 10;
+	string description = 11;
+	string responsibilities = 12;
+	string requirements = 13;
+	string benefits = 14;
+	repeated string job_tech = 15;
+}
+
+message UpdateJobPostingRequest {
+	string id = 1;
+	string title = 2;
+	string level = 3;
+	string job_type = 4;
+	double salary_min = 5;
+	double salary_max = 6;
+	string salary_currency = 7;
+	string location = 8;
+	string posted_at = 9;
+	string experience_requirement = 10;
+	string description = 11;
+	string responsibilities = 12;
+	string requirements = 13;
+	string benefits = 14;
+	repeated string job_tech = 15;
+}
+
+message DeleteJobPostingRequest {
+	string id = 1;
+}
+
+message DeleteJobPostingReply {
+	string message = 1;
+}
+
+message GetJobPostingRequest {
+	string id = 1;
+}
+
+message ListJobPostingsRequest {
+	int32 page = 1;
+	int32 page_size = 2;
+	string company_id = 3; // Filter by company
+	string location = 4; // Filter by location
+	string job_type = 5; // Filter by job type
+	string level = 6; // Filter by level
+	string keyword = 7; // Search in title and description
+	repeated string job_tech = 8; // Filter by technologies
+}
+
+message ListJobPostingsReply {
+	repeated JobPostingReply jobs = 1;
+	int32 total = 2;
+	int32 page = 3;
+	int32 page_size = 4;
+}
+
+// ==================== Company Messages ====================
+
+message CompanyReply {
+	string id = 1;
+	string name = 2;
+	string description = 3;
+	string website = 4;
+	string logo_url = 5;
+	string industry = 6;
+	string company_size = 7;
+	string location = 8;
+	string founded_year = 9;
+}
+
+message CreateCompanyRequest {
+	string name = 1;
+	string description = 2;
+	string website = 3;
+	string logo_url = 4;
+	string industry = 5;
+	string company_size = 6;
+	string location = 7;
+	string founded_year = 8;
+}
+
+message UpdateCompanyRequest {
+	string id = 1;
+	string name = 2;
+	string description = 3;
+	string website = 4;
+	string logo_url = 5;
+	string industry = 6;
+	string company_size = 7;
+	string location = 8;
+	string founded_year = 9;
+}
+
+message DeleteCompanyRequest {
+	string id = 1;
+}
+
+message DeleteCompanyReply {
+	bool success = 1;
+}
+
+message GetCompanyRequest {
+	string id = 1;
+}
+
+message ListCompaniesRequest {
+	int32 page = 1;
+	int32 page_size = 2;
+	string industry = 3; // Filter by industry
+	string location = 4; // Filter by location
+	string keyword = 5; // Search in name and description
+}
+
+message ListCompaniesReply {
+	repeated CompanyReply companies = 1;
+	int32 total = 2;
+	int32 page = 3;
+	int32 page_size = 4;
+}
