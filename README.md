@@ -53,21 +53,6 @@ wire
 
 Run the entire stack (Kafka + MongoDB + Application) with auto-seeded data:
 
-**Linux/Mac:**
-
-```bash
-chmod +x start.sh
-./start.sh
-```
-
-**Windows:**
-
-```bash
-start.bat
-```
-
-**Or manually:**
-
 ```bash
 # Create .env file
 cp env.template .env
@@ -79,31 +64,3 @@ docker-compose up -d
 docker-compose logs -f
 ```
 
-📚 **Detailed Documentation:**
-
-- [🚀 QUICKSTART.Docker.md](./QUICKSTART.Docker.md) - Quick start guide (Vietnamese)
-- [📖 README.Docker.md](./README.Docker.md) - Full Docker documentation
-
-### What's Included?
-
-✅ **Kafka** - Message queue (port 9092)  
-✅ **MongoDB** - Database with **auto-seeded data** (port 27017)
-
-- 6 Companies (One Mount, MB Bank, Techcombank, etc.)
-- 7 Job Postings with full details
-
-✅ **JoblyBE Application** - Backend API
-
-- HTTP API: `http://localhost:8000`
-- WebSocket: `ws://localhost:8000/ws`
-- gRPC: `localhost:9090`
-
-### Traditional Docker Build
-
-```bash
-# build
-docker build -t joblybe .
-
-# run
-docker run --rm -p 8000:8000 -p 9000:9000 -v $(pwd)/configs:/data/conf joblybe
-```
