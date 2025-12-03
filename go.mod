@@ -8,7 +8,10 @@ require (
 	github.com/go-kratos/kratos/v2 v2.8.0
 	github.com/go-kratos/swagger-api v1.0.1
 	github.com/google/wire v0.6.0
+	github.com/gorilla/handlers v1.5.2
+	github.com/gorilla/websocket v1.5.3
 	github.com/imroc/req/v3 v3.55.0
+	github.com/segmentio/kafka-go v0.4.49
 	github.com/spf13/cast v1.10.0
 	go.mongodb.org/mongo-driver v1.17.6
 	go.uber.org/automaxprocs v1.5.1
@@ -20,8 +23,10 @@ require (
 require (
 	github.com/andybalholm/brotli v1.2.0 // indirect
 	github.com/cloudflare/circl v1.6.1 // indirect
+	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/icholy/digest v1.1.0 // indirect
+	github.com/pierrec/lz4/v4 v4.1.15 // indirect
 	github.com/quic-go/qpack v0.5.1 // indirect
 	github.com/quic-go/quic-go v0.53.0 // indirect
 	github.com/refraction-networking/utls v1.7.3 // indirect

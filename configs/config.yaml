@@ -3,7 +3,7 @@ server:
     addr: 0.0.0.0:8000
     timeout: 30s
   grpc:
-    addr: 0.0.0.0:9000
+    addr: 0.0.0.0:9090
     timeout: 1s
   jwt_secret: ${JWT_SECRET}
   # Resume parser service URL
@@ -17,3 +17,14 @@ data:
     addr: 127.0.0.1:6379
     read_timeout: 0.2s
     write_timeout: 0.2s
+kafka:
+  brokers:
+    - ${KAFKA_BROKERS:localhost:9092}
+  username: ${KAFKA_USERNAME}
+  password: ${KAFKA_PASSWORD}
+  enable_sasl: false
+  timeout: 30s
+  resume_parse_topic: resume-parse-jobs
+  consumer_group: resume-parser-group
+  num_partitions: 1
+  num_workers: 2

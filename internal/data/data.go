@@ -29,9 +29,9 @@ type Data struct {
 }
 
 const (
-	CollectionUser         = "user"
-	CollectionCompany      = "company"
-	CollectionJobPosting   = "job_posting"
+	CollectionUser         = "users"
+	CollectionCompany      = "companies"
+	CollectionJobPosting   = "job_postings"
 	CollectionUserTracking = "user_tracking"
 )
 

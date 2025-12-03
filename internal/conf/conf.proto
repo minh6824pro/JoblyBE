@@ -8,6 +8,7 @@ import "google/protobuf/duration.proto";
 message Bootstrap {
   Server server = 1;
   Data data = 2;
+  Kafka kafka = 3;
 }
 
 message Server {
@@ -34,4 +35,16 @@ message Data {
     string name = 3 ;
   }
   Database database = 1;
+}
+
+message Kafka {
+  repeated string brokers = 1;
+  string username = 2;
+  string password = 3;
+  bool enable_sasl = 4;
+  google.protobuf.Duration timeout = 5;
+  string resume_parse_topic = 6;
+  string consumer_group = 7;
+  int32 num_partitions = 8;
+  int32 num_workers = 9;
 }

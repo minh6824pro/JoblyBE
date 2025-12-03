@@ -1,0 +1,167 @@
+version: "3.8"
+
+services:
+  # Zookeeper for Kafka
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    hostname: zookeeper
+    container_name: jobly-zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-logs:/var/lib/zookeeper/log
+    networks:
+      - jobly-network
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo 'ruok' | nc localhost 2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Kafka
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    hostname: kafka
+    container_name: jobly-kafka
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9093,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_LOG_RETENTION_HOURS: 168
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks:
+      - jobly-network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "kafka-broker-api-versions",
+          "--bootstrap-server",
+          "localhost:9092",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  # MongoDB
+  mongodb:
+    image: mongo:7.0
+    container_name: jobly-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-admin123}
+      MONGO_INITDB_DATABASE: ${DATABASE_NAME:-jobly}
+    volumes:
+      - mongodb-data:/data/db
+      - mongodb-config:/data/configdb
+      - ./script/mongo-init.js:/docker-entrypoint-initdb.d/01-init.js:ro
+      - ./script/seed_data.js:/docker-entrypoint-initdb.d/02-seed_data.js:ro
+    networks:
+      - jobly-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MongoDB Seed Runner (runs after MongoDB is healthy)
+  mongodb-seed:
+    image: mongo:7.0
+    container_name: jobly-mongodb-seed
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      DB_USERNAME: ${DB_USERNAME:-jobly_user}
+      DB_PASSWORD: ${DB_PASSWORD:-jobly_password_2024}
+      DATABASE_NAME: ${DATABASE_NAME:-jobly}
+    volumes:
+      - ./script/seed_data.js:/seed_data.js:ro
+    networks:
+      - jobly-network
+    command: sh -c "echo 'Waiting for MongoDB to be ready...' && sleep 10 && echo 'Running seed script...' && mongosh --host mongodb --username $$DB_USERNAME --password $$DB_PASSWORD --authenticationDatabase $$DATABASE_NAME $$DATABASE_NAME /seed_data.js && echo 'Seed data completed!'"
+    restart: "no"
+
+  # JoblyBE Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jobly-app
+    depends_on:
+      kafka:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      mongodb-seed:
+        condition: service_completed_successfully
+    ports:
+      - "8000:8000"
+      - "9090:9090"
+    environment:
+      # Server
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      RESUME_PARSER_URL: ${RESUME_PARSER_URL:-http://parser-service:8080}
+
+      # Database
+      DATABASE_SOURCE: mongodb://${DB_USERNAME:-jobly_user}:${DB_PASSWORD:-jobly_password_2024}@mongodb:27017/${DATABASE_NAME:-jobly}
+      DATABASE_NAME: ${DATABASE_NAME:-jobly}
+
+      # Kafka
+      KAFKA_BROKERS: kafka:9093
+      KAFKA_USERNAME: ${KAFKA_USERNAME:-}
+      KAFKA_PASSWORD: ${KAFKA_PASSWORD:-}
+      KAFKA_ENABLE_SASL: ${KAFKA_ENABLE_SASL:-false}
+      KAFKA_RESUME_PARSE_TOPIC: ${KAFKA_RESUME_PARSE_TOPIC:-resume-parse-jobs}
+      KAFKA_CONSUMER_GROUP: ${KAFKA_CONSUMER_GROUP:-resume-parser-group}
+    networks:
+      - jobly-network
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8000/api/v1/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  jobly-network:
+    driver: bridge
+
+volumes:
+  zookeeper-data:
+    driver: local
+  zookeeper-logs:
+    driver: local
+  kafka-data:
+    driver: local
+  mongodb-data:
+    driver: local
+  mongodb-config:
+    driver: local

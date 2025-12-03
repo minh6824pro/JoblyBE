@@ -19,6 +19,8 @@ const companies = [
     company_size: "1001+",
     location: "Vietnam",
     founded_year: "2018",
+    created_at: new Date(),
+    updated_at: new Date(),
   },
   {
     _id: ObjectId(),
@@ -30,6 +32,8 @@ const companies = [
     company_size: "1001+",
     location: "Vietnam",
     founded_year: "1994",
+    created_at: new Date(),
+    updated_at: new Date(),
   },
   {
     _id: ObjectId(),
@@ -41,6 +45,8 @@ const companies = [
     company_size: "1001+",
     location: "Vietnam",
     founded_year: "1993",
+    created_at: new Date(),
+    updated_at: new Date(),
   },
   {
     _id: ObjectId(),
@@ -53,6 +59,8 @@ const companies = [
     company_size: "1001+",
     location: "Vietnam",
     founded_year: "1967",
+    created_at: new Date(),
+    updated_at: new Date(),
   },
   {
     _id: ObjectId(),
@@ -64,6 +72,8 @@ const companies = [
     company_size: "1001+",
     location: "Vietnam",
     founded_year: "1886",
+    created_at: new Date(),
+    updated_at: new Date(),
   },
   {
     _id: ObjectId(),
@@ -75,6 +85,8 @@ const companies = [
     company_size: "501-1000",
     location: "Vietnam",
     founded_year: "1999",
+    created_at: new Date(),
+    updated_at: new Date(),
   },
 ];
 

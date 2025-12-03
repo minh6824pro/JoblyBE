@@ -2,25 +2,23 @@ package server
 
 import (
 	"JobblyBE/internal/data"
+	"JobblyBE/pkg/kafkax"
 	"JobblyBE/pkg/middleware/auth"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"mime/multipart"
 	"net/http"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
-
 	"go.mongodb.org/mongo-driver/bson/primitive"
-
-	"JobblyBE/internal/conf"
-
-	"github.com/imroc/req/v3"
-
-	"github.com/go-kratos/kratos/v2/log"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"github.com/go-kratos/kratos/v2/log"
+	"github.com/imroc/req/v3"
 )
 
 const (
@@ -71,45 +69,63 @@ type UploadHandler struct {
 	log       *log.Helper
 	cli       *req.Client
 	db        *mongo.Database
+	producer  *kafkax.Producer
+	jobRepo   *data.ResumeParseJobRepo
+	topic     string
 }
 
-func NewUploadHandler(parserURL string, logger log.Logger, databaseSource string, databaseName string, jwtSecret string) (*UploadHandler, error) {
+// UploadHandlerConfig holds configuration for UploadHandler
+type UploadHandlerConfig struct {
+	ParserURL      string
+	JwtSecret      string
+	DatabaseSource string
+	DatabaseName   string
+	KafkaTopic     string
+}
 
-	log := log.NewHelper(logger)
+func NewUploadHandler(
+	config *UploadHandlerConfig,
+	producer *kafkax.Producer,
+	jobRepo *data.ResumeParseJobRepo,
+	logger log.Logger,
+) (*UploadHandler, error) {
+	logHelper := log.NewHelper(logger)
+
 	// Create MongoDB client
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(databaseSource))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(config.DatabaseSource))
 	if err != nil {
-		log.Errorf("failed to connect to mongodb: %v", err)
+		logHelper.Errorf("failed to connect to mongodb: %v", err)
 		return nil, err
 	}
 
 	// Ping the database
 	if err := client.Ping(ctx, nil); err != nil {
-		log.Errorf("failed to ping mongodb: %v", err)
+		logHelper.Errorf("failed to ping mongodb: %v", err)
 		return nil, err
 	}
 
-	log.Info("successfully connected to mongodb")
+	logHelper.Info("successfully connected to mongodb for upload handler")
 
-	// Get database name from config or use default
-	dbName := databaseName
-	db := client.Database(dbName)
+	db := client.Database(config.DatabaseName)
 
 	return &UploadHandler{
-		parserURL: parserURL,
-		jwtSecret: jwtSecret,
-		log:       log,
+		parserURL: config.ParserURL,
+		jwtSecret: config.JwtSecret,
+		log:       logHelper,
 		db:        db,
+		producer:  producer,
+		jobRepo:   jobRepo,
+		topic:     config.KafkaTopic,
 		cli: req.C().
-			SetBaseURL(parserURL).
-			SetTimeout(5 * time.Minute), // 5 minutes timeout for parsing
+			SetBaseURL(config.ParserURL).
+			SetTimeout(5 * time.Minute),
 	}, nil
 }
 
-// sendToParserService forwards multipart file to external parser service
+// sendToParserService forwards multipart file to external parser service (for sync mode)
 func (h *UploadHandler) sendToParserService(ctx context.Context, file multipart.File, header *multipart.FileHeader) (*ParserResponse, error) {
 	var result ParserResponse
 	var errRS ServiceErrorResult
@@ -204,7 +220,201 @@ func extractToken(r *http.Request) string {
 	return ""
 }
 
-// HandleUploadResume handles resume file upload and sends to parser service
+// HandleUploadResumeAsync handles resume file upload with async processing via Kafka
+func (h *UploadHandler) HandleUploadResumeAsync(w http.ResponseWriter, r *http.Request) {
+	// Parse JWT from Authorization header
+	token := extractToken(r)
+	var userID string
+
+	if token == "" {
+		h.log.Warn("No token provided")
+		http.Error(w, "Unauthorized: token required", http.StatusUnauthorized)
+		return
+	}
+
+	claims, err := auth.ValidateAccessToken(token, h.jwtSecret)
+	if err != nil || claims == nil {
+		h.log.Warnf("Invalid or expired token: %v", err)
+		http.Error(w, "Unauthorized: invalid token", http.StatusUnauthorized)
+		return
+	}
+	userID = claims.UserID
+	h.log.Infof("User authenticated: %s", userID)
+
+	// Parse multipart form (max 10MB)
+	if err := r.ParseMultipartForm(MaxUploadSize); err != nil {
+		h.log.Errorf("failed to parse multipart form: %v", err)
+		http.Error(w, "Failed to parse form", http.StatusBadRequest)
+		return
+	}
+
+	// Get file from form
+	file, header, err := r.FormFile("file")
+	if err != nil {
+		h.log.Errorf("failed to get file from form: %v", err)
+		http.Error(w, "Failed to get file", http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	h.log.Infof("received file: %s, size: %d bytes", header.Filename, header.Size)
+
+	// Validate file type (must be PDF)
+	contentType := header.Header.Get("Content-Type")
+	if contentType != "application/pdf" {
+		h.log.Errorf("invalid file type: %s", contentType)
+		http.Error(w, "Only PDF files are allowed", http.StatusBadRequest)
+		return
+	}
+
+	// Check if user already has a resume
+	ctx := r.Context()
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		h.log.Errorf("failed to parse user id: %v", err)
+		http.Error(w, "Invalid user ID", http.StatusBadRequest)
+		return
+	}
+
+	var user data.User
+	err = h.db.Collection(data.CollectionUser).FindOne(ctx, bson.M{"_id": userObjID}).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			http.Error(w, "User not found", http.StatusNotFound)
+			return
+		}
+		h.log.Errorf("failed to find user: %v", err)
+		http.Error(w, "Failed to find user", http.StatusInternalServerError)
+		return
+	}
+
+	if len(user.Resume) > 0 {
+		http.Error(w, "You already have a resume. Please update it instead of creating a new one", http.StatusBadRequest)
+		return
+	}
+
+	// Read file data
+	fileData, err := io.ReadAll(file)
+	if err != nil {
+		h.log.Errorf("failed to read file: %v", err)
+		http.Error(w, "Failed to read file", http.StatusInternalServerError)
+		return
+	}
+
+	// Create parse job in database
+	job := &data.ResumeParseJob{
+		UserID:   userObjID,
+		FileName: header.Filename,
+		FileData: fileData,
+		Status:   data.ResumeParseStatusPending,
+	}
+
+	createdJob, err := h.jobRepo.Create(ctx, job)
+	if err != nil {
+		h.log.Errorf("failed to create parse job: %v", err)
+		http.Error(w, "Failed to create parse job", http.StatusInternalServerError)
+		return
+	}
+
+	// Send message to Kafka
+	kafkaMsg := ResumeParseMessage{
+		JobID:    createdJob.ID.Hex(),
+		UserID:   userID,
+		FileName: header.Filename,
+	}
+
+	if err := h.producer.SendMessage(ctx, h.topic, createdJob.ID.Hex(), kafkaMsg); err != nil {
+		h.log.Errorf("failed to send message to Kafka: %v", err)
+		// Update job status to failed
+		h.jobRepo.UpdateStatus(ctx, createdJob.ID.Hex(), data.ResumeParseStatusFailed, "Failed to queue job", "")
+		http.Error(w, "Failed to queue resume parsing job", http.StatusInternalServerError)
+		return
+	}
+
+	h.log.Infof("Resume parse job created and queued: %s", createdJob.ID.Hex())
+
+	// Return success response with job ID
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusAccepted)
+
+	response := map[string]interface{}{
+		"success": true,
+		"message": "Resume upload accepted. Processing will be done asynchronously.",
+		"job_id":  createdJob.ID.Hex(),
+		"status":  string(data.ResumeParseStatusPending),
+	}
+
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		h.log.Errorf("failed to encode response: %v", err)
+	}
+}
+
+// HandleGetJobStatus returns the status of a resume parse job
+func (h *UploadHandler) HandleGetJobStatus(w http.ResponseWriter, r *http.Request) {
+	// Parse JWT from Authorization header
+	token := extractToken(r)
+	if token == "" {
+		http.Error(w, "Unauthorized: token required", http.StatusUnauthorized)
+		return
+	}
+
+	claims, err := auth.ValidateAccessToken(token, h.jwtSecret)
+	if err != nil || claims == nil {
+		http.Error(w, "Unauthorized: invalid token", http.StatusUnauthorized)
+		return
+	}
+
+	// Get job ID from query
+	jobID := r.URL.Query().Get("job_id")
+	if jobID == "" {
+		http.Error(w, "job_id is required", http.StatusBadRequest)
+		return
+	}
+
+	// Get job from database
+	job, err := h.jobRepo.GetByID(r.Context(), jobID)
+	if err != nil {
+		h.log.Errorf("failed to get job: %v", err)
+		http.Error(w, "Failed to get job", http.StatusInternalServerError)
+		return
+	}
+
+	if job == nil {
+		http.Error(w, "Job not found", http.StatusNotFound)
+		return
+	}
+
+	// Check if job belongs to user
+	if job.UserID.Hex() != claims.UserID {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	// Return job status
+	w.Header().Set("Content-Type", "application/json")
+
+	response := map[string]interface{}{
+		"job_id":     job.ID.Hex(),
+		"status":     string(job.Status),
+		"file_name":  job.FileName,
+		"created_at": job.CreatedAt,
+		"updated_at": job.UpdatedAt,
+	}
+
+	if job.ErrorMessage != "" {
+		response["error_message"] = job.ErrorMessage
+	}
+
+	if !job.ResumeID.IsZero() {
+		response["resume_id"] = job.ResumeID.Hex()
+	}
+
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		h.log.Errorf("failed to encode response: %v", err)
+	}
+}
+
+// HandleUploadResume handles resume file upload (sync mode - kept for backward compatibility)
 func (h *UploadHandler) HandleUploadResume(w http.ResponseWriter, r *http.Request) {
 	// Parse JWT from Authorization header manually
 	token := extractToken(r)
@@ -331,40 +541,4 @@ func (h *UploadHandler) HandleUploadResume(w http.ResponseWriter, r *http.Reques
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 		return
 	}
-}
-
-type Database struct {
-	db  *mongo.Database
-	log *log.Helper
-}
-
-func NewDatabase(c *conf.Data, logger log.Logger) (*Database, error) {
-	helper := log.NewHelper(logger)
-
-	// Create MongoDB client
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
-
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(c.Database.Source))
-	if err != nil {
-		helper.Errorf("failed to connect to mongodb: %v", err)
-		return nil, err
-	}
-
-	// Ping the database
-	if err := client.Ping(ctx, nil); err != nil {
-		helper.Errorf("failed to ping mongodb: %v", err)
-		return nil, err
-	}
-
-	helper.Info("successfully connected to mongodb")
-
-	// Get database name from config or use default
-	dbName := c.Database.Name
-	db := client.Database(dbName)
-
-	return &Database{
-		db:  db,
-		log: helper,
-	}, nil
 }
