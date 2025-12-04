@@ -159,6 +159,11 @@ func (h *Hub) SendToUser(userID string, message *WSMessage) {
 
 // SendJobStatus sends a job status update to a user
 func (h *Hub) SendJobStatus(userID string, payload *JobStatusPayload) {
+	// Log the payload being sent for debugging
+	if payload.CVData != nil {
+		h.log.Infof("SendJobStatus: Sending CVData to user %s for job %s", userID, payload.JobID)
+	}
+
 	message := &WSMessage{
 		Type:    WSMessageTypeJobStatus,
 		Payload: payload,

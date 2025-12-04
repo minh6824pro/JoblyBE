@@ -265,7 +265,7 @@ func (h *UploadHandler) HandleUploadResumeAsync(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	// Check if user already has a resume
+	// Read file data
 	ctx := r.Context()
 	userObjID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
@@ -274,6 +274,7 @@ func (h *UploadHandler) HandleUploadResumeAsync(w http.ResponseWriter, r *http.R
 		return
 	}
 
+	// Verify user exists
 	var user data.User
 	err = h.db.Collection(data.CollectionUser).FindOne(ctx, bson.M{"_id": userObjID}).Decode(&user)
 	if err != nil {
@@ -283,11 +284,6 @@ func (h *UploadHandler) HandleUploadResumeAsync(w http.ResponseWriter, r *http.R
 		}
 		h.log.Errorf("failed to find user: %v", err)
 		http.Error(w, "Failed to find user", http.StatusInternalServerError)
-		return
-	}
-
-	if len(user.Resume) > 0 {
-		http.Error(w, "You already have a resume. Please update it instead of creating a new one", http.StatusBadRequest)
 		return
 	}
 
@@ -479,7 +475,7 @@ func (h *UploadHandler) HandleUploadResume(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// Check if user already has a resume
+	// Verify user exists
 	var user data.User
 	err = collection.FindOne(ctx, bson.M{"_id": userIDObj}).Decode(&user)
 	if err != nil {
@@ -490,12 +486,6 @@ func (h *UploadHandler) HandleUploadResume(w http.ResponseWriter, r *http.Reques
 		}
 		h.log.Errorf("failed to find user: %v", err)
 		http.Error(w, "Failed to find user", http.StatusInternalServerError)
-		return
-	}
-
-	if len(user.Resume) > 0 {
-		h.log.Warnf("user already has a resume")
-		http.Error(w, "You already have a resume. Please update it instead of creating a new one", http.StatusBadRequest)
 		return
 	}
 

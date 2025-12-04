@@ -73,15 +73,6 @@ func (uc *ResumeUseCase) CreateResume(ctx context.Context, resume *Resume) (*Res
 		return nil, err
 	}
 
-	// Check if user already has a resume
-	existingResumes, _, err := uc.repo.ListResumes(ctx, resume.UserID, 1, 1)
-	if err != nil {
-		return nil, err
-	}
-	if len(existingResumes) > 0 {
-		return nil, ErrResumeAlreadyExists
-	}
-
 	// Set timestamp and version
 	resume.CreatedAt = time.Now()
 	resume.Version = 1

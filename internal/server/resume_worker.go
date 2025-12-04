@@ -155,6 +155,10 @@ func (w *ResumeWorker) handleMessage(ctx context.Context, msg kafka.Message) err
 		w.log.Errorf("Failed to clear file data: %v", err)
 	}
 
+	// Log CVData for debugging
+	w.log.Infof("Sending CVData via WebSocket - Education count: %d, Experience count: %d",
+		len(parserResp.CVData.Education), len(parserResp.CVData.Experience))
+
 	// Notify user via WebSocket with complete data
 	w.hub.SendJobStatus(parseMsg.UserID, &JobStatusPayload{
 		JobID:    parseMsg.JobID,
@@ -289,7 +293,7 @@ func (w *ResumeWorker) saveResumeToUser(ctx context.Context, userID string, resu
 		return "", fmt.Errorf("invalid user ID: %w", err)
 	}
 
-	// Check if user already has a resume
+	// Verify user exists
 	var user data.User
 	err = w.db.Collection(data.CollectionUser).FindOne(ctx, bson.M{"_id": userObjID}).Decode(&user)
 	if err != nil {
@@ -297,10 +301,6 @@ func (w *ResumeWorker) saveResumeToUser(ctx context.Context, userID string, resu
 			return "", fmt.Errorf("user not found")
 		}
 		return "", fmt.Errorf("failed to find user: %w", err)
-	}
-
-	if len(user.Resume) > 0 {
-		return "", fmt.Errorf("user already has a resume")
 	}
 
 	filter := bson.M{"_id": userObjID}
