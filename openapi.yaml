@@ -885,9 +885,13 @@ components:
                     items:
                         type: string
                 education:
-                    $ref: '#/components/schemas/api.resume.v1.Education'
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.resume.v1.Education'
                 experience:
-                    $ref: '#/components/schemas/api.resume.v1.Experience'
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.resume.v1.Experience'
                 certifications:
                     type: array
                     items:

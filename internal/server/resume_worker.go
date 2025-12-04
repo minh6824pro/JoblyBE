@@ -240,28 +240,26 @@ func (w *ResumeWorker) sendToParserService(ctx context.Context, fileData []byte,
 func (w *ResumeWorker) convertToDataResume(parserResp *ParserResponse) *data.Resume {
 	cvData := parserResp.CVData
 
-	// Convert first education (if exists)
-	var education data.Education
-	if len(cvData.Education) > 0 {
-		edu := cvData.Education[0]
-		education = data.Education{
+	// Convert all education
+	educationList := make([]data.Education, 0, len(cvData.Education))
+	for _, edu := range cvData.Education {
+		educationList = append(educationList, data.Education{
 			Degree:         edu.Degree,
 			Institution:    edu.Institution,
 			GraduationYear: fmt.Sprintf("%d", edu.GraduationYear),
-		}
+		})
 	}
 
-	// Convert first experience (if exists)
-	var experience data.Experience
-	if len(cvData.Experience) > 0 {
-		exp := cvData.Experience[0]
-		experience = data.Experience{
+	// Convert all experience
+	experienceList := make([]data.Experience, 0, len(cvData.Experience))
+	for _, exp := range cvData.Experience {
+		experienceList = append(experienceList, data.Experience{
 			Title:            exp.Title,
 			Company:          exp.Company,
 			Duration:         exp.Duration,
 			Responsibilities: exp.Responsibilities,
 			Achievements:     exp.Achievements,
-		}
+		})
 	}
 
 	resumeDetail := data.ResumeDetail{
@@ -270,8 +268,8 @@ func (w *ResumeWorker) convertToDataResume(parserResp *ParserResponse) *data.Res
 		Phone:          cvData.Phone,
 		Summary:        cvData.Summary,
 		Skills:         cvData.Skills,
-		Education:      education,
-		Experience:     experience,
+		Education:      educationList,
+		Experience:     experienceList,
 		Certifications: cvData.Certifications,
 		Languages:      cvData.Languages,
 	}

@@ -62,8 +62,8 @@ message ResumeDetail {
 	string phone = 3;
 	string summary = 4;
 	repeated string skills = 5;
-	Education education = 6;
-	Experience experience = 7;
+	repeated Education education = 6;
+	repeated Experience experience = 7;
 	repeated string certifications = 8;
 	repeated string languages = 9;
 }

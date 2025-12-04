@@ -23,8 +23,8 @@ type ResumeDetail struct {
 	Phone          string
 	Summary        string
 	Skills         []string
-	Education      *Education
-	Experience     *Experience
+	Education      []*Education
+	Experience     []*Experience
 	Certifications []string
 	Languages      []string
 }

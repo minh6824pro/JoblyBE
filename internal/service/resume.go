@@ -138,37 +138,47 @@ func (s *ResumeService) resumeDetailToPb(detail *biz.ResumeDetail) *pb.ResumeDet
 		Phone:          detail.Phone,
 		Summary:        detail.Summary,
 		Skills:         detail.Skills,
-		Education:      s.educationToPb(detail.Education),
-		Experience:     s.experienceToPb(detail.Experience),
+		Education:      s.educationArrayToPb(detail.Education),
+		Experience:     s.experienceArrayToPb(detail.Experience),
 		Certifications: detail.Certifications,
 		Languages:      detail.Languages,
 	}
 }
 
-func (s *ResumeService) educationToPb(edu *biz.Education) *pb.Education {
-	if edu == nil {
+func (s *ResumeService) educationArrayToPb(eduList []*biz.Education) []*pb.Education {
+	if eduList == nil {
 		return nil
 	}
-
-	return &pb.Education{
-		Degree:         edu.Degree,
-		Institution:    edu.Institution,
-		GraduationYear: edu.GraduationYear,
+	result := make([]*pb.Education, 0, len(eduList))
+	for _, edu := range eduList {
+		if edu != nil {
+			result = append(result, &pb.Education{
+				Degree:         edu.Degree,
+				Institution:    edu.Institution,
+				GraduationYear: edu.GraduationYear,
+			})
+		}
 	}
+	return result
 }
 
-func (s *ResumeService) experienceToPb(exp *biz.Experience) *pb.Experience {
-	if exp == nil {
+func (s *ResumeService) experienceArrayToPb(expList []*biz.Experience) []*pb.Experience {
+	if expList == nil {
 		return nil
 	}
-
-	return &pb.Experience{
-		Title:            exp.Title,
-		Company:          exp.Company,
-		Duration:         exp.Duration,
-		Responsibilities: exp.Responsibilities,
-		Achievements:     exp.Achievements,
+	result := make([]*pb.Experience, 0, len(expList))
+	for _, exp := range expList {
+		if exp != nil {
+			result = append(result, &pb.Experience{
+				Title:            exp.Title,
+				Company:          exp.Company,
+				Duration:         exp.Duration,
+				Responsibilities: exp.Responsibilities,
+				Achievements:     exp.Achievements,
+			})
+		}
 	}
+	return result
 }
 
 func (s *ResumeService) protoToResumeDetail(detail *pb.ResumeDetail) *biz.ResumeDetail {
@@ -182,35 +192,45 @@ func (s *ResumeService) protoToResumeDetail(detail *pb.ResumeDetail) *biz.Resume
 		Phone:          detail.Phone,
 		Summary:        detail.Summary,
 		Skills:         detail.Skills,
-		Education:      s.protoToEducation(detail.Education),
-		Experience:     s.protoToExperience(detail.Experience),
+		Education:      s.protoToEducationArray(detail.Education),
+		Experience:     s.protoToExperienceArray(detail.Experience),
 		Certifications: detail.Certifications,
 		Languages:      detail.Languages,
 	}
 }
 
-func (s *ResumeService) protoToEducation(edu *pb.Education) *biz.Education {
-	if edu == nil {
+func (s *ResumeService) protoToEducationArray(eduList []*pb.Education) []*biz.Education {
+	if eduList == nil {
 		return nil
 	}
-
-	return &biz.Education{
-		Degree:         edu.Degree,
-		Institution:    edu.Institution,
-		GraduationYear: edu.GraduationYear,
+	result := make([]*biz.Education, 0, len(eduList))
+	for _, edu := range eduList {
+		if edu != nil {
+			result = append(result, &biz.Education{
+				Degree:         edu.Degree,
+				Institution:    edu.Institution,
+				GraduationYear: edu.GraduationYear,
+			})
+		}
 	}
+	return result
 }
 
-func (s *ResumeService) protoToExperience(exp *pb.Experience) *biz.Experience {
-	if exp == nil {
+func (s *ResumeService) protoToExperienceArray(expList []*pb.Experience) []*biz.Experience {
+	if expList == nil {
 		return nil
 	}
-
-	return &biz.Experience{
-		Title:            exp.Title,
-		Company:          exp.Company,
-		Duration:         exp.Duration,
-		Responsibilities: exp.Responsibilities,
-		Achievements:     exp.Achievements,
+	result := make([]*biz.Experience, 0, len(expList))
+	for _, exp := range expList {
+		if exp != nil {
+			result = append(result, &biz.Experience{
+				Title:            exp.Title,
+				Company:          exp.Company,
+				Duration:         exp.Duration,
+				Responsibilities: exp.Responsibilities,
+				Achievements:     exp.Achievements,
+			})
+		}
 	}
+	return result
 }

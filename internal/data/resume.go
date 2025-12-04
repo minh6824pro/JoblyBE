@@ -19,15 +19,15 @@ type Resume struct {
 }
 
 type ResumeDetail struct {
-	Name           string     `bson:"name"`
-	Email          string     `bson:"email"`
-	Phone          string     `bson:"phone"`
-	Summary        string     `bson:"summary"`
-	Skills         []string   `bson:"skill"`
-	Education      Education  `bson:"education"`
-	Experience     Experience `bson:"experience"`
-	Certifications []string   `bson:"certifications"`
-	Languages      []string   `bson:"languages"`
+	Name           string       `bson:"name"`
+	Email          string       `bson:"email"`
+	Phone          string       `bson:"phone"`
+	Summary        string       `bson:"summary"`
+	Skills         []string     `bson:"skill"`
+	Education      []Education  `bson:"education"`
+	Experience     []Experience `bson:"experience"`
+	Certifications []string     `bson:"certifications"`
+	Languages      []string     `bson:"languages"`
 }
 
 type Education struct {
@@ -75,8 +75,8 @@ func (r *resumeRepo) CreateResume(ctx context.Context, resume *biz.Resume) (*biz
 			Phone:          resume.ResumeDetail.Phone,
 			Summary:        resume.ResumeDetail.Summary,
 			Skills:         resume.ResumeDetail.Skills,
-			Education:      r.toEducationDoc(resume.ResumeDetail.Education),
-			Experience:     r.toExperienceDoc(resume.ResumeDetail.Experience),
+			Education:      r.toEducationDocsArray(resume.ResumeDetail.Education),
+			Experience:     r.toExperienceDocsArray(resume.ResumeDetail.Experience),
 			Certifications: resume.ResumeDetail.Certifications,
 			Languages:      resume.ResumeDetail.Languages,
 		},
@@ -133,8 +133,8 @@ func (r *resumeRepo) UpdateResume(ctx context.Context, resume *biz.Resume) (*biz
 				Phone:          resume.ResumeDetail.Phone,
 				Summary:        resume.ResumeDetail.Summary,
 				Skills:         resume.ResumeDetail.Skills,
-				Education:      r.toEducationDoc(resume.ResumeDetail.Education),
-				Experience:     r.toExperienceDoc(resume.ResumeDetail.Experience),
+				Education:      r.toEducationDocsArray(resume.ResumeDetail.Education),
+				Experience:     r.toExperienceDocsArray(resume.ResumeDetail.Experience),
 				Certifications: resume.ResumeDetail.Certifications,
 				Languages:      resume.ResumeDetail.Languages,
 			},
@@ -282,8 +282,8 @@ func (r *resumeRepo) toBiz(doc *Resume, userID string) *biz.Resume {
 			Phone:          doc.ResumeDetail.Phone,
 			Summary:        doc.ResumeDetail.Summary,
 			Skills:         doc.ResumeDetail.Skills,
-			Education:      r.toEducationBiz(&doc.ResumeDetail.Education),
-			Experience:     r.toExperienceBiz(&doc.ResumeDetail.Experience),
+			Education:      r.toEducationBizArray(doc.ResumeDetail.Education),
+			Experience:     r.toExperienceBizArray(doc.ResumeDetail.Experience),
 			Certifications: doc.ResumeDetail.Certifications,
 			Languages:      doc.ResumeDetail.Languages,
 		},
@@ -292,50 +292,70 @@ func (r *resumeRepo) toBiz(doc *Resume, userID string) *biz.Resume {
 	}
 }
 
-func (r *resumeRepo) toEducationBiz(doc *Education) *biz.Education {
-	if doc == nil {
+func (r *resumeRepo) toEducationBizArray(docs []Education) []*biz.Education {
+	if docs == nil {
 		return nil
 	}
-	return &biz.Education{
-		Degree:         doc.Degree,
-		Institution:    doc.Institution,
-		GraduationYear: doc.GraduationYear,
+	result := make([]*biz.Education, 0, len(docs))
+	for i := range docs {
+		result = append(result, &biz.Education{
+			Degree:         docs[i].Degree,
+			Institution:    docs[i].Institution,
+			GraduationYear: docs[i].GraduationYear,
+		})
 	}
+	return result
 }
 
-func (r *resumeRepo) toEducationDoc(edu *biz.Education) Education {
-	if edu == nil {
-		return Education{}
-	}
-	return Education{
-		Degree:         edu.Degree,
-		Institution:    edu.Institution,
-		GraduationYear: edu.GraduationYear,
-	}
-}
-
-func (r *resumeRepo) toExperienceBiz(doc *Experience) *biz.Experience {
-	if doc == nil {
+func (r *resumeRepo) toEducationDocsArray(edus []*biz.Education) []Education {
+	if edus == nil {
 		return nil
 	}
-	return &biz.Experience{
-		Title:            doc.Title,
-		Company:          doc.Company,
-		Duration:         doc.Duration,
-		Responsibilities: doc.Responsibilities,
-		Achievements:     doc.Achievements,
+	result := make([]Education, 0, len(edus))
+	for _, edu := range edus {
+		if edu != nil {
+			result = append(result, Education{
+				Degree:         edu.Degree,
+				Institution:    edu.Institution,
+				GraduationYear: edu.GraduationYear,
+			})
+		}
 	}
+	return result
 }
 
-func (r *resumeRepo) toExperienceDoc(exp *biz.Experience) Experience {
-	if exp == nil {
-		return Experience{}
+func (r *resumeRepo) toExperienceBizArray(docs []Experience) []*biz.Experience {
+	if docs == nil {
+		return nil
 	}
-	return Experience{
-		Title:            exp.Title,
-		Company:          exp.Company,
-		Duration:         exp.Duration,
-		Responsibilities: exp.Responsibilities,
-		Achievements:     exp.Achievements,
+	result := make([]*biz.Experience, 0, len(docs))
+	for i := range docs {
+		result = append(result, &biz.Experience{
+			Title:            docs[i].Title,
+			Company:          docs[i].Company,
+			Duration:         docs[i].Duration,
+			Responsibilities: docs[i].Responsibilities,
+			Achievements:     docs[i].Achievements,
+		})
 	}
+	return result
+}
+
+func (r *resumeRepo) toExperienceDocsArray(exps []*biz.Experience) []Experience {
+	if exps == nil {
+		return nil
+	}
+	result := make([]Experience, 0, len(exps))
+	for _, exp := range exps {
+		if exp != nil {
+			result = append(result, Experience{
+				Title:            exp.Title,
+				Company:          exp.Company,
+				Duration:         exp.Duration,
+				Responsibilities: exp.Responsibilities,
+				Achievements:     exp.Achievements,
+			})
+		}
+	}
+	return result
 }

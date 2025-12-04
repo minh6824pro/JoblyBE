@@ -106,8 +106,8 @@ type ResumeDetail struct {
 	Phone          string                 `protobuf:"bytes,3,opt,name=phone,proto3" json:"phone,omitempty"`
 	Summary        string                 `protobuf:"bytes,4,opt,name=summary,proto3" json:"summary,omitempty"`
 	Skills         []string               `protobuf:"bytes,5,rep,name=skills,proto3" json:"skills,omitempty"`
-	Education      *Education             `protobuf:"bytes,6,opt,name=education,proto3" json:"education,omitempty"`
-	Experience     *Experience            `protobuf:"bytes,7,opt,name=experience,proto3" json:"experience,omitempty"`
+	Education      []*Education           `protobuf:"bytes,6,rep,name=education,proto3" json:"education,omitempty"`
+	Experience     []*Experience          `protobuf:"bytes,7,rep,name=experience,proto3" json:"experience,omitempty"`
 	Certifications []string               `protobuf:"bytes,8,rep,name=certifications,proto3" json:"certifications,omitempty"`
 	Languages      []string               `protobuf:"bytes,9,rep,name=languages,proto3" json:"languages,omitempty"`
 	unknownFields  protoimpl.UnknownFields
@@ -179,14 +179,14 @@ func (x *ResumeDetail) GetSkills() []string {
 	return nil
 }
 
-func (x *ResumeDetail) GetEducation() *Education {
+func (x *ResumeDetail) GetEducation() []*Education {
 	if x != nil {
 		return x.Education
 	}
 	return nil
 }
 
-func (x *ResumeDetail) GetExperience() *Experience {
+func (x *ResumeDetail) GetExperience() []*Experience {
 	if x != nil {
 		return x.Experience
 	}
@@ -718,9 +718,9 @@ const file_resume_v1_resume_proto_rawDesc = "" +
 	"\x05phone\x18\x03 \x01(\tR\x05phone\x12\x18\n" +
 	"\asummary\x18\x04 \x01(\tR\asummary\x12\x16\n" +
 	"\x06skills\x18\x05 \x03(\tR\x06skills\x126\n" +
-	"\teducation\x18\x06 \x01(\v2\x18.api.resume.v1.EducationR\teducation\x129\n" +
+	"\teducation\x18\x06 \x03(\v2\x18.api.resume.v1.EducationR\teducation\x129\n" +
 	"\n" +
-	"experience\x18\a \x01(\v2\x19.api.resume.v1.ExperienceR\n" +
+	"experience\x18\a \x03(\v2\x19.api.resume.v1.ExperienceR\n" +
 	"experience\x12&\n" +
 	"\x0ecertifications\x18\b \x03(\tR\x0ecertifications\x12\x1c\n" +
 	"\tlanguages\x18\t \x03(\tR\tlanguages\"n\n" +
