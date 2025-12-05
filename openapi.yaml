@@ -472,6 +472,24 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.resume.v1.DeleteResumeReply'
+    /api/v1/users/tracking/jd_tos:
+        post:
+            tags:
+                - Resume
+            operationId: Resume_CreateTrackingJDTOS
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.resume.v1.CreateTrackingJDTOSRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.resume.v1.CreateTrackingJDTOSReply'
 components:
     schemas:
         api.auth.v1.AuthReply:
@@ -820,6 +838,17 @@ components:
                 resumeDetail:
                     $ref: '#/components/schemas/api.resume.v1.ResumeDetail'
             description: Request/Response messages
+        api.resume.v1.CreateTrackingJDTOSReply:
+            type: object
+            properties: {}
+        api.resume.v1.CreateTrackingJDTOSRequest:
+            type: object
+            properties:
+                jobId:
+                    type: string
+                timeOnSight:
+                    type: integer
+                    format: int32
         api.resume.v1.DeleteResumeReply:
             type: object
             properties:

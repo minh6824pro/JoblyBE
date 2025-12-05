@@ -20,6 +20,7 @@ var _ = binding.EncodeURL
 const _ = http.SupportPackageIsVersion1
 
 const OperationResumeCreateResume = "/api.resume.v1.Resume/CreateResume"
+const OperationResumeCreateTrackingJDTOS = "/api.resume.v1.Resume/CreateTrackingJDTOS"
 const OperationResumeDeleteResume = "/api.resume.v1.Resume/DeleteResume"
 const OperationResumeGetResume = "/api.resume.v1.Resume/GetResume"
 const OperationResumeListResumes = "/api.resume.v1.Resume/ListResumes"
@@ -28,6 +29,7 @@ const OperationResumeUpdateResume = "/api.resume.v1.Resume/UpdateResume"
 type ResumeHTTPServer interface {
 	// CreateResume Create a new resume
 	CreateResume(context.Context, *CreateResumeRequest) (*ResumeReply, error)
+	CreateTrackingJDTOS(context.Context, *CreateTrackingJDTOSRequest) (*CreateTrackingJDTOSReply, error)
 	// DeleteResume Delete a resume
 	DeleteResume(context.Context, *DeleteResumeRequest) (*DeleteResumeReply, error)
 	// GetResume Get a resume by ID
@@ -45,6 +47,7 @@ func RegisterResumeHTTPServer(s *http.Server, srv ResumeHTTPServer) {
 	r.GET("/api/v1/resumes/{id}", _Resume_GetResume0_HTTP_Handler(srv))
 	r.GET("/api/v1/resumes", _Resume_ListResumes0_HTTP_Handler(srv))
 	r.DELETE("/api/v1/resumes/{id}", _Resume_DeleteResume0_HTTP_Handler(srv))
+	r.POST("/api/v1/users/tracking/jd_tos", _Resume_CreateTrackingJDTOS0_HTTP_Handler(srv))
 }
 
 func _Resume_CreateResume0_HTTP_Handler(srv ResumeHTTPServer) func(ctx http.Context) error {
@@ -157,9 +160,32 @@ func _Resume_DeleteResume0_HTTP_Handler(srv ResumeHTTPServer) func(ctx http.Cont
 	}
 }
 
+func _Resume_CreateTrackingJDTOS0_HTTP_Handler(srv ResumeHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateTrackingJDTOSRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationResumeCreateTrackingJDTOS)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateTrackingJDTOS(ctx, req.(*CreateTrackingJDTOSRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*CreateTrackingJDTOSReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type ResumeHTTPClient interface {
 	// CreateResume Create a new resume
 	CreateResume(ctx context.Context, req *CreateResumeRequest, opts ...http.CallOption) (rsp *ResumeReply, err error)
+	CreateTrackingJDTOS(ctx context.Context, req *CreateTrackingJDTOSRequest, opts ...http.CallOption) (rsp *CreateTrackingJDTOSReply, err error)
 	// DeleteResume Delete a resume
 	DeleteResume(ctx context.Context, req *DeleteResumeRequest, opts ...http.CallOption) (rsp *DeleteResumeReply, err error)
 	// GetResume Get a resume by ID
@@ -184,6 +210,19 @@ func (c *ResumeHTTPClientImpl) CreateResume(ctx context.Context, in *CreateResum
 	pattern := "/api/v1/resumes"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationResumeCreateResume))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func (c *ResumeHTTPClientImpl) CreateTrackingJDTOS(ctx context.Context, in *CreateTrackingJDTOSRequest, opts ...http.CallOption) (*CreateTrackingJDTOSReply, error) {
+	var out CreateTrackingJDTOSReply
+	pattern := "/api/v1/users/tracking/jd_tos"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationResumeCreateTrackingJDTOS))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {

@@ -12,6 +12,7 @@ type TrackingType string
 
 const (
 	TrackingJobFilter TrackingType = "tracking_job_filter"
+	TrackingJDTOS                  = "tracking_user_jd_tos"
 )
 
 type UserTracking struct {
@@ -22,18 +23,25 @@ type UserTracking struct {
 	CreatedAt    time.Time          `bson:"created_at" json:"created_at"`
 }
 
+type UserJDTOS struct {
+	JobID       primitive.ObjectID `bson:"job_id" json:"job_id"`
+	TimeOnSight int32              `bson:"time_on_sight" json:"time_on_sight"`
+}
 type UserTrackingRepo interface {
 	CreateUserTracking(ctx context.Context, userTracking *UserTracking) (*UserTracking, error)
+	FindAndUpdateUserTrackingJDTOS(ctx context.Context, userID, jobID primitive.ObjectID, additionalTime int32) (*UserTracking, error)
 }
 
 type UserTrackingUseCase struct {
 	UserTrackingRepo UserTrackingRepo
+	jobRepo          JobPostingRepo
 	log              *log.Helper
 }
 
-func NewUserTrackingUseCase(userRepo UserTrackingRepo, logger log.Logger) *UserTrackingUseCase {
+func NewUserTrackingUseCase(userRepo UserTrackingRepo, jobRepo JobPostingRepo, logger log.Logger) *UserTrackingUseCase {
 	return &UserTrackingUseCase{
 		UserTrackingRepo: userRepo,
+		jobRepo:          jobRepo,
 		log:              log.NewHelper(logger),
 	}
 }
@@ -46,7 +54,7 @@ func (uc *UserTrackingUseCase) CreateUserTrackingJobFilter(ctx context.Context, 
 
 	// Build metadata with only non-empty fields
 	metadata := make(map[string]interface{})
-	
+
 	if filter.CompanyID != "" {
 		metadata["company_id"] = filter.CompanyID
 	}
@@ -83,4 +91,45 @@ func (uc *UserTrackingUseCase) CreateUserTrackingJobFilter(ctx context.Context, 
 		return err
 	}
 	return nil
+}
+
+func (uc *UserTrackingUseCase) CreateUserTrackingJDTOS(ctx context.Context, userID, JobID string, tOS int32) error {
+	userIDObject, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return err
+	}
+	jobIDObject, err := primitive.ObjectIDFromHex(JobID)
+	if err != nil {
+		return err
+	}
+
+	// Check if job exists
+	job, err := uc.jobRepo.GetJobPosting(ctx, JobID)
+	if err != nil {
+		return err
+	}
+	if job == nil {
+		return ErrJobNotFound
+	}
+
+	// Try to find and update existing tracking first
+	_, err = uc.UserTrackingRepo.FindAndUpdateUserTrackingJDTOS(ctx, userIDObject, jobIDObject, tOS)
+	if err == nil {
+		// Successfully updated existing tracking
+		return nil
+	}
+
+	// If not found, create new tracking
+	now := time.Now()
+	userTracking := &UserTracking{
+		UserID:       userIDObject,
+		TrackingType: TrackingJDTOS,
+		Metadata: UserJDTOS{
+			JobID:       jobIDObject,
+			TimeOnSight: tOS,
+		},
+		CreatedAt: now,
+	}
+	_, err = uc.UserTrackingRepo.CreateUserTracking(ctx, userTracking)
+	return err
 }

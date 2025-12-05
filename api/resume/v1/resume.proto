@@ -45,8 +45,21 @@ service Resume {
 			delete: "/api/v1/resumes/{id}"
 		};
 	}
-}
 
+	rpc CreateTrackingJDTOS (CreateTrackingJDTOSRequest) returns (CreateTrackingJDTOSReply) {
+		option (google.api.http) = {
+			post: "/api/v1/users/tracking/jd_tos",
+			body: "*"
+		};
+	}
+}
+message CreateTrackingJDTOSRequest{
+	string job_id =1;
+	int32 time_on_sight=2;
+}
+message CreateTrackingJDTOSReply{
+
+}
 // Resume messages
 message ResumeReply {
 	string id = 1;

@@ -1,20 +1,20 @@
 package service
 
 import (
-	"context"
-
 	pb "JobblyBE/api/resume/v1"
 	"JobblyBE/internal/biz"
 	"JobblyBE/pkg/middleware/auth"
+	"context"
 )
 
 type ResumeService struct {
 	pb.UnimplementedResumeServer
-	uc *biz.ResumeUseCase
+	uc       *biz.ResumeUseCase
+	tracking *biz.UserTrackingUseCase
 }
 
-func NewResumeService(uc *biz.ResumeUseCase) *ResumeService {
-	return &ResumeService{uc: uc}
+func NewResumeService(uc *biz.ResumeUseCase, tracking *biz.UserTrackingUseCase) *ResumeService {
+	return &ResumeService{uc: uc, tracking: tracking}
 }
 
 func (s *ResumeService) CreateResume(ctx context.Context, req *pb.CreateResumeRequest) (*pb.ResumeReply, error) {
@@ -114,6 +114,17 @@ func (s *ResumeService) DeleteResume(ctx context.Context, req *pb.DeleteResumeRe
 		Success: true,
 		Message: "Resume deleted successfully",
 	}, nil
+}
+
+func (s *ResumeService) CreateTrackingJDTOS(ctx context.Context, req *pb.CreateTrackingJDTOSRequest) (*pb.CreateTrackingJDTOSReply, error) {
+	claims, err := auth.GetClaimsFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.tracking.CreateUserTrackingJDTOS(ctx, claims.UserID, req.JobId, req.TimeOnSight); err != nil {
+		return nil, err
+	}
+	return &pb.CreateTrackingJDTOSReply{}, nil
 }
 
 // Helper functions to convert between proto and biz models
