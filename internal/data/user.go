@@ -3,6 +3,7 @@ package data
 import (
 	"JobblyBE/internal/biz"
 	"context"
+	"errors"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/log"
@@ -13,17 +14,19 @@ import (
 
 // User struct for MongoDB
 type User struct {
-	ID          primitive.ObjectID `bson:"_id,omitempty"`
-	FullName    string             `bson:"full_name"`
-	Email       string             `bson:"email"`
-	Password    string             `bson:"password"` // hashed password
-	PhoneNumber string             `bson:"phone_number"`
-	Role        string             `bson:"role"`
-	Active      bool               `bson:"active"`
-	Resume      []Resume           `bson:"resume"`
-	LastLogin   *time.Time         `bson:"last_login,omitempty"`
-	CreatedAt   time.Time          `bson:"created_at"`
-	UpdatedAt   time.Time          `bson:"updated_at"`
+	ID          primitive.ObjectID   `bson:"_id,omitempty"`
+	FullName    string               `bson:"full_name"`
+	Email       string               `bson:"email"`
+	Password    string               `bson:"password"` // hashed password
+	PhoneNumber string               `bson:"phone_number"`
+	Role        string               `bson:"role"`
+	Active      bool                 `bson:"active"`
+	Resume      []Resume             `bson:"resume"`
+	SavedJdID   []primitive.ObjectID `bson:"saved_jd_id,omitempty"`
+
+	LastLogin *time.Time `bson:"last_login,omitempty"`
+	CreatedAt time.Time  `bson:"created_at"`
+	UpdatedAt time.Time  `bson:"updated_at"`
 }
 
 type userRepo struct {
@@ -153,6 +156,108 @@ func (r *userRepo) UpdateUser(ctx context.Context, user *biz.User) error {
 	}
 
 	return nil
+}
+
+// AddSavedJob adds a job to user's saved jobs
+func (r *userRepo) AddSavedJob(ctx context.Context, userID, jobID string) error {
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return err
+	}
+	jobObjID, err := primitive.ObjectIDFromHex(jobID)
+	if err != nil {
+		return err
+	}
+
+	// Check if already saved
+	filter := bson.M{
+		"_id":         userObjID,
+		"saved_jd_id": jobObjID,
+	}
+	count, err := r.data.db.Collection(CollectionUser).CountDocuments(ctx, filter)
+	if err != nil {
+		r.log.Errorf("failed to check saved job: %v", err)
+		return err
+	}
+	if count > 0 {
+		return errors.New("job already saved")
+	}
+
+	// Add to array
+	update := bson.M{
+		"$addToSet": bson.M{"saved_jd_id": jobObjID},
+		"$set":      bson.M{"updated_at": time.Now()},
+	}
+
+	_, err = r.data.db.Collection(CollectionUser).UpdateOne(
+		ctx,
+		bson.M{"_id": userObjID},
+		update,
+	)
+	if err != nil {
+		r.log.Errorf("failed to add saved job: %v", err)
+		return err
+	}
+
+	return nil
+}
+
+// RemoveSavedJob removes a job from user's saved jobs
+func (r *userRepo) RemoveSavedJob(ctx context.Context, userID, jobID string) error {
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return err
+	}
+	jobObjID, err := primitive.ObjectIDFromHex(jobID)
+	if err != nil {
+		return err
+	}
+
+	update := bson.M{
+		"$pull": bson.M{"saved_jd_id": jobObjID},
+		"$set":  bson.M{"updated_at": time.Now()},
+	}
+
+	_, err = r.data.db.Collection(CollectionUser).UpdateOne(
+		ctx,
+		bson.M{"_id": userObjID},
+		update,
+	)
+	if err != nil {
+		r.log.Errorf("failed to remove saved job: %v", err)
+		return err
+	}
+
+	return nil
+}
+
+// GetSavedJobIDs gets user's saved job IDs
+func (r *userRepo) GetSavedJobIDs(ctx context.Context, userID string) ([]string, error) {
+	userObjID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	var user User
+	err = r.data.db.Collection(CollectionUser).FindOne(
+		ctx,
+		bson.M{"_id": userObjID},
+	).Decode(&user)
+
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return []string{}, nil
+		}
+		r.log.Errorf("failed to get user: %v", err)
+		return nil, err
+	}
+
+	jobIDs := make([]string, 0, len(user.SavedJdID))
+	for _, id := range user.SavedJdID {
+		jobIDs = append(jobIDs, id.Hex())
+	}
+
+	return jobIDs, nil
 }
 
 // toBiz converts data layer User to biz layer User

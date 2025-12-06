@@ -4,44 +4,19 @@ import (
 	"context"
 	"errors"
 
-	"time"
-
 	"github.com/go-kratos/kratos/v2/log"
 	"golang.org/x/crypto/bcrypt"
 )
 
 var (
-	ErrUserNotFound = errors.New("user not found")
-	ErrUserAlreadyExists = errors.New("user already exists")
+	ErrUserNotFound       = errors.New("user not found")
+	ErrUserAlreadyExists  = errors.New("user already exists")
 	ErrInvalidCredentials = errors.New("invalid credentials")
-	ErrUserInactive = errors.New("user account is inactive")
-	ErrWeakPassword = errors.New("password is too weak")
-	ErrInvalidEmail = errors.New("invalid email format")
-	ErrInvalidPhone = errors.New("invalid phone format")
+	ErrUserInactive       = errors.New("user account is inactive")
+	ErrWeakPassword       = errors.New("password is too weak")
+	ErrInvalidEmail       = errors.New("invalid email format")
+	ErrInvalidPhone       = errors.New("invalid phone format")
 )
-
-// User entity in business layer
-type User struct {
-	UserID      string
-	FullName    string
-	Email       string
-	Password    string // hashed password
-	PhoneNumber string
-	Role        Role
-	Active      bool
-	LastLogin   *time.Time
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-}
-
-// UserRepo interface định nghĩa các methods để tương tác với database
-type UserRepo interface {
-	CreateUser(ctx context.Context, user *User) (*User, error)
-	GetUserByEmail(ctx context.Context, email string) (*User, error)
-	GetUserByID(ctx context.Context, id string) (*User, error)
-	UpdateLastLogin(ctx context.Context, userID string) error
-	UpdateUser(ctx context.Context, user *User) error
-}
 
 // AuthUseCase handles authentication business logic
 type AuthUseCase struct {

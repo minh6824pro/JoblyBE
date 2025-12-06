@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package api.user.v1;
+
+import "errors/errors.proto";
+
+option go_package = "JobblyBE/api/user/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.user.v1";
+
+enum ErrorReason {
+  ERROR_REASON_UNSPECIFIED = 0 [(errors.code) = 500];
+  SYSTEM_ERROR = 1 [(errors.code) = 500];
+  DATA_REQUEST_INVALID = 2 [(errors.code) = 400];
+  
+  // Job related errors
+  JOB_NOT_FOUND = 10 [(errors.code) = 404];
+  JOB_ALREADY_SAVED = 11 [(errors.code) = 400];
+  JOB_NOT_SAVED = 12 [(errors.code) = 400];
+}

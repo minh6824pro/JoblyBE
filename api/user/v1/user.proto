@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+package api.user.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "JobblyBE/api/user/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.user.v1";
+
+service User {
+	rpc CreateTrackingJDTOS (CreateTrackingJDTOSRequest) returns (CreateTrackingJDTOSReply) {
+		option (google.api.http) = {
+			post: "/api/v1/users/tracking/jd_tos",
+			body: "*"
+		};
+	}
+
+	// Save a job
+	rpc SaveJob (SaveJobRequest) returns (SaveJobReply) {
+		option (google.api.http) = {
+			post: "/api/v1/users/saved-jobs"
+			body: "*"
+		};
+	}
+
+	// Unsave a job
+	rpc UnsaveJob (UnsaveJobRequest) returns (UnsaveJobReply) {
+		option (google.api.http) = {
+			delete: "/api/v1/users/saved-jobs/{job_id}"
+		};
+	}
+
+	// Get all saved jobs
+	rpc GetSavedJobs (GetSavedJobsRequest) returns (GetSavedJobsReply) {
+		option (google.api.http) = {
+			get: "/api/v1/users/saved-jobs"
+		};
+	}
+}
+
+message CreateTrackingJDTOSRequest {
+	string job_id = 1;
+	int32 time_on_sight = 2;
+}
+
+message CreateTrackingJDTOSReply {
+}
+
+message SaveJobRequest {
+	string job_id = 1;
+}
+
+message SaveJobReply {
+	bool success = 1;
+	string message = 2;
+}
+
+message UnsaveJobRequest {
+	string job_id = 1;
+}
+
+message UnsaveJobReply {
+	bool success = 1;
+	string message = 2;
+}
+
+message GetSavedJobsRequest {
+	int32 page = 1;
+	int32 page_size = 2;
+}
+
+message GetSavedJobsReply {
+	repeated JobPosting jobs = 1;
+	int32 total = 2;
+	int32 page = 3;
+	int32 page_size = 4;
+}
+
+// JobPosting message (same structure as in job.proto)
+message JobPosting {
+	string id = 1;
+	string company_id = 2;
+	string title = 3;
+	string level = 4;
+	string job_type = 5;
+	double salary_min = 6;
+	double salary_max = 7;
+	string salary_currency = 8;
+	string location = 9;
+	string posted_at = 10;
+	string experience_requirement = 11;
+	string description = 12;
+	string responsibilities = 13;
+	string requirements = 14;
+	string benefits = 15;
+	repeated string job_tech = 16;
+	string created_at = 17;
+}

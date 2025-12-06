@@ -472,16 +472,40 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.resume.v1.DeleteResumeReply'
-    /api/v1/users/tracking/jd_tos:
+    /api/v1/users/saved-jobs:
+        get:
+            tags:
+                - User
+            description: Get all saved jobs
+            operationId: User_GetSavedJobs
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.user.v1.GetSavedJobsReply'
         post:
             tags:
-                - Resume
-            operationId: Resume_CreateTrackingJDTOS
+                - User
+            description: Save a job
+            operationId: User_SaveJob
             requestBody:
                 content:
                     application/json:
                         schema:
-                            $ref: '#/components/schemas/api.resume.v1.CreateTrackingJDTOSRequest'
+                            $ref: '#/components/schemas/api.user.v1.SaveJobRequest'
                 required: true
             responses:
                 "200":
@@ -489,7 +513,44 @@ paths:
                     content:
                         application/json:
                             schema:
-                                $ref: '#/components/schemas/api.resume.v1.CreateTrackingJDTOSReply'
+                                $ref: '#/components/schemas/api.user.v1.SaveJobReply'
+    /api/v1/users/saved-jobs/{jobId}:
+        delete:
+            tags:
+                - User
+            description: Unsave a job
+            operationId: User_UnsaveJob
+            parameters:
+                - name: jobId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.user.v1.UnsaveJobReply'
+    /api/v1/users/tracking/jd_tos:
+        post:
+            tags:
+                - User
+            operationId: User_CreateTrackingJDTOS
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.user.v1.CreateTrackingJDTOSRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.user.v1.CreateTrackingJDTOSReply'
 components:
     schemas:
         api.auth.v1.AuthReply:
@@ -838,17 +899,6 @@ components:
                 resumeDetail:
                     $ref: '#/components/schemas/api.resume.v1.ResumeDetail'
             description: Request/Response messages
-        api.resume.v1.CreateTrackingJDTOSReply:
-            type: object
-            properties: {}
-        api.resume.v1.CreateTrackingJDTOSRequest:
-            type: object
-            properties:
-                jobId:
-                    type: string
-                timeOnSight:
-                    type: integer
-                    format: int32
         api.resume.v1.DeleteResumeReply:
             type: object
             properties:
@@ -951,6 +1001,94 @@ components:
                     type: string
                 resumeDetail:
                     $ref: '#/components/schemas/api.resume.v1.ResumeDetail'
+        api.user.v1.CreateTrackingJDTOSReply:
+            type: object
+            properties: {}
+        api.user.v1.CreateTrackingJDTOSRequest:
+            type: object
+            properties:
+                jobId:
+                    type: string
+                timeOnSight:
+                    type: integer
+                    format: int32
+        api.user.v1.GetSavedJobsReply:
+            type: object
+            properties:
+                jobs:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.user.v1.JobPosting'
+                total:
+                    type: integer
+                    format: int32
+                page:
+                    type: integer
+                    format: int32
+                pageSize:
+                    type: integer
+                    format: int32
+        api.user.v1.JobPosting:
+            type: object
+            properties:
+                id:
+                    type: string
+                companyId:
+                    type: string
+                title:
+                    type: string
+                level:
+                    type: string
+                jobType:
+                    type: string
+                salaryMin:
+                    type: number
+                    format: double
+                salaryMax:
+                    type: number
+                    format: double
+                salaryCurrency:
+                    type: string
+                location:
+                    type: string
+                postedAt:
+                    type: string
+                experienceRequirement:
+                    type: string
+                description:
+                    type: string
+                responsibilities:
+                    type: string
+                requirements:
+                    type: string
+                benefits:
+                    type: string
+                jobTech:
+                    type: array
+                    items:
+                        type: string
+                createdAt:
+                    type: string
+            description: JobPosting message (same structure as in job.proto)
+        api.user.v1.SaveJobReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                message:
+                    type: string
+        api.user.v1.SaveJobRequest:
+            type: object
+            properties:
+                jobId:
+                    type: string
+        api.user.v1.UnsaveJobReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                message:
+                    type: string
 tags:
     - name: Auth
     - name: Company
@@ -958,3 +1096,4 @@ tags:
     - name: JobPosting
       description: Job Posting Service
     - name: Resume
+    - name: User

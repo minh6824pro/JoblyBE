@@ -19,12 +19,11 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	Resume_CreateResume_FullMethodName        = "/api.resume.v1.Resume/CreateResume"
-	Resume_UpdateResume_FullMethodName        = "/api.resume.v1.Resume/UpdateResume"
-	Resume_GetResume_FullMethodName           = "/api.resume.v1.Resume/GetResume"
-	Resume_ListResumes_FullMethodName         = "/api.resume.v1.Resume/ListResumes"
-	Resume_DeleteResume_FullMethodName        = "/api.resume.v1.Resume/DeleteResume"
-	Resume_CreateTrackingJDTOS_FullMethodName = "/api.resume.v1.Resume/CreateTrackingJDTOS"
+	Resume_CreateResume_FullMethodName = "/api.resume.v1.Resume/CreateResume"
+	Resume_UpdateResume_FullMethodName = "/api.resume.v1.Resume/UpdateResume"
+	Resume_GetResume_FullMethodName    = "/api.resume.v1.Resume/GetResume"
+	Resume_ListResumes_FullMethodName  = "/api.resume.v1.Resume/ListResumes"
+	Resume_DeleteResume_FullMethodName = "/api.resume.v1.Resume/DeleteResume"
 )
 
 // ResumeClient is the client API for Resume service.
@@ -41,7 +40,6 @@ type ResumeClient interface {
 	ListResumes(ctx context.Context, in *ListResumesRequest, opts ...grpc.CallOption) (*ListResumesReply, error)
 	// Delete a resume
 	DeleteResume(ctx context.Context, in *DeleteResumeRequest, opts ...grpc.CallOption) (*DeleteResumeReply, error)
-	CreateTrackingJDTOS(ctx context.Context, in *CreateTrackingJDTOSRequest, opts ...grpc.CallOption) (*CreateTrackingJDTOSReply, error)
 }
 
 type resumeClient struct {
@@ -102,16 +100,6 @@ func (c *resumeClient) DeleteResume(ctx context.Context, in *DeleteResumeRequest
 	return out, nil
 }
 
-func (c *resumeClient) CreateTrackingJDTOS(ctx context.Context, in *CreateTrackingJDTOSRequest, opts ...grpc.CallOption) (*CreateTrackingJDTOSReply, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateTrackingJDTOSReply)
-	err := c.cc.Invoke(ctx, Resume_CreateTrackingJDTOS_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // ResumeServer is the server API for Resume service.
 // All implementations must embed UnimplementedResumeServer
 // for forward compatibility.
@@ -126,7 +114,6 @@ type ResumeServer interface {
 	ListResumes(context.Context, *ListResumesRequest) (*ListResumesReply, error)
 	// Delete a resume
 	DeleteResume(context.Context, *DeleteResumeRequest) (*DeleteResumeReply, error)
-	CreateTrackingJDTOS(context.Context, *CreateTrackingJDTOSRequest) (*CreateTrackingJDTOSReply, error)
 	mustEmbedUnimplementedResumeServer()
 }
 
@@ -151,9 +138,6 @@ func (UnimplementedResumeServer) ListResumes(context.Context, *ListResumesReques
 }
 func (UnimplementedResumeServer) DeleteResume(context.Context, *DeleteResumeRequest) (*DeleteResumeReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteResume not implemented")
-}
-func (UnimplementedResumeServer) CreateTrackingJDTOS(context.Context, *CreateTrackingJDTOSRequest) (*CreateTrackingJDTOSReply, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateTrackingJDTOS not implemented")
 }
 func (UnimplementedResumeServer) mustEmbedUnimplementedResumeServer() {}
 func (UnimplementedResumeServer) testEmbeddedByValue()                {}
@@ -266,24 +250,6 @@ func _Resume_DeleteResume_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Resume_CreateTrackingJDTOS_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateTrackingJDTOSRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ResumeServer).CreateTrackingJDTOS(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: Resume_CreateTrackingJDTOS_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ResumeServer).CreateTrackingJDTOS(ctx, req.(*CreateTrackingJDTOSRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // Resume_ServiceDesc is the grpc.ServiceDesc for Resume service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -310,10 +276,6 @@ var Resume_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteResume",
 			Handler:    _Resume_DeleteResume_Handler,
-		},
-		{
-			MethodName: "CreateTrackingJDTOS",
-			Handler:    _Resume_CreateTrackingJDTOS_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
