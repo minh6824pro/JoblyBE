@@ -45,6 +45,13 @@ service Resume {
 			delete: "/api/v1/resumes/{id}"
 		};
 	}
+	
+	// Generate CV description using ChatGPT
+	rpc GenerateCVDescription (GenerateCVDescriptionRequest) returns (GenerateCVDescriptionReply) {
+		option (google.api.http) = {
+			post: "/api/v1/resumes/{resume_id}/generate-description"
+		};
+	}
 }
 // Resume messages
 message ResumeReply {
@@ -114,5 +121,13 @@ message DeleteResumeRequest {
 message DeleteResumeReply {
 	bool success = 1;
 	string message = 2;
+}
+
+message GenerateCVDescriptionRequest {
+	string resume_id = 1;
+}
+
+message GenerateCVDescriptionReply {
+	string description = 1;
 }
 

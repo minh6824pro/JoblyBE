@@ -115,6 +115,23 @@ func (s *ResumeService) DeleteResume(ctx context.Context, req *pb.DeleteResumeRe
 	}, nil
 }
 
+func (s *ResumeService) GenerateCVDescription(ctx context.Context, req *pb.GenerateCVDescriptionRequest) (*pb.GenerateCVDescriptionReply, error) {
+	// Get user ID from JWT claims
+	claims, err := auth.GetClaimsFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	description, err := s.uc.GenerateCVDescription(ctx, req.ResumeId, claims.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.GenerateCVDescriptionReply{
+		Description: description,
+	}, nil
+}
+
 // Helper functions to convert between proto and biz models
 func (s *ResumeService) resumeToPb(resume *biz.Resume) *pb.ResumeReply {
 	return &pb.ResumeReply{

@@ -1,6 +1,8 @@
 package biz
 
 import (
+	"JobblyBE/pkg/configx"
+	"JobblyBE/pkg/openai"
 	"context"
 	"time"
 
@@ -54,15 +56,19 @@ type ResumeRepo interface {
 
 // ResumeUseCase is the use case for resume operations
 type ResumeUseCase struct {
-	repo ResumeRepo
-	log  *log.Helper
+	repo       ResumeRepo
+	trackingUC *UserTrackingUseCase
+	openAIKey  string
+	log        *log.Helper
 }
 
 // NewResumeUseCase creates a new resume use case
-func NewResumeUseCase(repo ResumeRepo, logger log.Logger) *ResumeUseCase {
+func NewResumeUseCase(repo ResumeRepo, trackingUC *UserTrackingUseCase, logger log.Logger) *ResumeUseCase {
 	return &ResumeUseCase{
-		repo: repo,
-		log:  log.NewHelper(logger),
+		repo:       repo,
+		trackingUC: trackingUC,
+		openAIKey:  configx.GetEnvOrString("OPENAI_API_KEY", ""),
+		log:        log.NewHelper(logger),
 	}
 }
 
@@ -172,6 +178,159 @@ func (uc *ResumeUseCase) validateResume(resume *Resume) error {
 	}
 
 	return nil
+}
+
+// GenerateCVDescription generates a CV description using ChatGPT based on CV data and most viewed job
+func (uc *ResumeUseCase) GenerateCVDescription(ctx context.Context, resumeID, userID string) (string, error) {
+	// Get resume
+	resume, err := uc.GetResume(ctx, resumeID, userID)
+	if err != nil {
+		return "", err
+	}
+
+	var prompt string
+
+	// Try to get most viewed job
+	job, err := uc.trackingUC.GetMostViewedJobByUser(ctx, userID)
+	if err != nil {
+		// No tracking found, just use CV info
+		uc.log.Info("No job tracking found for user, generating description based on CV only")
+		prompt = uc.buildPromptWithCVOnly(resume.ResumeDetail)
+	} else {
+		// Build prompt with CV and job info
+		prompt = uc.buildPromptWithJobAndCV(resume.ResumeDetail, job)
+	}
+
+	// Call ChatGPT API
+	description, err := uc.callChatGPT(ctx, prompt)
+	if err != nil {
+		return "", err
+	}
+
+	return description, nil
+}
+
+// buildPromptWithCVOnly creates a prompt using only CV information
+func (uc *ResumeUseCase) buildPromptWithCVOnly(cv *ResumeDetail) string {
+	prompt := "Based on the following CV information, write a professional and compelling summary/description for this candidate:\n\n"
+	prompt += "Name: " + cv.Name + "\n"
+	prompt += "Email: " + cv.Email + "\n"
+	if cv.Phone != "" {
+		prompt += "Phone: " + cv.Phone + "\n"
+	}
+	if cv.Summary != "" {
+		prompt += "Current Summary: " + cv.Summary + "\n"
+	}
+
+	if len(cv.Skills) > 0 {
+		prompt += "\nSkills:\n"
+		for _, skill := range cv.Skills {
+			prompt += "- " + skill + "\n"
+		}
+	}
+
+	if len(cv.Education) > 0 {
+		prompt += "\nEducation:\n"
+		for _, edu := range cv.Education {
+			prompt += "- " + edu.Degree + " at " + edu.Institution + " (" + edu.GraduationYear + ")\n"
+		}
+	}
+
+	if len(cv.Experience) > 0 {
+		prompt += "\nExperience:\n"
+		for _, exp := range cv.Experience {
+			prompt += "- " + exp.Title + " at " + exp.Company + " (" + exp.Duration + ")\n"
+			for _, resp := range exp.Responsibilities {
+				prompt += "  * " + resp + "\n"
+			}
+		}
+	}
+
+	prompt += "\nIMPORTANT: Write the summary in FIRST PERSON perspective (using 'I', 'my', 'me'), as if the candidate is writing about themselves.\n"
+	prompt += "Write a concise, professional summary (2-3 paragraphs) that highlights the key strengths, experiences, and qualifications. Focus on career achievements and what makes this candidate stand out.\n"
+	prompt += "Start with statements like 'I am...', 'I have experience in...', 'My expertise includes...', etc."
+
+	return prompt
+}
+
+// buildPromptWithJobAndCV creates a prompt using both CV and job information
+func (uc *ResumeUseCase) buildPromptWithJobAndCV(cv *ResumeDetail, job *JobPosting) string {
+	prompt := "Based on the following CV information and the job position the candidate is most interested in, write a professional and compelling summary/description tailored for this specific role:\n\n"
+	prompt += "TARGET JOB:\n"
+	prompt += "Position: " + job.Title + "\n"
+	if job.Company != nil {
+		prompt += "Company: " + job.Company.Name + "\n"
+	}
+	if job.Description != "" {
+		prompt += "Job Description: " + job.Description + "\n"
+	}
+	if job.Requirements != "" {
+		prompt += "Requirements: " + job.Requirements + "\n"
+	}
+
+	prompt += "\nCANDIDATE CV:\n"
+	prompt += "Name: " + cv.Name + "\n"
+	if cv.Summary != "" {
+		prompt += "Current Summary: " + cv.Summary + "\n"
+	}
+
+	if len(cv.Skills) > 0 {
+		prompt += "\nSkills:\n"
+		for _, skill := range cv.Skills {
+			prompt += "- " + skill + "\n"
+		}
+	}
+
+	if len(cv.Education) > 0 {
+		prompt += "\nEducation:\n"
+		for _, edu := range cv.Education {
+			prompt += "- " + edu.Degree + " at " + edu.Institution + " (" + edu.GraduationYear + ")\n"
+		}
+	}
+
+	if len(cv.Experience) > 0 {
+		prompt += "\nExperience:\n"
+		for _, exp := range cv.Experience {
+			prompt += "- " + exp.Title + " at " + exp.Company + " (" + exp.Duration + ")\n"
+			for _, resp := range exp.Responsibilities {
+				prompt += "  * " + resp + "\n"
+			}
+		}
+	}
+
+	prompt += "\nIMPORTANT: Write the summary in FIRST PERSON perspective (using 'I', 'my', 'me'), as if the candidate is writing about themselves.\n"
+	prompt += "Write a concise, professional summary (2-3 paragraphs) that:\n"
+	prompt += "1. Highlights how my experience and skills align with the target job requirements\n"
+	prompt += "2. Emphasizes my relevant achievements and qualifications for this specific position\n"
+	companyInfo := "this company"
+	if job.Company != nil {
+		companyInfo = "this role at " + job.Company.Name
+	}
+	prompt += "3. Shows why I would be a great fit for " + companyInfo + "\n"
+	prompt += "Start with statements like 'I am...', 'I have...', 'My background includes...', etc."
+
+	return prompt
+}
+
+// callChatGPT makes an API call to OpenAI's ChatGPT
+func (uc *ResumeUseCase) callChatGPT(ctx context.Context, prompt string) (string, error) {
+	if uc.openAIKey == "" {
+		return "", errors.BadRequest("OPENAI_API_KEY_NOT_CONFIGURED", "OpenAI API key is not configured")
+	}
+
+	uc.log.Info("Calling ChatGPT API with prompt length: ", len(prompt))
+
+	// Create OpenAI client
+	client := openai.NewClient(uc.openAIKey)
+
+	// Call ChatGPT
+	response, err := client.CreateChatCompletion(ctx, prompt)
+	if err != nil {
+		uc.log.Errorf("Failed to call ChatGPT: %v", err)
+		return "", errors.InternalServer("CHATGPT_API_ERROR", "Failed to generate CV description")
+	}
+
+	return response, nil
 }
 
 // Error definitions

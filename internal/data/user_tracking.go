@@ -9,6 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type UserTracking struct {
@@ -84,4 +85,35 @@ func (r *userTrackingRepo) FindAndUpdateUserTrackingJDTOS(ctx context.Context, u
 	}
 
 	return r.toBiz(&ut), nil
+}
+
+// GetMostViewedJobByUser gets the tracking with highest time_on_sight for a user
+func (r *userTrackingRepo) GetMostViewedJobByUser(ctx context.Context, userID primitive.ObjectID) (*biz.UserJDTOS, error) {
+	// Find all JDTOS trackings for this user
+	filter := bson.M{
+		"user_id":       userID,
+		"tracking_type": biz.TrackingJDTOS,
+	}
+	// Sort by time_on_sight descending, limit 1
+	opts := options.FindOne().SetSort(bson.M{"metadata.time_on_sight": -1})
+
+	var ut UserTracking
+	err := r.data.db.Collection(CollectionUserTracking).FindOne(ctx, filter, opts).Decode(&ut)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, err
+		}
+		r.log.Errorf("failed to get most viewed job: %v", err)
+		return nil, err
+	}
+
+	// Extract metadata
+	metadata := ut.Metadata.(primitive.M)
+	jobID := metadata["job_id"].(primitive.ObjectID)
+	timeOnSight := metadata["time_on_sight"].(int32)
+
+	return &biz.UserJDTOS{
+		JobID:       jobID,
+		TimeOnSight: timeOnSight,
+	}, nil
 }

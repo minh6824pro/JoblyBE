@@ -588,6 +588,25 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.resume.v1.DeleteResumeReply'
+    /api/v1/resumes/{resumeId}/generate-description:
+        post:
+            tags:
+                - Resume
+            description: Generate CV description using ChatGPT
+            operationId: Resume_GenerateCVDescription
+            parameters:
+                - name: resumeId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.resume.v1.GenerateCVDescriptionReply'
     /api/v1/users/applications:
         get:
             tags:
@@ -1250,6 +1269,11 @@ components:
                     type: array
                     items:
                         type: string
+        api.resume.v1.GenerateCVDescriptionReply:
+            type: object
+            properties:
+                description:
+                    type: string
         api.resume.v1.ListResumesReply:
             type: object
             properties:

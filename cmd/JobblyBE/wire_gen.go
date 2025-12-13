@@ -42,7 +42,7 @@ func wireApp(confServer *conf.Server, confData *conf.Data, kafka *conf.Kafka, lo
 	companyUseCase := biz.NewCompanyUseCase(companyRepo, logger)
 	companyService := service.NewCompanyService(companyUseCase)
 	resumeRepo := data.NewResumeRepo(dataData, logger)
-	resumeUseCase := biz.NewResumeUseCase(resumeRepo, logger)
+	resumeUseCase := biz.NewResumeUseCase(resumeRepo, userTrackingUseCase, logger)
 	resumeService := service.NewResumeService(resumeUseCase)
 	userUseCase := biz.NewUserUseCase(userRepo, jobPostingRepo, logger)
 	userService := service.NewUserService(userUseCase, userTrackingUseCase)

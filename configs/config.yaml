@@ -8,6 +8,8 @@ server:
   jwt_secret: ${JWT_SECRET}
   # Resume parser service URL
   resume_parser_url: ${RESUME_PARSER_URL}
+  # OpenAI API key for ChatGPT
+  openai_api_key: ${OPENAI_API_KEY}
 data:
   database:
     driver: mongodb

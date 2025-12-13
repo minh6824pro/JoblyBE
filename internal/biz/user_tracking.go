@@ -30,6 +30,7 @@ type UserJDTOS struct {
 type UserTrackingRepo interface {
 	CreateUserTracking(ctx context.Context, userTracking *UserTracking) (*UserTracking, error)
 	FindAndUpdateUserTrackingJDTOS(ctx context.Context, userID, jobID primitive.ObjectID, additionalTime int32) (*UserTracking, error)
+	GetMostViewedJobByUser(ctx context.Context, userID primitive.ObjectID) (*UserJDTOS, error)
 }
 
 type UserTrackingUseCase struct {
@@ -132,4 +133,27 @@ func (uc *UserTrackingUseCase) CreateUserTrackingJDTOS(ctx context.Context, user
 	}
 	_, err = uc.UserTrackingRepo.CreateUserTracking(ctx, userTracking)
 	return err
+}
+
+// GetMostViewedJobByUser gets the job with highest time on sight for a user
+func (uc *UserTrackingUseCase) GetMostViewedJobByUser(ctx context.Context, userID string) (*JobPosting, error) {
+	userIDObject, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get tracking with highest time on sight
+	tracking, err := uc.UserTrackingRepo.GetMostViewedJobByUser(ctx, userIDObject)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get the job details
+	jobID := tracking.JobID.Hex()
+	job, err := uc.jobRepo.GetJobPosting(ctx, jobID)
+	if err != nil {
+		return nil, err
+	}
+
+	return job, nil
 }

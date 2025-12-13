@@ -700,6 +700,94 @@ func (x *DeleteResumeReply) GetMessage() string {
 	return ""
 }
 
+type GenerateCVDescriptionRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ResumeId      string                 `protobuf:"bytes,1,opt,name=resume_id,json=resumeId,proto3" json:"resume_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GenerateCVDescriptionRequest) Reset() {
+	*x = GenerateCVDescriptionRequest{}
+	mi := &file_resume_v1_resume_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GenerateCVDescriptionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GenerateCVDescriptionRequest) ProtoMessage() {}
+
+func (x *GenerateCVDescriptionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_resume_v1_resume_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GenerateCVDescriptionRequest.ProtoReflect.Descriptor instead.
+func (*GenerateCVDescriptionRequest) Descriptor() ([]byte, []int) {
+	return file_resume_v1_resume_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *GenerateCVDescriptionRequest) GetResumeId() string {
+	if x != nil {
+		return x.ResumeId
+	}
+	return ""
+}
+
+type GenerateCVDescriptionReply struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Description   string                 `protobuf:"bytes,1,opt,name=description,proto3" json:"description,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GenerateCVDescriptionReply) Reset() {
+	*x = GenerateCVDescriptionReply{}
+	mi := &file_resume_v1_resume_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GenerateCVDescriptionReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GenerateCVDescriptionReply) ProtoMessage() {}
+
+func (x *GenerateCVDescriptionReply) ProtoReflect() protoreflect.Message {
+	mi := &file_resume_v1_resume_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GenerateCVDescriptionReply.ProtoReflect.Descriptor instead.
+func (*GenerateCVDescriptionReply) Descriptor() ([]byte, []int) {
+	return file_resume_v1_resume_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *GenerateCVDescriptionReply) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
 var File_resume_v1_resume_proto protoreflect.FileDescriptor
 
 const file_resume_v1_resume_proto_rawDesc = "" +
@@ -754,13 +842,18 @@ const file_resume_v1_resume_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"G\n" +
 	"\x11DeleteResumeReply\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage2\xad\x04\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\";\n" +
+	"\x1cGenerateCVDescriptionRequest\x12\x1b\n" +
+	"\tresume_id\x18\x01 \x01(\tR\bresumeId\">\n" +
+	"\x1aGenerateCVDescriptionReply\x12 \n" +
+	"\vdescription\x18\x01 \x01(\tR\vdescription2\xd9\x05\n" +
 	"\x06Resume\x12j\n" +
 	"\fCreateResume\x12\".api.resume.v1.CreateResumeRequest\x1a\x1a.api.resume.v1.ResumeReply\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/api/v1/resumes\x12o\n" +
 	"\fUpdateResume\x12\".api.resume.v1.UpdateResumeRequest\x1a\x1a.api.resume.v1.ResumeReply\"\x1f\x82\xd3\xe4\x93\x02\x19:\x01*\x1a\x14/api/v1/resumes/{id}\x12f\n" +
 	"\tGetResume\x12\x1f.api.resume.v1.GetResumeRequest\x1a\x1a.api.resume.v1.ResumeReply\"\x1c\x82\xd3\xe4\x93\x02\x16\x12\x14/api/v1/resumes/{id}\x12j\n" +
 	"\vListResumes\x12!.api.resume.v1.ListResumesRequest\x1a\x1f.api.resume.v1.ListResumesReply\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/api/v1/resumes\x12r\n" +
-	"\fDeleteResume\x12\".api.resume.v1.DeleteResumeRequest\x1a .api.resume.v1.DeleteResumeReply\"\x1c\x82\xd3\xe4\x93\x02\x16*\x14/api/v1/resumes/{id}B,\n" +
+	"\fDeleteResume\x12\".api.resume.v1.DeleteResumeRequest\x1a .api.resume.v1.DeleteResumeReply\"\x1c\x82\xd3\xe4\x93\x02\x16*\x14/api/v1/resumes/{id}\x12\xa9\x01\n" +
+	"\x15GenerateCVDescription\x12+.api.resume.v1.GenerateCVDescriptionRequest\x1a).api.resume.v1.GenerateCVDescriptionReply\"8\x82\xd3\xe4\x93\x022\"0/api/v1/resumes/{resume_id}/generate-descriptionB,\n" +
 	"\rapi.resume.v1P\x01Z\x19JobblyBE/api/resume/v1;v1b\x06proto3"
 
 var (
@@ -775,19 +868,21 @@ func file_resume_v1_resume_proto_rawDescGZIP() []byte {
 	return file_resume_v1_resume_proto_rawDescData
 }
 
-var file_resume_v1_resume_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_resume_v1_resume_proto_msgTypes = make([]protoimpl.MessageInfo, 13)
 var file_resume_v1_resume_proto_goTypes = []any{
-	(*ResumeReply)(nil),         // 0: api.resume.v1.ResumeReply
-	(*ResumeDetail)(nil),        // 1: api.resume.v1.ResumeDetail
-	(*Education)(nil),           // 2: api.resume.v1.Education
-	(*Experience)(nil),          // 3: api.resume.v1.Experience
-	(*CreateResumeRequest)(nil), // 4: api.resume.v1.CreateResumeRequest
-	(*UpdateResumeRequest)(nil), // 5: api.resume.v1.UpdateResumeRequest
-	(*GetResumeRequest)(nil),    // 6: api.resume.v1.GetResumeRequest
-	(*ListResumesRequest)(nil),  // 7: api.resume.v1.ListResumesRequest
-	(*ListResumesReply)(nil),    // 8: api.resume.v1.ListResumesReply
-	(*DeleteResumeRequest)(nil), // 9: api.resume.v1.DeleteResumeRequest
-	(*DeleteResumeReply)(nil),   // 10: api.resume.v1.DeleteResumeReply
+	(*ResumeReply)(nil),                  // 0: api.resume.v1.ResumeReply
+	(*ResumeDetail)(nil),                 // 1: api.resume.v1.ResumeDetail
+	(*Education)(nil),                    // 2: api.resume.v1.Education
+	(*Experience)(nil),                   // 3: api.resume.v1.Experience
+	(*CreateResumeRequest)(nil),          // 4: api.resume.v1.CreateResumeRequest
+	(*UpdateResumeRequest)(nil),          // 5: api.resume.v1.UpdateResumeRequest
+	(*GetResumeRequest)(nil),             // 6: api.resume.v1.GetResumeRequest
+	(*ListResumesRequest)(nil),           // 7: api.resume.v1.ListResumesRequest
+	(*ListResumesReply)(nil),             // 8: api.resume.v1.ListResumesReply
+	(*DeleteResumeRequest)(nil),          // 9: api.resume.v1.DeleteResumeRequest
+	(*DeleteResumeReply)(nil),            // 10: api.resume.v1.DeleteResumeReply
+	(*GenerateCVDescriptionRequest)(nil), // 11: api.resume.v1.GenerateCVDescriptionRequest
+	(*GenerateCVDescriptionReply)(nil),   // 12: api.resume.v1.GenerateCVDescriptionReply
 }
 var file_resume_v1_resume_proto_depIdxs = []int32{
 	1,  // 0: api.resume.v1.ResumeReply.resume_detail:type_name -> api.resume.v1.ResumeDetail
@@ -801,13 +896,15 @@ var file_resume_v1_resume_proto_depIdxs = []int32{
 	6,  // 8: api.resume.v1.Resume.GetResume:input_type -> api.resume.v1.GetResumeRequest
 	7,  // 9: api.resume.v1.Resume.ListResumes:input_type -> api.resume.v1.ListResumesRequest
 	9,  // 10: api.resume.v1.Resume.DeleteResume:input_type -> api.resume.v1.DeleteResumeRequest
-	0,  // 11: api.resume.v1.Resume.CreateResume:output_type -> api.resume.v1.ResumeReply
-	0,  // 12: api.resume.v1.Resume.UpdateResume:output_type -> api.resume.v1.ResumeReply
-	0,  // 13: api.resume.v1.Resume.GetResume:output_type -> api.resume.v1.ResumeReply
-	8,  // 14: api.resume.v1.Resume.ListResumes:output_type -> api.resume.v1.ListResumesReply
-	10, // 15: api.resume.v1.Resume.DeleteResume:output_type -> api.resume.v1.DeleteResumeReply
-	11, // [11:16] is the sub-list for method output_type
-	6,  // [6:11] is the sub-list for method input_type
+	11, // 11: api.resume.v1.Resume.GenerateCVDescription:input_type -> api.resume.v1.GenerateCVDescriptionRequest
+	0,  // 12: api.resume.v1.Resume.CreateResume:output_type -> api.resume.v1.ResumeReply
+	0,  // 13: api.resume.v1.Resume.UpdateResume:output_type -> api.resume.v1.ResumeReply
+	0,  // 14: api.resume.v1.Resume.GetResume:output_type -> api.resume.v1.ResumeReply
+	8,  // 15: api.resume.v1.Resume.ListResumes:output_type -> api.resume.v1.ListResumesReply
+	10, // 16: api.resume.v1.Resume.DeleteResume:output_type -> api.resume.v1.DeleteResumeReply
+	12, // 17: api.resume.v1.Resume.GenerateCVDescription:output_type -> api.resume.v1.GenerateCVDescriptionReply
+	12, // [12:18] is the sub-list for method output_type
+	6,  // [6:12] is the sub-list for method input_type
 	6,  // [6:6] is the sub-list for extension type_name
 	6,  // [6:6] is the sub-list for extension extendee
 	0,  // [0:6] is the sub-list for field type_name
@@ -824,7 +921,7 @@ func file_resume_v1_resume_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_resume_v1_resume_proto_rawDesc), len(file_resume_v1_resume_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   11,
+			NumMessages:   13,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
