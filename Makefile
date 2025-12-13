@@ -13,7 +13,8 @@ API_PROTO_FILES=api/auth/v1/auth.proto \
                 api/job/v1/error_reason.proto \
                 api/resume/v1/resume.proto \
                 api/user/v1/user.proto \
-                api/user/v1/error_reason.proto
+                api/user/v1/error_reason.proto \
+                api/application/v1/application.proto
 
 .PHONY: init
 # init env

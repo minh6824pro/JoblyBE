@@ -1,6 +1,7 @@
 package server
 
 import (
+	applicationv1 "JobblyBE/api/application/v1"
 	authv1 "JobblyBE/api/auth/v1"
 	jobv1 "JobblyBE/api/job/v1"
 	resumev1 "JobblyBE/api/resume/v1"
@@ -33,6 +34,7 @@ func NewHTTPServer(
 	companySvc *service.CompanyService,
 	resumeSvc *service.ResumeService,
 	userSvc *service.UserService,
+	applicationSvc *service.JobApplicationService,
 	dataLayer *data.Data,
 	logger log.Logger,
 ) *http.Server {
@@ -75,6 +77,7 @@ func NewHTTPServer(
 	jobv1.RegisterCompanyHTTPServer(srv, companySvc)
 	resumev1.RegisterResumeHTTPServer(srv, resumeSvc)
 	userv1.RegisterUserHTTPServer(srv, userSvc)
+	applicationv1.RegisterJobApplicationHTTPServer(srv, applicationSvc)
 
 	// Get config values
 	resumeParserURL := configx.GetEnvOrString("RESUME_PARSER_URL", c.ResumeParserUrl)

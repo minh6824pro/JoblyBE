@@ -6,6 +6,87 @@ info:
     title: ""
     version: 0.0.1
 paths:
+    /api/v1/applications:
+        post:
+            tags:
+                - JobApplication
+            description: Apply for a job
+            operationId: JobApplication_ApplyJob
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.application.v1.ApplyJobRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.application.v1.JobApplicationReply'
+    /api/v1/applications/{id}:
+        get:
+            tags:
+                - JobApplication
+            description: Get application detail
+            operationId: JobApplication_GetApplication
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.application.v1.JobApplicationDetailReply'
+        delete:
+            tags:
+                - JobApplication
+            description: Withdraw application (for user)
+            operationId: JobApplication_WithdrawApplication
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.application.v1.WithdrawApplicationReply'
+    /api/v1/applications/{id}/status:
+        put:
+            tags:
+                - JobApplication
+            description: Update application status (for HR)
+            operationId: JobApplication_UpdateApplicationStatus
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.application.v1.UpdateApplicationStatusRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.application.v1.JobApplicationReply'
     /api/v1/auth/change-password:
         post:
             tags:
@@ -369,6 +450,41 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.job.v1.DeleteJobPostingReply'
+    /api/v1/jobs/{jobId}/applications:
+        get:
+            tags:
+                - JobApplication
+            description: List applications for a job posting (for HR)
+            operationId: JobApplication_ListJobApplications
+            parameters:
+                - name: jobId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: status
+                  in: query
+                  description: Optional filter by status
+                  schema:
+                    type: integer
+                    format: enum
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.application.v1.ListApplicationsReply'
     /api/v1/resumes:
         get:
             tags:
@@ -472,6 +588,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.resume.v1.DeleteResumeReply'
+    /api/v1/users/applications:
+        get:
+            tags:
+                - JobApplication
+            description: List applications for a user
+            operationId: JobApplication_ListUserApplications
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.application.v1.ListApplicationsReply'
     /api/v1/users/saved-jobs:
         get:
             tags:
@@ -553,6 +693,184 @@ paths:
                                 $ref: '#/components/schemas/api.user.v1.CreateTrackingJDTOSReply'
 components:
     schemas:
+        api.application.v1.ApplyJobRequest:
+            type: object
+            properties:
+                jobId:
+                    type: string
+                resumeId:
+                    type: string
+        api.application.v1.Education:
+            type: object
+            properties:
+                degree:
+                    type: string
+                institution:
+                    type: string
+                graduationYear:
+                    type: string
+        api.application.v1.Experience:
+            type: object
+            properties:
+                title:
+                    type: string
+                company:
+                    type: string
+                duration:
+                    type: string
+                responsibilities:
+                    type: array
+                    items:
+                        type: string
+                achievements:
+                    type: array
+                    items:
+                        type: string
+        api.application.v1.JobApplicationDetail:
+            type: object
+            properties:
+                id:
+                    type: string
+                userId:
+                    type: string
+                resumeId:
+                    type: string
+                jobId:
+                    type: string
+                applicantName:
+                    type: string
+                university:
+                    type: string
+                status:
+                    type: integer
+                    format: enum
+                appliedAt:
+                    type: string
+                updatedAt:
+                    type: string
+                hrNote:
+                    type: string
+                resumeDetail:
+                    allOf:
+                        - $ref: '#/components/schemas/api.application.v1.ResumeDetail'
+                    description: Full resume detail
+                jobInfo:
+                    allOf:
+                        - $ref: '#/components/schemas/api.application.v1.JobInfo'
+                    description: Job info
+            description: Full application detail (with resume detail)
+        api.application.v1.JobApplicationDetailReply:
+            type: object
+            properties:
+                application:
+                    $ref: '#/components/schemas/api.application.v1.JobApplicationDetail'
+        api.application.v1.JobApplicationInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                userId:
+                    type: string
+                resumeId:
+                    type: string
+                jobId:
+                    type: string
+                applicantName:
+                    type: string
+                university:
+                    type: string
+                status:
+                    type: integer
+                    format: enum
+                appliedAt:
+                    type: string
+                updatedAt:
+                    type: string
+                jobInfo:
+                    allOf:
+                        - $ref: '#/components/schemas/api.application.v1.JobInfo'
+                    description: Job info
+            description: Basic application info (without full resume detail)
+        api.application.v1.JobApplicationReply:
+            type: object
+            properties:
+                application:
+                    $ref: '#/components/schemas/api.application.v1.JobApplicationInfo'
+        api.application.v1.JobInfo:
+            type: object
+            properties:
+                id:
+                    type: string
+                title:
+                    type: string
+                companyName:
+                    type: string
+                location:
+                    type: string
+        api.application.v1.ListApplicationsReply:
+            type: object
+            properties:
+                applications:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.application.v1.JobApplicationInfo'
+                total:
+                    type: integer
+                    format: int32
+                page:
+                    type: integer
+                    format: int32
+                pageSize:
+                    type: integer
+                    format: int32
+        api.application.v1.ResumeDetail:
+            type: object
+            properties:
+                name:
+                    type: string
+                email:
+                    type: string
+                phone:
+                    type: string
+                summary:
+                    type: string
+                skills:
+                    type: array
+                    items:
+                        type: string
+                education:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.application.v1.Education'
+                experience:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.application.v1.Experience'
+                certifications:
+                    type: array
+                    items:
+                        type: string
+                languages:
+                    type: array
+                    items:
+                        type: string
+        api.application.v1.UpdateApplicationStatusRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                status:
+                    type: integer
+                    format: enum
+                hrNote:
+                    type: string
+        api.application.v1.WithdrawApplicationReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                message:
+                    type: string
         api.auth.v1.AuthReply:
             type: object
             properties:
@@ -1093,6 +1411,8 @@ tags:
     - name: Auth
     - name: Company
       description: Company Service
+    - name: JobApplication
+      description: Job Application Service
     - name: JobPosting
       description: Job Posting Service
     - name: Resume

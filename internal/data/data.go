@@ -20,6 +20,7 @@ var ProviderSet = wire.NewSet(
 	NewCompanyRepo,
 	NewUserTrackingRepo,
 	NewResumeRepo,
+	NewJobApplicationRepo,
 )
 
 // Data .
@@ -33,6 +34,7 @@ const (
 	CollectionCompany      = "companies"
 	CollectionJobPosting   = "job_postings"
 	CollectionUserTracking = "user_tracking"
+	CollectionApplication  = "job_applications"
 )
 
 // NewData .

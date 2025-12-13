@@ -46,7 +46,10 @@ func wireApp(confServer *conf.Server, confData *conf.Data, kafka *conf.Kafka, lo
 	resumeService := service.NewResumeService(resumeUseCase)
 	userUseCase := biz.NewUserUseCase(userRepo, jobPostingRepo, logger)
 	userService := service.NewUserService(userUseCase, userTrackingUseCase)
-	httpServer := server.NewHTTPServer(confServer, confData, kafka, authService, jobPostingService, companyService, resumeService, userService, dataData, logger)
+	jobApplicationRepo := data.NewJobApplicationRepo(dataData, logger)
+	jobApplicationUseCase := biz.NewJobApplicationUseCase(jobApplicationRepo, resumeRepo, jobPostingRepo, logger)
+	jobApplicationService := service.NewJobApplicationService(jobApplicationUseCase)
+	httpServer := server.NewHTTPServer(confServer, confData, kafka, authService, jobPostingService, companyService, resumeService, userService, jobApplicationService, dataData, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
 		cleanup()

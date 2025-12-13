@@ -1,0 +1,190 @@
+syntax = "proto3";
+
+package api.application.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "JobblyBE/api/application/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.application.v1";
+
+// Job Application Service
+service JobApplication {
+	// Apply for a job
+	rpc ApplyJob (ApplyJobRequest) returns (JobApplicationReply) {
+		option (google.api.http) = {
+			post: "/api/v1/applications"
+			body: "*"
+		};
+	}
+	
+	// Get application detail
+	rpc GetApplication (GetApplicationRequest) returns (JobApplicationDetailReply) {
+		option (google.api.http) = {
+			get: "/api/v1/applications/{id}"
+		};
+	}
+	
+	// List applications for a user
+	rpc ListUserApplications (ListUserApplicationsRequest) returns (ListApplicationsReply) {
+		option (google.api.http) = {
+			get: "/api/v1/users/applications"
+		};
+	}
+	
+	// List applications for a job posting (for HR)
+	rpc ListJobApplications (ListJobApplicationsRequest) returns (ListApplicationsReply) {
+		option (google.api.http) = {
+			get: "/api/v1/jobs/{job_id}/applications"
+		};
+	}
+	
+	// Update application status (for HR)
+	rpc UpdateApplicationStatus (UpdateApplicationStatusRequest) returns (JobApplicationReply) {
+		option (google.api.http) = {
+			put: "/api/v1/applications/{id}/status"
+			body: "*"
+		};
+	}
+	
+	// Withdraw application (for user)
+	rpc WithdrawApplication (WithdrawApplicationRequest) returns (WithdrawApplicationReply) {
+		option (google.api.http) = {
+			delete: "/api/v1/applications/{id}"
+		};
+	}
+}
+
+// ==================== Enums ====================
+
+enum ApplicationStatus {
+	APPLIED = 0;
+	REVIEWING = 1;
+	ACCEPTED = 2;
+	REJECTED = 3;
+}
+
+// ==================== Messages ====================
+
+// Basic application info (without full resume detail)
+message JobApplicationInfo {
+	string id = 1;
+	string user_id = 2;
+	string resume_id = 3;
+	string job_id = 4;
+	string applicant_name = 5;
+	string university = 6;
+	ApplicationStatus status = 7;
+	string applied_at = 8;
+	string updated_at = 9;
+	
+	// Job info
+	JobInfo job_info = 10;
+}
+
+// Full application detail (with resume detail)
+message JobApplicationDetail {
+	string id = 1;
+	string user_id = 2;
+	string resume_id = 3;
+	string job_id = 4;
+	string applicant_name = 5;
+	string university = 6;
+	ApplicationStatus status = 7;
+	string applied_at = 8;
+	string updated_at = 9;
+	string hr_note = 10;
+	
+	// Full resume detail
+	ResumeDetail resume_detail = 11;
+	
+	// Job info
+	JobInfo job_info = 12;
+}
+
+message ResumeDetail {
+	string name = 1;
+	string email = 2;
+	string phone = 3;
+	string summary = 4;
+	repeated string skills = 5;
+	repeated Education education = 6;
+	repeated Experience experience = 7;
+	repeated string certifications = 8;
+	repeated string languages = 9;
+}
+
+message Education {
+	string degree = 1;
+	string institution = 2;
+	string graduation_year = 3;
+}
+
+message Experience {
+	string title = 1;
+	string company = 2;
+	string duration = 3;
+	repeated string responsibilities = 4;
+	repeated string achievements = 5;
+}
+
+message JobInfo {
+	string id = 1;
+	string title = 2;
+	string company_name = 3;
+	string location = 4;
+}
+
+// ==================== Request/Response Messages ====================
+
+message ApplyJobRequest {
+	string job_id = 1;
+	string resume_id = 2;
+}
+
+message JobApplicationReply {
+	JobApplicationInfo application = 1;
+}
+
+message JobApplicationDetailReply {
+	JobApplicationDetail application = 1;
+}
+
+message GetApplicationRequest {
+	string id = 1;
+}
+
+message ListUserApplicationsRequest {
+	int32 page = 1;
+	int32 page_size = 2;
+}
+
+message ListJobApplicationsRequest {
+	string job_id = 1;
+	int32 page = 2;
+	int32 page_size = 3;
+	// Optional filter by status
+	ApplicationStatus status = 4;
+}
+
+message ListApplicationsReply {
+	repeated JobApplicationInfo applications = 1;
+	int32 total = 2;
+	int32 page = 3;
+	int32 page_size = 4;
+}
+
+message UpdateApplicationStatusRequest {
+	string id = 1;
+	ApplicationStatus status = 2;
+	string hr_note = 3;
+}
+
+message WithdrawApplicationRequest {
+	string id = 1;
+}
+
+message WithdrawApplicationReply {
+	bool success = 1;
+	string message = 2;
+}

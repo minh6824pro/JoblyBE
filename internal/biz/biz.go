@@ -10,6 +10,7 @@ var ProviderSet = wire.NewSet(
 	NewUserTrackingUseCase,
 	NewResumeUseCase,
 	NewUserUseCase,
+	NewJobApplicationUseCase,
 )
 
 type Role string
