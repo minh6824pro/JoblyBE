@@ -28,18 +28,21 @@ type ResumeDetail struct {
 	Experience     []Experience `bson:"experience"`
 	Certifications []string     `bson:"certifications"`
 	Languages      []string     `bson:"languages"`
+	Achievements   []string     `bson:"achievements"`
 }
 
 type Education struct {
 	Degree         string `bson:"degree"`
 	Institution    string `bson:"institution"`
 	GraduationYear string `bson:"graduation_year"`
+	Description    string `bson:"description"`
 }
 
 type Experience struct {
 	Title            string   `bson:"title"`
 	Company          string   `bson:"company"`
 	Duration         string   `bson:"duration"`
+	Description      string   `bson:"description"`
 	Responsibilities []string `bson:"responsibilities"`
 	Achievements     []string `bson:"achievements"`
 }
@@ -79,6 +82,7 @@ func (r *resumeRepo) CreateResume(ctx context.Context, resume *biz.Resume) (*biz
 			Experience:     r.toExperienceDocsArray(resume.ResumeDetail.Experience),
 			Certifications: resume.ResumeDetail.Certifications,
 			Languages:      resume.ResumeDetail.Languages,
+			Achievements:   resume.ResumeDetail.Achievements,
 		},
 		Version:   1,
 		CreatedAt: time.Now(),
@@ -137,6 +141,7 @@ func (r *resumeRepo) UpdateResume(ctx context.Context, resume *biz.Resume) (*biz
 				Experience:     r.toExperienceDocsArray(resume.ResumeDetail.Experience),
 				Certifications: resume.ResumeDetail.Certifications,
 				Languages:      resume.ResumeDetail.Languages,
+				Achievements:   resume.ResumeDetail.Achievements,
 			},
 			"resume.$.version": resume.Version,
 			"updated_at":       time.Now(),
@@ -286,6 +291,7 @@ func (r *resumeRepo) toBiz(doc *Resume, userID string) *biz.Resume {
 			Experience:     r.toExperienceBizArray(doc.ResumeDetail.Experience),
 			Certifications: doc.ResumeDetail.Certifications,
 			Languages:      doc.ResumeDetail.Languages,
+			Achievements:   doc.ResumeDetail.Achievements,
 		},
 		Version:   doc.Version,
 		CreatedAt: doc.CreatedAt,
@@ -302,6 +308,7 @@ func (r *resumeRepo) toEducationBizArray(docs []Education) []*biz.Education {
 			Degree:         docs[i].Degree,
 			Institution:    docs[i].Institution,
 			GraduationYear: docs[i].GraduationYear,
+			Description:    docs[i].Description,
 		})
 	}
 	return result
@@ -318,6 +325,7 @@ func (r *resumeRepo) toEducationDocsArray(edus []*biz.Education) []Education {
 				Degree:         edu.Degree,
 				Institution:    edu.Institution,
 				GraduationYear: edu.GraduationYear,
+				Description:    edu.Description,
 			})
 		}
 	}
@@ -334,6 +342,7 @@ func (r *resumeRepo) toExperienceBizArray(docs []Experience) []*biz.Experience {
 			Title:            docs[i].Title,
 			Company:          docs[i].Company,
 			Duration:         docs[i].Duration,
+			Description:      docs[i].Description,
 			Responsibilities: docs[i].Responsibilities,
 			Achievements:     docs[i].Achievements,
 		})
@@ -352,6 +361,7 @@ func (r *resumeRepo) toExperienceDocsArray(exps []*biz.Experience) []Experience 
 				Title:            exp.Title,
 				Company:          exp.Company,
 				Duration:         exp.Duration,
+				Description:      exp.Description,
 				Responsibilities: exp.Responsibilities,
 				Achievements:     exp.Achievements,
 			})

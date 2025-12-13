@@ -600,6 +600,12 @@ paths:
                   required: true
                   schema:
                     type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.resume.v1.GenerateCVDescriptionRequest'
+                required: true
             responses:
                 "200":
                     description: OK
@@ -1252,6 +1258,8 @@ components:
                     type: string
                 graduationYear:
                     type: string
+                description:
+                    type: string
         api.resume.v1.Experience:
             type: object
             properties:
@@ -1260,6 +1268,8 @@ components:
                 company:
                     type: string
                 duration:
+                    type: string
+                description:
                     type: string
                 responsibilities:
                     type: array
@@ -1272,7 +1282,16 @@ components:
         api.resume.v1.GenerateCVDescriptionReply:
             type: object
             properties:
-                description:
+                content:
+                    type: string
+        api.resume.v1.GenerateCVDescriptionRequest:
+            type: object
+            properties:
+                resumeId:
+                    type: string
+                fieldTag:
+                    type: string
+                currentInput:
                     type: string
         api.resume.v1.ListResumesReply:
             type: object
@@ -1318,6 +1337,10 @@ components:
                     items:
                         type: string
                 languages:
+                    type: array
+                    items:
+                        type: string
+                achievements:
                     type: array
                     items:
                         type: string

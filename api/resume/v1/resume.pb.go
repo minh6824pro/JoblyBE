@@ -110,6 +110,7 @@ type ResumeDetail struct {
 	Experience     []*Experience          `protobuf:"bytes,7,rep,name=experience,proto3" json:"experience,omitempty"`
 	Certifications []string               `protobuf:"bytes,8,rep,name=certifications,proto3" json:"certifications,omitempty"`
 	Languages      []string               `protobuf:"bytes,9,rep,name=languages,proto3" json:"languages,omitempty"`
+	Achievements   []string               `protobuf:"bytes,10,rep,name=achievements,proto3" json:"achievements,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -207,11 +208,19 @@ func (x *ResumeDetail) GetLanguages() []string {
 	return nil
 }
 
+func (x *ResumeDetail) GetAchievements() []string {
+	if x != nil {
+		return x.Achievements
+	}
+	return nil
+}
+
 type Education struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	Degree         string                 `protobuf:"bytes,1,opt,name=degree,proto3" json:"degree,omitempty"`
 	Institution    string                 `protobuf:"bytes,2,opt,name=institution,proto3" json:"institution,omitempty"`
 	GraduationYear string                 `protobuf:"bytes,3,opt,name=graduation_year,json=graduationYear,proto3" json:"graduation_year,omitempty"`
+	Description    string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -267,13 +276,21 @@ func (x *Education) GetGraduationYear() string {
 	return ""
 }
 
+func (x *Education) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
 type Experience struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
 	Title            string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
 	Company          string                 `protobuf:"bytes,2,opt,name=company,proto3" json:"company,omitempty"`
 	Duration         string                 `protobuf:"bytes,3,opt,name=duration,proto3" json:"duration,omitempty"`
-	Responsibilities []string               `protobuf:"bytes,4,rep,name=responsibilities,proto3" json:"responsibilities,omitempty"`
-	Achievements     []string               `protobuf:"bytes,5,rep,name=achievements,proto3" json:"achievements,omitempty"`
+	Description      string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
+	Responsibilities []string               `protobuf:"bytes,5,rep,name=responsibilities,proto3" json:"responsibilities,omitempty"`
+	Achievements     []string               `protobuf:"bytes,6,rep,name=achievements,proto3" json:"achievements,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -325,6 +342,13 @@ func (x *Experience) GetCompany() string {
 func (x *Experience) GetDuration() string {
 	if x != nil {
 		return x.Duration
+	}
+	return ""
+}
+
+func (x *Experience) GetDescription() string {
+	if x != nil {
+		return x.Description
 	}
 	return ""
 }
@@ -703,6 +727,8 @@ func (x *DeleteResumeReply) GetMessage() string {
 type GenerateCVDescriptionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	ResumeId      string                 `protobuf:"bytes,1,opt,name=resume_id,json=resumeId,proto3" json:"resume_id,omitempty"`
+	FieldTag      string                 `protobuf:"bytes,2,opt,name=field_tag,json=fieldTag,proto3" json:"field_tag,omitempty"`
+	CurrentInput  string                 `protobuf:"bytes,3,opt,name=current_input,json=currentInput,proto3" json:"current_input,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -744,9 +770,23 @@ func (x *GenerateCVDescriptionRequest) GetResumeId() string {
 	return ""
 }
 
+func (x *GenerateCVDescriptionRequest) GetFieldTag() string {
+	if x != nil {
+		return x.FieldTag
+	}
+	return ""
+}
+
+func (x *GenerateCVDescriptionRequest) GetCurrentInput() string {
+	if x != nil {
+		return x.CurrentInput
+	}
+	return ""
+}
+
 type GenerateCVDescriptionReply struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Description   string                 `protobuf:"bytes,1,opt,name=description,proto3" json:"description,omitempty"`
+	Content       string                 `protobuf:"bytes,1,opt,name=content,proto3" json:"content,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -781,9 +821,9 @@ func (*GenerateCVDescriptionReply) Descriptor() ([]byte, []int) {
 	return file_resume_v1_resume_proto_rawDescGZIP(), []int{12}
 }
 
-func (x *GenerateCVDescriptionReply) GetDescription() string {
+func (x *GenerateCVDescriptionReply) GetContent() string {
 	if x != nil {
-		return x.Description
+		return x.Content
 	}
 	return ""
 }
@@ -799,7 +839,7 @@ const file_resume_v1_resume_proto_rawDesc = "" +
 	"\rresume_detail\x18\x03 \x01(\v2\x1b.api.resume.v1.ResumeDetailR\fresumeDetail\x12\x18\n" +
 	"\aversion\x18\x04 \x01(\x05R\aversion\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x05 \x01(\tR\tcreatedAt\"\xb9\x02\n" +
+	"created_at\x18\x05 \x01(\tR\tcreatedAt\"\xdd\x02\n" +
 	"\fResumeDetail\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x14\n" +
@@ -811,18 +851,22 @@ const file_resume_v1_resume_proto_rawDesc = "" +
 	"experience\x18\a \x03(\v2\x19.api.resume.v1.ExperienceR\n" +
 	"experience\x12&\n" +
 	"\x0ecertifications\x18\b \x03(\tR\x0ecertifications\x12\x1c\n" +
-	"\tlanguages\x18\t \x03(\tR\tlanguages\"n\n" +
+	"\tlanguages\x18\t \x03(\tR\tlanguages\x12\"\n" +
+	"\fachievements\x18\n" +
+	" \x03(\tR\fachievements\"\x90\x01\n" +
 	"\tEducation\x12\x16\n" +
 	"\x06degree\x18\x01 \x01(\tR\x06degree\x12 \n" +
 	"\vinstitution\x18\x02 \x01(\tR\vinstitution\x12'\n" +
-	"\x0fgraduation_year\x18\x03 \x01(\tR\x0egraduationYear\"\xa8\x01\n" +
+	"\x0fgraduation_year\x18\x03 \x01(\tR\x0egraduationYear\x12 \n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\"\xca\x01\n" +
 	"\n" +
 	"Experience\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12\x18\n" +
 	"\acompany\x18\x02 \x01(\tR\acompany\x12\x1a\n" +
-	"\bduration\x18\x03 \x01(\tR\bduration\x12*\n" +
-	"\x10responsibilities\x18\x04 \x03(\tR\x10responsibilities\x12\"\n" +
-	"\fachievements\x18\x05 \x03(\tR\fachievements\"W\n" +
+	"\bduration\x18\x03 \x01(\tR\bduration\x12 \n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\x12*\n" +
+	"\x10responsibilities\x18\x05 \x03(\tR\x10responsibilities\x12\"\n" +
+	"\fachievements\x18\x06 \x03(\tR\fachievements\"W\n" +
 	"\x13CreateResumeRequest\x12@\n" +
 	"\rresume_detail\x18\x01 \x01(\v2\x1b.api.resume.v1.ResumeDetailR\fresumeDetail\"g\n" +
 	"\x13UpdateResumeRequest\x12\x0e\n" +
@@ -842,18 +886,20 @@ const file_resume_v1_resume_proto_rawDesc = "" +
 	"\x02id\x18\x01 \x01(\tR\x02id\"G\n" +
 	"\x11DeleteResumeReply\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage\";\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"}\n" +
 	"\x1cGenerateCVDescriptionRequest\x12\x1b\n" +
-	"\tresume_id\x18\x01 \x01(\tR\bresumeId\">\n" +
-	"\x1aGenerateCVDescriptionReply\x12 \n" +
-	"\vdescription\x18\x01 \x01(\tR\vdescription2\xd9\x05\n" +
+	"\tresume_id\x18\x01 \x01(\tR\bresumeId\x12\x1b\n" +
+	"\tfield_tag\x18\x02 \x01(\tR\bfieldTag\x12#\n" +
+	"\rcurrent_input\x18\x03 \x01(\tR\fcurrentInput\"6\n" +
+	"\x1aGenerateCVDescriptionReply\x12\x18\n" +
+	"\acontent\x18\x01 \x01(\tR\acontent2\xdc\x05\n" +
 	"\x06Resume\x12j\n" +
 	"\fCreateResume\x12\".api.resume.v1.CreateResumeRequest\x1a\x1a.api.resume.v1.ResumeReply\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/api/v1/resumes\x12o\n" +
 	"\fUpdateResume\x12\".api.resume.v1.UpdateResumeRequest\x1a\x1a.api.resume.v1.ResumeReply\"\x1f\x82\xd3\xe4\x93\x02\x19:\x01*\x1a\x14/api/v1/resumes/{id}\x12f\n" +
 	"\tGetResume\x12\x1f.api.resume.v1.GetResumeRequest\x1a\x1a.api.resume.v1.ResumeReply\"\x1c\x82\xd3\xe4\x93\x02\x16\x12\x14/api/v1/resumes/{id}\x12j\n" +
 	"\vListResumes\x12!.api.resume.v1.ListResumesRequest\x1a\x1f.api.resume.v1.ListResumesReply\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/api/v1/resumes\x12r\n" +
-	"\fDeleteResume\x12\".api.resume.v1.DeleteResumeRequest\x1a .api.resume.v1.DeleteResumeReply\"\x1c\x82\xd3\xe4\x93\x02\x16*\x14/api/v1/resumes/{id}\x12\xa9\x01\n" +
-	"\x15GenerateCVDescription\x12+.api.resume.v1.GenerateCVDescriptionRequest\x1a).api.resume.v1.GenerateCVDescriptionReply\"8\x82\xd3\xe4\x93\x022\"0/api/v1/resumes/{resume_id}/generate-descriptionB,\n" +
+	"\fDeleteResume\x12\".api.resume.v1.DeleteResumeRequest\x1a .api.resume.v1.DeleteResumeReply\"\x1c\x82\xd3\xe4\x93\x02\x16*\x14/api/v1/resumes/{id}\x12\xac\x01\n" +
+	"\x15GenerateCVDescription\x12+.api.resume.v1.GenerateCVDescriptionRequest\x1a).api.resume.v1.GenerateCVDescriptionReply\";\x82\xd3\xe4\x93\x025:\x01*\"0/api/v1/resumes/{resume_id}/generate-descriptionB,\n" +
 	"\rapi.resume.v1P\x01Z\x19JobblyBE/api/resume/v1;v1b\x06proto3"
 
 var (

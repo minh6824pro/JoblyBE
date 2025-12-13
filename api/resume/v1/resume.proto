@@ -50,6 +50,7 @@ service Resume {
 	rpc GenerateCVDescription (GenerateCVDescriptionRequest) returns (GenerateCVDescriptionReply) {
 		option (google.api.http) = {
 			post: "/api/v1/resumes/{resume_id}/generate-description"
+			body:"*"
 		};
 	}
 }
@@ -72,20 +73,23 @@ message ResumeDetail {
 	repeated Experience experience = 7;
 	repeated string certifications = 8;
 	repeated string languages = 9;
+	repeated string achievements = 10;
 }
 
 message Education {
 	string degree = 1;
 	string institution = 2;
 	string graduation_year = 3;
+	string description = 4;
 }
 
 message Experience {
 	string title = 1;
 	string company = 2;
 	string duration = 3;
-	repeated string responsibilities = 4;
-	repeated string achievements = 5;
+	string description = 4;
+	repeated string responsibilities = 5;
+	repeated string achievements = 6;
 }
 
 // Request/Response messages
@@ -125,9 +129,11 @@ message DeleteResumeReply {
 
 message GenerateCVDescriptionRequest {
 	string resume_id = 1;
+	string field_tag = 2;
+	string current_input = 3;
 }
 
 message GenerateCVDescriptionReply {
-	string description = 1;
+	string content = 1;
 }
 

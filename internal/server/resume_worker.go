@@ -251,6 +251,7 @@ func (w *ResumeWorker) convertToDataResume(parserResp *ParserResponse) *data.Res
 			Degree:         edu.Degree,
 			Institution:    edu.Institution,
 			GraduationYear: fmt.Sprintf("%d", edu.GraduationYear),
+			Description:    edu.Description,
 		})
 	}
 
@@ -261,6 +262,7 @@ func (w *ResumeWorker) convertToDataResume(parserResp *ParserResponse) *data.Res
 			Title:            exp.Title,
 			Company:          exp.Company,
 			Duration:         exp.Duration,
+			Description:      exp.Description,
 			Responsibilities: exp.Responsibilities,
 			Achievements:     exp.Achievements,
 		})
@@ -276,6 +278,7 @@ func (w *ResumeWorker) convertToDataResume(parserResp *ParserResponse) *data.Res
 		Experience:     experienceList,
 		Certifications: cvData.Certifications,
 		Languages:      cvData.Languages,
+		Achievements:   cvData.Achievements,
 	}
 
 	return &data.Resume{

@@ -29,18 +29,21 @@ type ResumeDetail struct {
 	Experience     []*Experience
 	Certifications []string
 	Languages      []string
+	Achievements   []string
 }
 
 type Education struct {
 	Degree         string
 	Institution    string
 	GraduationYear string
+	Description    string
 }
 
 type Experience struct {
 	Title            string
 	Company          string
 	Duration         string
+	Description      string
 	Responsibilities []string
 	Achievements     []string
 }
@@ -180,8 +183,8 @@ func (uc *ResumeUseCase) validateResume(resume *Resume) error {
 	return nil
 }
 
-// GenerateCVDescription generates a CV description using ChatGPT based on CV data and most viewed job
-func (uc *ResumeUseCase) GenerateCVDescription(ctx context.Context, resumeID, userID string) (string, error) {
+// GenerateCVDescription generates CV content using ChatGPT based on field tag and CV data
+func (uc *ResumeUseCase) GenerateCVDescription(ctx context.Context, resumeID, userID, fieldTag, currentInput string) (string, error) {
 	// Get resume
 	resume, err := uc.GetResume(ctx, resumeID, userID)
 	if err != nil {
@@ -190,124 +193,286 @@ func (uc *ResumeUseCase) GenerateCVDescription(ctx context.Context, resumeID, us
 
 	var prompt string
 
-	// Try to get most viewed job
+	// Try to get most viewed job for context
 	job, err := uc.trackingUC.GetMostViewedJobByUser(ctx, userID)
 	if err != nil {
-		// No tracking found, just use CV info
-		uc.log.Info("No job tracking found for user, generating description based on CV only")
-		prompt = uc.buildPromptWithCVOnly(resume.ResumeDetail)
+		// No tracking found, build prompt without job context
+		uc.log.Info("No job tracking found for user, generating content based on CV only")
+		prompt = uc.buildPromptByFieldTag(fieldTag, currentInput, resume.ResumeDetail, nil)
 	} else {
-		// Build prompt with CV and job info
-		prompt = uc.buildPromptWithJobAndCV(resume.ResumeDetail, job)
+		// Build prompt with job context
+		prompt = uc.buildPromptByFieldTag(fieldTag, currentInput, resume.ResumeDetail, job)
 	}
 
 	// Call ChatGPT API
-	description, err := uc.callChatGPT(ctx, prompt)
+	content, err := uc.callChatGPT(ctx, prompt)
 	if err != nil {
 		return "", err
 	}
 
-	return description, nil
+	return content, nil
 }
 
-// buildPromptWithCVOnly creates a prompt using only CV information
-func (uc *ResumeUseCase) buildPromptWithCVOnly(cv *ResumeDetail) string {
-	prompt := "Based on the following CV information, write a professional and compelling summary/description for this candidate:\n\n"
-	prompt += "Name: " + cv.Name + "\n"
-	prompt += "Email: " + cv.Email + "\n"
-	if cv.Phone != "" {
-		prompt += "Phone: " + cv.Phone + "\n"
-	}
-	if cv.Summary != "" {
-		prompt += "Current Summary: " + cv.Summary + "\n"
+// buildPromptByFieldTag builds prompt based on the field tag
+func (uc *ResumeUseCase) buildPromptByFieldTag(fieldTag, currentInput string, cv *ResumeDetail, job *JobPosting) string {
+	var prompt string
+
+	// Base CV information
+	cvInfo := uc.buildCVInfoSection(cv)
+
+	// Job context if available
+	jobContext := ""
+	if job != nil {
+		jobContext = uc.buildJobContextSection(job)
 	}
 
-	if len(cv.Skills) > 0 {
-		prompt += "\nSkills:\n"
-		for _, skill := range cv.Skills {
-			prompt += "- " + skill + "\n"
-		}
+	switch fieldTag {
+	case "summary", "description", "objective":
+		prompt = uc.buildSummaryPrompt(cvInfo, jobContext, currentInput)
+	case "experience_description":
+		prompt = uc.buildExperienceDescriptionPrompt(cvInfo, jobContext, currentInput)
+	case "education_description":
+		prompt = uc.buildEducationDescriptionPrompt(cvInfo, jobContext, currentInput)
+	default:
+		// Unsupported field tag
+		return ""
 	}
-
-	if len(cv.Education) > 0 {
-		prompt += "\nEducation:\n"
-		for _, edu := range cv.Education {
-			prompt += "- " + edu.Degree + " at " + edu.Institution + " (" + edu.GraduationYear + ")\n"
-		}
-	}
-
-	if len(cv.Experience) > 0 {
-		prompt += "\nExperience:\n"
-		for _, exp := range cv.Experience {
-			prompt += "- " + exp.Title + " at " + exp.Company + " (" + exp.Duration + ")\n"
-			for _, resp := range exp.Responsibilities {
-				prompt += "  * " + resp + "\n"
-			}
-		}
-	}
-
-	prompt += "\nIMPORTANT: Write the summary in FIRST PERSON perspective (using 'I', 'my', 'me'), as if the candidate is writing about themselves.\n"
-	prompt += "Write a concise, professional summary (2-3 paragraphs) that highlights the key strengths, experiences, and qualifications. Focus on career achievements and what makes this candidate stand out.\n"
-	prompt += "Start with statements like 'I am...', 'I have experience in...', 'My expertise includes...', etc."
 
 	return prompt
 }
 
-// buildPromptWithJobAndCV creates a prompt using both CV and job information
-func (uc *ResumeUseCase) buildPromptWithJobAndCV(cv *ResumeDetail, job *JobPosting) string {
-	prompt := "Based on the following CV information and the job position the candidate is most interested in, write a professional and compelling summary/description tailored for this specific role:\n\n"
-	prompt += "TARGET JOB:\n"
-	prompt += "Position: " + job.Title + "\n"
-	if job.Company != nil {
-		prompt += "Company: " + job.Company.Name + "\n"
-	}
-	if job.Description != "" {
-		prompt += "Job Description: " + job.Description + "\n"
-	}
-	if job.Requirements != "" {
-		prompt += "Requirements: " + job.Requirements + "\n"
+// buildCVInfoSection creates CV information section
+func (uc *ResumeUseCase) buildCVInfoSection(cv *ResumeDetail) string {
+	info := "CANDIDATE INFORMATION:\n"
+	info += "Name: " + cv.Name + "\n"
+
+	if cv.Email != "" {
+		info += "Email: " + cv.Email + "\n"
 	}
 
-	prompt += "\nCANDIDATE CV:\n"
-	prompt += "Name: " + cv.Name + "\n"
+	if cv.Phone != "" {
+		info += "Phone: " + cv.Phone + "\n"
+	}
+
 	if cv.Summary != "" {
-		prompt += "Current Summary: " + cv.Summary + "\n"
+		info += "Summary: " + cv.Summary + "\n"
 	}
 
 	if len(cv.Skills) > 0 {
-		prompt += "\nSkills:\n"
-		for _, skill := range cv.Skills {
-			prompt += "- " + skill + "\n"
+		info += "Skills: "
+		for i, skill := range cv.Skills {
+			if i > 0 {
+				info += ", "
+			}
+			info += skill
 		}
+		info += "\n"
 	}
 
 	if len(cv.Education) > 0 {
-		prompt += "\nEducation:\n"
+		info += "Education:\n"
 		for _, edu := range cv.Education {
-			prompt += "- " + edu.Degree + " at " + edu.Institution + " (" + edu.GraduationYear + ")\n"
+			info += "- " + edu.Degree + " at " + edu.Institution
+			if edu.GraduationYear != "" {
+				info += " (" + edu.GraduationYear + ")"
+			}
+			info += "\n"
 		}
 	}
 
 	if len(cv.Experience) > 0 {
-		prompt += "\nExperience:\n"
+		info += "Experience:\n"
 		for _, exp := range cv.Experience {
-			prompt += "- " + exp.Title + " at " + exp.Company + " (" + exp.Duration + ")\n"
-			for _, resp := range exp.Responsibilities {
-				prompt += "  * " + resp + "\n"
+			info += "- " + exp.Title + " at " + exp.Company
+			if exp.Duration != "" {
+				info += " (" + exp.Duration + ")"
+			}
+			info += "\n"
+			if len(exp.Responsibilities) > 0 {
+				info += "  Responsibilities:\n"
+				for _, resp := range exp.Responsibilities {
+					info += "  * " + resp + "\n"
+				}
+			}
+			if len(exp.Achievements) > 0 {
+				info += "  Achievements:\n"
+				for _, ach := range exp.Achievements {
+					info += "  * " + ach + "\n"
+				}
 			}
 		}
 	}
 
-	prompt += "\nIMPORTANT: Write the summary in FIRST PERSON perspective (using 'I', 'my', 'me'), as if the candidate is writing about themselves.\n"
-	prompt += "Write a concise, professional summary (2-3 paragraphs) that:\n"
-	prompt += "1. Highlights how my experience and skills align with the target job requirements\n"
-	prompt += "2. Emphasizes my relevant achievements and qualifications for this specific position\n"
-	companyInfo := "this company"
-	if job.Company != nil {
-		companyInfo = "this role at " + job.Company.Name
+	if len(cv.Certifications) > 0 {
+		info += "Certifications: "
+		for i, cert := range cv.Certifications {
+			if i > 0 {
+				info += ", "
+			}
+			info += cert
+		}
+		info += "\n"
 	}
-	prompt += "3. Shows why I would be a great fit for " + companyInfo + "\n"
-	prompt += "Start with statements like 'I am...', 'I have...', 'My background includes...', etc."
+
+	if len(cv.Languages) > 0 {
+		info += "Languages: "
+		for i, lang := range cv.Languages {
+			if i > 0 {
+				info += ", "
+			}
+			info += lang
+		}
+		info += "\n"
+	}
+
+	if len(cv.Achievements) > 0 {
+		info += "Achievements:\n"
+		for _, ach := range cv.Achievements {
+			info += "- " + ach + "\n"
+		}
+	}
+
+	return info
+}
+
+// buildJobContextSection creates job context section
+func (uc *ResumeUseCase) buildJobContextSection(job *JobPosting) string {
+	context := "\nTARGET JOB CONTEXT:\n"
+	context += "Position: " + job.Title + "\n"
+
+	if job.Company != nil {
+		context += "Company: " + job.Company.Name + "\n"
+	}
+
+	if job.Description != "" {
+		context += "Job Description: " + job.Description + "\n"
+	}
+
+	if job.Requirements != "" {
+		context += "Requirements: " + job.Requirements + "\n"
+	}
+
+	return context
+}
+
+// buildSummaryPrompt builds prompt for summary/description/objective
+func (uc *ResumeUseCase) buildSummaryPrompt(cvInfo, jobContext, currentInput string) string {
+	prompt := "Write a professional CV summary/description in FIRST PERSON perspective (using 'I', 'my', 'me').\n\n"
+	prompt += cvInfo
+	prompt += jobContext
+
+	if currentInput != "" {
+		prompt += "\nCurrent Summary: " + currentInput + "\n"
+		prompt += "\nImprove and enhance the current summary based on the candidate's information"
+		if jobContext != "" {
+			prompt += " and target job requirements"
+		}
+		prompt += ".\n"
+	}
+
+	prompt += "\nWrite a concise, compelling 2-3 paragraph summary that:\n"
+	prompt += "- Highlights key strengths and expertise\n"
+	prompt += "- Emphasizes relevant experience and skills\n"
+	if jobContext != "" {
+		prompt += "- Shows alignment with the target position\n"
+	}
+	prompt += "- Uses first person (I am, I have, My experience, etc.)\n"
+	prompt += "\nCRITICAL LANGUAGE REQUIREMENT:\n"
+	prompt += "Carefully analyze the language used in the candidate's CV information above.\n"
+	prompt += "If the CV contains Vietnamese text (e.g., 'Đại học', 'Công ty', 'Kinh nghiệm', Vietnamese names/addresses), write your response in Vietnamese.\n"
+	prompt += "If the CV is in English, write your response in English.\n"
+	prompt += "Match the language of the CV exactly - do not translate or mix languages.\n"
+	prompt += "\nProvide only the summary text without any additional explanation."
+
+	return prompt
+}
+
+// buildSkillsPrompt builds prompt for skills enhancement
+func (uc *ResumeUseCase) buildSkillsPrompt(cvInfo, jobContext, currentInput string) string {
+	prompt := "Suggest relevant professional skills for this candidate.\n\n"
+	prompt += cvInfo
+	prompt += jobContext
+
+	if currentInput != "" {
+		prompt += "\nCurrent Skills: " + currentInput + "\n"
+		prompt += "\nExpand and enhance the skills list based on the candidate's background"
+		if jobContext != "" {
+			prompt += " and target job requirements"
+		}
+		prompt += ".\n"
+	}
+
+	prompt += "\nProvide a comma-separated list of relevant skills (10-15 skills).\n"
+	prompt += "Include both technical and soft skills as appropriate.\n"
+	prompt += "\nIMPORTANT: Write in the SAME LANGUAGE as the CV content (Vietnamese if CV is in Vietnamese, English if CV is in English).\n"
+	prompt += "Provide only the skills list without any additional explanation."
+
+	return prompt
+}
+
+// buildExperienceDescriptionPrompt builds prompt for experience description
+func (uc *ResumeUseCase) buildExperienceDescriptionPrompt(cvInfo, jobContext, currentInput string) string {
+	prompt := "Write professional experience description in FIRST PERSON perspective (using 'I', 'my', 'me').\n\n"
+	prompt += cvInfo
+	prompt += jobContext
+
+	if currentInput != "" {
+		prompt += "\nCurrent Description: " + currentInput + "\n"
+		prompt += "\nImprove and enhance the current experience description based on the candidate's information"
+		if jobContext != "" {
+			prompt += " and target job requirements"
+		}
+		prompt += ".\n"
+	}
+
+	prompt += "\nWrite a concise, compelling 2-3 paragraph description that:\n"
+	prompt += "- Highlights key responsibilities and achievements\n"
+	prompt += "- Emphasizes relevant skills and impact\n"
+	prompt += "- Includes specific metrics and results where possible\n"
+	if jobContext != "" {
+		prompt += "- Shows alignment with the target position\n"
+	}
+	prompt += "- Uses first person (I was responsible for, I developed, I led, etc.)\n"
+	prompt += "\nCRITICAL LANGUAGE REQUIREMENT:\n"
+	prompt += "Carefully analyze the language used in the candidate's CV information above.\n"
+	prompt += "If the CV contains Vietnamese text (e.g., 'Đại học', 'Công ty', 'Kinh nghiệm', Vietnamese names/addresses), write your response in Vietnamese.\n"
+	prompt += "If the CV is in English, write your response in English.\n"
+	prompt += "Match the language of the CV exactly - do not translate or mix languages.\n"
+	prompt += "\nProvide only the description text without any additional explanation."
+
+	return prompt
+}
+
+// buildEducationDescriptionPrompt builds prompt for education description
+func (uc *ResumeUseCase) buildEducationDescriptionPrompt(cvInfo, jobContext, currentInput string) string {
+	prompt := "Write professional education description in FIRST PERSON perspective (using 'I', 'my', 'me').\n\n"
+	prompt += cvInfo
+	prompt += jobContext
+
+	if currentInput != "" {
+		prompt += "\nCurrent Description: " + currentInput + "\n"
+		prompt += "\nImprove and enhance the current education description based on the candidate's information"
+		if jobContext != "" {
+			prompt += " and target job requirements"
+		}
+		prompt += ".\n"
+	}
+
+	prompt += "\nWrite a concise, compelling 1-2 paragraph description that:\n"
+	prompt += "- Highlights relevant coursework and academic achievements\n"
+	prompt += "- Emphasizes skills and knowledge gained\n"
+	prompt += "- Shows relevance to career goals"
+	if jobContext != "" {
+		prompt += " and target position"
+	}
+	prompt += "\n"
+	prompt += "- Uses first person (I studied, I specialized in, My coursework included, etc.)\n"
+	prompt += "\nCRITICAL LANGUAGE REQUIREMENT:\n"
+	prompt += "Carefully analyze the language used in the candidate's CV information above.\n"
+	prompt += "If the CV contains Vietnamese text (e.g., 'Đại học', 'Công ty', 'Kinh nghiệm', Vietnamese names/addresses), write your response in Vietnamese.\n"
+	prompt += "If the CV is in English, write your response in English.\n"
+	prompt += "Match the language of the CV exactly - do not translate or mix languages.\n"
+	prompt += "\nProvide only the description text without any additional explanation."
 
 	return prompt
 }

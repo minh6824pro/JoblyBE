@@ -46,12 +46,14 @@ type CVData struct {
 	Experience     []Experience `json:"experience"`
 	Certifications []string     `json:"certifications"`
 	Languages      []string     `json:"languages"`
+	Achievements   []string     `json:"achievements"`
 }
 
 type Education struct {
 	Degree         string  `json:"degree"`
 	Institution    string  `json:"institution"`
 	GraduationYear int     `json:"graduation_year"`
+	Description    string  `json:"description"`
 	GPA            float64 `json:"gpa"`
 }
 
@@ -59,6 +61,7 @@ type Experience struct {
 	Title            string   `json:"title"`
 	Company          string   `json:"company"`
 	Duration         string   `json:"duration"`
+	Description      string   `json:"description"`
 	Responsibilities []string `json:"responsibilities"`
 	Achievements     []string `json:"achievements"`
 }

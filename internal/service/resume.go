@@ -122,13 +122,19 @@ func (s *ResumeService) GenerateCVDescription(ctx context.Context, req *pb.Gener
 		return nil, err
 	}
 
-	description, err := s.uc.GenerateCVDescription(ctx, req.ResumeId, claims.UserID)
+	// Default field tag to "summary" if not provided
+	fieldTag := req.FieldTag
+	if fieldTag == "" {
+		fieldTag = "summary"
+	}
+
+	content, err := s.uc.GenerateCVDescription(ctx, req.ResumeId, claims.UserID, fieldTag, req.CurrentInput)
 	if err != nil {
 		return nil, err
 	}
 
 	return &pb.GenerateCVDescriptionReply{
-		Description: description,
+		Content: content,
 	}, nil
 }
 
@@ -158,6 +164,7 @@ func (s *ResumeService) resumeDetailToPb(detail *biz.ResumeDetail) *pb.ResumeDet
 		Experience:     s.experienceArrayToPb(detail.Experience),
 		Certifications: detail.Certifications,
 		Languages:      detail.Languages,
+		Achievements:   detail.Achievements,
 	}
 }
 
@@ -172,6 +179,7 @@ func (s *ResumeService) educationArrayToPb(eduList []*biz.Education) []*pb.Educa
 				Degree:         edu.Degree,
 				Institution:    edu.Institution,
 				GraduationYear: edu.GraduationYear,
+				Description:    edu.Description,
 			})
 		}
 	}
@@ -189,6 +197,7 @@ func (s *ResumeService) experienceArrayToPb(expList []*biz.Experience) []*pb.Exp
 				Title:            exp.Title,
 				Company:          exp.Company,
 				Duration:         exp.Duration,
+				Description:      exp.Description,
 				Responsibilities: exp.Responsibilities,
 				Achievements:     exp.Achievements,
 			})
@@ -212,6 +221,7 @@ func (s *ResumeService) protoToResumeDetail(detail *pb.ResumeDetail) *biz.Resume
 		Experience:     s.protoToExperienceArray(detail.Experience),
 		Certifications: detail.Certifications,
 		Languages:      detail.Languages,
+		Achievements:   detail.Achievements,
 	}
 }
 
@@ -226,6 +236,7 @@ func (s *ResumeService) protoToEducationArray(eduList []*pb.Education) []*biz.Ed
 				Degree:         edu.Degree,
 				Institution:    edu.Institution,
 				GraduationYear: edu.GraduationYear,
+				Description:    edu.Description,
 			})
 		}
 	}
@@ -243,6 +254,7 @@ func (s *ResumeService) protoToExperienceArray(expList []*pb.Experience) []*biz.
 				Title:            exp.Title,
 				Company:          exp.Company,
 				Duration:         exp.Duration,
+				Description:      exp.Description,
 				Responsibilities: exp.Responsibilities,
 				Achievements:     exp.Achievements,
 			})

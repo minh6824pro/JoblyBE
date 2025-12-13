@@ -164,6 +164,9 @@ func _Resume_DeleteResume0_HTTP_Handler(srv ResumeHTTPServer) func(ctx http.Cont
 func _Resume_GenerateCVDescription0_HTTP_Handler(srv ResumeHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in GenerateCVDescriptionRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
@@ -238,10 +241,10 @@ func (c *ResumeHTTPClientImpl) DeleteResume(ctx context.Context, in *DeleteResum
 func (c *ResumeHTTPClientImpl) GenerateCVDescription(ctx context.Context, in *GenerateCVDescriptionRequest, opts ...http.CallOption) (*GenerateCVDescriptionReply, error) {
 	var out GenerateCVDescriptionReply
 	pattern := "/api/v1/resumes/{resume_id}/generate-description"
-	path := binding.EncodeURL(pattern, in, true)
+	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationResumeGenerateCVDescription))
 	opts = append(opts, http.PathTemplate(pattern))
-	err := c.cc.Invoke(ctx, "POST", path, nil, &out, opts...)
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}
