@@ -121,6 +121,7 @@ services:
       # Server
       JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
       RESUME_PARSER_URL: ${RESUME_PARSER_URL:-http://parser-service:8080}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
 
       # Database
       DATABASE_SOURCE: mongodb://${DB_USERNAME:-jobly_user}:${DB_PASSWORD:-jobly_password_2024}@mongodb:27017/${DATABASE_NAME:-jobly}
