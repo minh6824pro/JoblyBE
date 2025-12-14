@@ -448,6 +448,7 @@ type Education struct {
 	Degree         string                 `protobuf:"bytes,1,opt,name=degree,proto3" json:"degree,omitempty"`
 	Institution    string                 `protobuf:"bytes,2,opt,name=institution,proto3" json:"institution,omitempty"`
 	GraduationYear string                 `protobuf:"bytes,3,opt,name=graduation_year,json=graduationYear,proto3" json:"graduation_year,omitempty"`
+	Description    string                 `protobuf:"bytes,4,opt,name=description,proto3" json:"description,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -503,6 +504,13 @@ func (x *Education) GetGraduationYear() string {
 	return ""
 }
 
+func (x *Education) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
 type Experience struct {
 	state            protoimpl.MessageState `protogen:"open.v1"`
 	Title            string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`
@@ -510,6 +518,7 @@ type Experience struct {
 	Duration         string                 `protobuf:"bytes,3,opt,name=duration,proto3" json:"duration,omitempty"`
 	Responsibilities []string               `protobuf:"bytes,4,rep,name=responsibilities,proto3" json:"responsibilities,omitempty"`
 	Achievements     []string               `protobuf:"bytes,5,rep,name=achievements,proto3" json:"achievements,omitempty"`
+	Description      string                 `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
 	unknownFields    protoimpl.UnknownFields
 	sizeCache        protoimpl.SizeCache
 }
@@ -577,6 +586,13 @@ func (x *Experience) GetAchievements() []string {
 		return x.Achievements
 	}
 	return nil
+}
+
+func (x *Experience) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
 }
 
 type JobInfo struct {
@@ -1227,18 +1243,20 @@ const file_application_v1_application_proto_rawDesc = "" +
 	"experience\x18\a \x03(\v2\x1e.api.application.v1.ExperienceR\n" +
 	"experience\x12&\n" +
 	"\x0ecertifications\x18\b \x03(\tR\x0ecertifications\x12\x1c\n" +
-	"\tlanguages\x18\t \x03(\tR\tlanguages\"n\n" +
+	"\tlanguages\x18\t \x03(\tR\tlanguages\"\x90\x01\n" +
 	"\tEducation\x12\x16\n" +
 	"\x06degree\x18\x01 \x01(\tR\x06degree\x12 \n" +
 	"\vinstitution\x18\x02 \x01(\tR\vinstitution\x12'\n" +
-	"\x0fgraduation_year\x18\x03 \x01(\tR\x0egraduationYear\"\xa8\x01\n" +
+	"\x0fgraduation_year\x18\x03 \x01(\tR\x0egraduationYear\x12 \n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\"\xca\x01\n" +
 	"\n" +
 	"Experience\x12\x14\n" +
 	"\x05title\x18\x01 \x01(\tR\x05title\x12\x18\n" +
 	"\acompany\x18\x02 \x01(\tR\acompany\x12\x1a\n" +
 	"\bduration\x18\x03 \x01(\tR\bduration\x12*\n" +
 	"\x10responsibilities\x18\x04 \x03(\tR\x10responsibilities\x12\"\n" +
-	"\fachievements\x18\x05 \x03(\tR\fachievements\"n\n" +
+	"\fachievements\x18\x05 \x03(\tR\fachievements\x12 \n" +
+	"\vdescription\x18\x06 \x01(\tR\vdescription\"n\n" +
 	"\aJobInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12!\n" +

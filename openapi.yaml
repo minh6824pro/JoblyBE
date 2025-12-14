@@ -798,6 +798,8 @@ components:
                     type: string
                 graduationYear:
                     type: string
+                description:
+                    type: string
         api.application.v1.Experience:
             type: object
             properties:
@@ -815,6 +817,8 @@ components:
                     type: array
                     items:
                         type: string
+                description:
+                    type: string
         api.application.v1.JobApplicationDetail:
             type: object
             properties:

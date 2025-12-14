@@ -119,6 +119,7 @@ message Education {
 	string degree = 1;
 	string institution = 2;
 	string graduation_year = 3;
+	string description = 4;
 }
 
 message Experience {
@@ -127,6 +128,7 @@ message Experience {
 	string duration = 3;
 	repeated string responsibilities = 4;
 	repeated string achievements = 5;
+	string description = 6;
 }
 
 message JobInfo {

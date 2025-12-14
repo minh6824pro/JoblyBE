@@ -207,6 +207,7 @@ func (s *JobApplicationService) resumeDetailToPb(detail *biz.ResumeDetail) *pb.R
 			Degree:         edu.Degree,
 			Institution:    edu.Institution,
 			GraduationYear: edu.GraduationYear,
+			Description:    edu.Description,
 		}
 	}
 
@@ -218,6 +219,7 @@ func (s *JobApplicationService) resumeDetailToPb(detail *biz.ResumeDetail) *pb.R
 			Duration:         exp.Duration,
 			Responsibilities: exp.Responsibilities,
 			Achievements:     exp.Achievements,
+			Description:      exp.Description,
 		}
 	}
 
