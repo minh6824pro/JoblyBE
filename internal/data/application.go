@@ -158,7 +158,7 @@ func (r *jobApplicationRepo) GetApplicationWithDetail(ctx context.Context, id st
 	var result struct {
 		JobApplication `bson:",inline"`
 		User           struct {
-			Resumes []Resume `bson:"resumes"`
+			Resume []Resume `bson:"resume"`
 		} `bson:"user"`
 		Job struct {
 			ID       primitive.ObjectID `bson:"_id"`
@@ -177,8 +177,8 @@ func (r *jobApplicationRepo) GetApplicationWithDetail(ctx context.Context, id st
 
 	app := r.toApplicationBiz(&result.JobApplication)
 
-	// Find the matching resume in user's resumes
-	for _, resume := range result.User.Resumes {
+	// Find the matching resume in user's resume array
+	for _, resume := range result.User.Resume {
 		if resume.ID == result.JobApplication.ResumeID {
 			app.ResumeDetail = r.toResumeDetailBiz(&resume.ResumeDetail)
 			break
