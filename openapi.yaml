@@ -811,6 +811,8 @@ components:
                     type: string
                 updatedAt:
                     type: string
+                hrNote:
+                    type: string
                 jobInfo:
                     allOf:
                         - $ref: '#/components/schemas/api.application.v1.JobInfo'

@@ -152,6 +152,7 @@ func (s *JobApplicationService) applicationToInfoPb(app *biz.JobApplication) *pb
 		Status:        s.bizStatusToProtoStatus(app.Status),
 		AppliedAt:     app.AppliedAt.Format("2006-01-02T15:04:05Z07:00"),
 		UpdatedAt:     app.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		HrNote:        app.HRNote,
 	}
 
 	// Add job info if available

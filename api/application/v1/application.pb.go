@@ -86,8 +86,9 @@ type JobApplicationInfo struct {
 	Status        ApplicationStatus      `protobuf:"varint,7,opt,name=status,proto3,enum=api.application.v1.ApplicationStatus" json:"status,omitempty"`
 	AppliedAt     string                 `protobuf:"bytes,8,opt,name=applied_at,json=appliedAt,proto3" json:"applied_at,omitempty"`
 	UpdatedAt     string                 `protobuf:"bytes,9,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	HrNote        string                 `protobuf:"bytes,10,opt,name=hr_note,json=hrNote,proto3" json:"hr_note,omitempty"`
 	// Job info
-	JobInfo       *JobInfo `protobuf:"bytes,10,opt,name=job_info,json=jobInfo,proto3" json:"job_info,omitempty"`
+	JobInfo       *JobInfo `protobuf:"bytes,11,opt,name=job_info,json=jobInfo,proto3" json:"job_info,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -181,6 +182,13 @@ func (x *JobApplicationInfo) GetAppliedAt() string {
 func (x *JobApplicationInfo) GetUpdatedAt() string {
 	if x != nil {
 		return x.UpdatedAt
+	}
+	return ""
+}
+
+func (x *JobApplicationInfo) GetHrNote() string {
+	if x != nil {
+		return x.HrNote
 	}
 	return ""
 }
@@ -1172,7 +1180,7 @@ var File_application_v1_application_proto protoreflect.FileDescriptor
 
 const file_application_v1_application_proto_rawDesc = "" +
 	"\n" +
-	" application/v1/application.proto\x12\x12api.application.v1\x1a\x1cgoogle/api/annotations.proto\"\xed\x02\n" +
+	" application/v1/application.proto\x12\x12api.application.v1\x1a\x1cgoogle/api/annotations.proto\"\x86\x03\n" +
 	"\x12JobApplicationInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1b\n" +
@@ -1186,9 +1194,10 @@ const file_application_v1_application_proto_rawDesc = "" +
 	"\n" +
 	"applied_at\x18\b \x01(\tR\tappliedAt\x12\x1d\n" +
 	"\n" +
-	"updated_at\x18\t \x01(\tR\tupdatedAt\x126\n" +
-	"\bjob_info\x18\n" +
-	" \x01(\v2\x1b.api.application.v1.JobInfoR\ajobInfo\"\xcf\x03\n" +
+	"updated_at\x18\t \x01(\tR\tupdatedAt\x12\x17\n" +
+	"\ahr_note\x18\n" +
+	" \x01(\tR\x06hrNote\x126\n" +
+	"\bjob_info\x18\v \x01(\v2\x1b.api.application.v1.JobInfoR\ajobInfo\"\xcf\x03\n" +
 	"\x14JobApplicationDetail\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\tR\x06userId\x12\x1b\n" +

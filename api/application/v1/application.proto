@@ -77,9 +77,10 @@ message JobApplicationInfo {
 	ApplicationStatus status = 7;
 	string applied_at = 8;
 	string updated_at = 9;
+	string hr_note = 10;
 	
 	// Job info
-	JobInfo job_info = 10;
+	JobInfo job_info = 11;
 }
 
 // Full application detail (with resume detail)
