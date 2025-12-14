@@ -56,8 +56,18 @@ func (s *AuthService) Register(ctx context.Context, req *pb.RegisterRequest) (*p
 		return nil, pb.ErrorDataRequestInvalid("invalid password")
 	}
 
+	// Parse role, default to USER
+	role := biz.RoleUser
+	if req.Role != "" {
+		role = biz.Role(req.Role)
+		// Validate role
+		if role != biz.RoleUser && role != biz.RoleHR && role != biz.RoleAdmin {
+			return nil, pb.ErrorDataRequestInvalid("invalid role, must be USER, HR, or ADMIN")
+		}
+	}
+
 	// Register user through use case
-	user, err := s.authUC.RegisterUser(ctx, req.FullName, req.Email, req.Password, req.PhoneNumber)
+	user, err := s.authUC.RegisterUser(ctx, req.FullName, req.Email, req.Password, req.PhoneNumber, role, req.CompanyId)
 	if err != nil {
 		if errors.Is(err, biz.ErrUserAlreadyExists) {
 			return nil, pb.ErrorEmailAlreadyExists("email already exists")
@@ -73,6 +83,7 @@ func (s *AuthService) Register(ctx context.Context, req *pb.RegisterRequest) (*p
 		user.FullName,
 		user.PhoneNumber,
 		string(user.Role),
+		user.CompanyID,
 		s.jwtSecret,
 	)
 	if err != nil {
@@ -88,6 +99,7 @@ func (s *AuthService) Register(ctx context.Context, req *pb.RegisterRequest) (*p
 			Email:       user.Email,
 			PhoneNumber: user.PhoneNumber,
 			Role:        string(user.Role),
+			CompanyId:   user.CompanyID,
 		},
 	}, nil
 }
@@ -120,6 +132,7 @@ func (s *AuthService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Auth
 		user.FullName,
 		user.PhoneNumber,
 		string(user.Role),
+		user.CompanyID,
 		s.jwtSecret,
 	)
 	if err != nil {
@@ -135,6 +148,7 @@ func (s *AuthService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Auth
 			Email:       user.Email,
 			PhoneNumber: user.PhoneNumber,
 			Role:        string(user.Role),
+			CompanyId:   user.CompanyID,
 		},
 	}, nil
 }
@@ -168,6 +182,7 @@ func (s *AuthService) RefreshToken(ctx context.Context, req *pb.RefreshTokenRequ
 		user.FullName,
 		user.PhoneNumber,
 		string(user.Role),
+		user.CompanyID,
 		s.jwtSecret,
 		auth.AccessTokenDuration,
 	)

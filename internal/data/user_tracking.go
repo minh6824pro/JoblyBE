@@ -107,10 +107,34 @@ func (r *userTrackingRepo) GetMostViewedJobByUser(ctx context.Context, userID pr
 		return nil, err
 	}
 
-	// Extract metadata
-	metadata := ut.Metadata.(primitive.M)
-	jobID := metadata["job_id"].(primitive.ObjectID)
-	timeOnSight := metadata["time_on_sight"].(int32)
+	// Extract metadata - handle both primitive.M and primitive.D
+	var metadata primitive.M
+	switch m := ut.Metadata.(type) {
+	case primitive.M:
+		metadata = m
+	case primitive.D:
+		metadata = m.Map()
+	default:
+		r.log.Errorf("unexpected metadata type: %T", ut.Metadata)
+		return nil, biz.ErrInvalidRequest
+	}
+
+	jobID, ok := metadata["job_id"].(primitive.ObjectID)
+	if !ok {
+		r.log.Errorf("invalid job_id in metadata")
+		return nil, biz.ErrInvalidRequest
+	}
+
+	timeOnSight, ok := metadata["time_on_sight"].(int32)
+	if !ok {
+		// Try int64 and convert
+		if timeInt64, ok := metadata["time_on_sight"].(int64); ok {
+			timeOnSight = int32(timeInt64)
+		} else {
+			r.log.Errorf("invalid time_on_sight in metadata")
+			return nil, biz.ErrInvalidRequest
+		}
+	}
 
 	return &biz.UserJDTOS{
 		JobID:       jobID,

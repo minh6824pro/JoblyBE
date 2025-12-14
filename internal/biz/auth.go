@@ -33,8 +33,8 @@ func NewAuthUsecase(userRepo UserRepo, logger log.Logger) *AuthUseCase {
 }
 
 // RegisterUser registers a new user
-func (uc *AuthUseCase) RegisterUser(ctx context.Context, fullName, email, password, phoneNumber string) (*User, error) {
-	uc.log.WithContext(ctx).Infof("RegisterUser: %s", email)
+func (uc *AuthUseCase) RegisterUser(ctx context.Context, fullName, email, password, phoneNumber string, role Role, companyID string) (*User, error) {
+	uc.log.WithContext(ctx).Infof("RegisterUser: %s with role %s", email, role)
 
 	// Check if user already exists
 	existingUser, err := uc.userRepo.GetUserByEmail(ctx, email)
@@ -43,6 +43,16 @@ func (uc *AuthUseCase) RegisterUser(ctx context.Context, fullName, email, passwo
 	}
 	if existingUser != nil {
 		return nil, ErrUserAlreadyExists
+	}
+
+	// Validate HR role has companyID
+	if role == RoleHR && companyID == "" {
+		return nil, errors.New("HR account must be linked to a company")
+	}
+
+	// Default to USER role if not specified
+	if role == "" {
+		role = RoleUser
 	}
 
 	// Hash password
@@ -58,7 +68,8 @@ func (uc *AuthUseCase) RegisterUser(ctx context.Context, fullName, email, passwo
 		Email:       email,
 		Password:    string(hashedPassword),
 		PhoneNumber: phoneNumber,
-		Role:        RoleUser,
+		Role:        role,
+		CompanyID:   companyID,
 		Active:      true,
 	}
 

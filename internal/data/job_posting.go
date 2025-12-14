@@ -29,6 +29,8 @@ type JobPosting struct {
 	Requirements          string             `bson:"requirements"`
 	Benefits              string             `bson:"benefits"`
 	JobTech               []string           `bson:"job_tech"`
+	Active                bool               `bson:"active"`
+	CreatedBy             string             `bson:"created_by"` // User ID who created this job
 	CreatedAt             time.Time          `bson:"created_at"`
 }
 
@@ -71,6 +73,8 @@ func (r *jobPostingRepo) CreateJobPosting(ctx context.Context, job *biz.JobPosti
 		Requirements:          job.Requirements,
 		Benefits:              job.Benefits,
 		JobTech:               job.JobTech,
+		Active:                job.Active,
+		CreatedBy:             job.CreatedBy,
 		CreatedAt:             now,
 	}
 
@@ -107,6 +111,7 @@ func (r *jobPostingRepo) UpdateJobPosting(ctx context.Context, job *biz.JobPosti
 			"requirements":           job.Requirements,
 			"benefits":               job.Benefits,
 			"job_tech":               job.JobTech,
+			"active":                 job.Active,
 		},
 	}
 
@@ -227,6 +232,10 @@ func (r *jobPostingRepo) ListJobPostings(ctx context.Context, filter *biz.JobFil
 			}
 			query["job_tech"] = bson.M{"$in": techRegexes}
 		}
+		// Filter active jobs by default (unless explicitly included)
+		if !filter.IncludeInactive {
+			query["active"] = true
+		}
 	}
 
 	// Count total
@@ -287,6 +296,81 @@ func (r *jobPostingRepo) ListJobPostings(ctx context.Context, filter *biz.JobFil
 	return jobs, int32(total), nil
 }
 
+// ListMyJobs lists job postings created by a company
+func (r *jobPostingRepo) ListMyJobs(ctx context.Context, companyID string, page, pageSize int32, includeInactive bool) ([]*biz.JobPosting, int32, error) {
+	// Convert company ID
+	companyObjID, err := primitive.ObjectIDFromHex(companyID)
+	if err != nil {
+		r.log.Errorf("invalid company ID: %v", err)
+		return nil, 0, err
+	}
+
+	// Build filter query
+	query := bson.M{"company_id": companyObjID}
+
+	// Filter by active status
+	if !includeInactive {
+		query["active"] = true
+	}
+
+	// Count total
+	total, err := r.data.db.Collection(CollectionJobPosting).CountDocuments(ctx, query)
+	if err != nil {
+		r.log.Errorf("failed to count my jobs: %v", err)
+		return nil, 0, err
+	}
+
+	// Calculate skip
+	skip := (page - 1) * pageSize
+
+	// Use aggregation to join with company
+	pipeline := mongo.Pipeline{
+		{{Key: "$match", Value: query}},
+		{{Key: "$sort", Value: bson.M{"created_at": -1}}},
+		{{Key: "$skip", Value: skip}},
+		{{Key: "$limit", Value: pageSize}},
+		{{Key: "$lookup", Value: bson.M{
+			"from":         "companies",
+			"localField":   "company_id",
+			"foreignField": "_id",
+			"as":           "company",
+		}}},
+		{{Key: "$unwind", Value: bson.M{
+			"path":                       "$company",
+			"preserveNullAndEmptyArrays": true,
+		}}},
+	}
+
+	cursor, err := r.data.db.Collection(CollectionJobPosting).Aggregate(ctx, pipeline)
+	if err != nil {
+		r.log.Errorf("failed to list my jobs: %v", err)
+		return nil, 0, err
+	}
+	defer cursor.Close(ctx)
+
+	type JobWithCompany struct {
+		JobPosting `bson:",inline"`
+		Company    *Company `bson:"company"`
+	}
+
+	var jobs []*biz.JobPosting
+	for cursor.Next(ctx) {
+		var result JobWithCompany
+		if err := cursor.Decode(&result); err != nil {
+			continue
+		}
+
+		bizJob := r.toBiz(&result.JobPosting)
+		if result.Company != nil {
+			companyRepo := &companyRepo{data: r.data, log: r.log}
+			bizJob.Company = companyRepo.toBiz(result.Company)
+		}
+		jobs = append(jobs, bizJob)
+	}
+
+	return jobs, int32(total), nil
+}
+
 // toBiz converts data layer JobPosting to biz layer JobPosting
 func (r *jobPostingRepo) toBiz(j *JobPosting) *biz.JobPosting {
 	return &biz.JobPosting{
@@ -306,6 +390,77 @@ func (r *jobPostingRepo) toBiz(j *JobPosting) *biz.JobPosting {
 		Requirements:          j.Requirements,
 		Benefits:              j.Benefits,
 		JobTech:               j.JobTech,
+		Active:                j.Active,
+		CreatedBy:             j.CreatedBy,
 		CreatedAt:             j.CreatedAt,
 	}
+}
+
+// GetMyCreatedJobs lists job postings created by a specific user
+func (r *jobPostingRepo) GetMyCreatedJobs(ctx context.Context, userID string, page, pageSize int32, includeInactive bool) ([]*biz.JobPosting, int32, error) {
+	// Build filter query
+	query := bson.M{"created_by": userID}
+
+	// Filter by active status
+	if !includeInactive {
+		query["active"] = true
+	}
+
+	// Count total
+	total, err := r.data.db.Collection(CollectionJobPosting).CountDocuments(ctx, query)
+	if err != nil {
+		r.log.Errorf("failed to count my created jobs: %v", err)
+		return nil, 0, err
+	}
+
+	// Calculate skip
+	skip := (page - 1) * pageSize
+
+	// Use aggregation to join with company
+	pipeline := mongo.Pipeline{
+		{{Key: "$match", Value: query}},
+		{{Key: "$sort", Value: bson.M{"created_at": -1}}},
+		{{Key: "$skip", Value: skip}},
+		{{Key: "$limit", Value: pageSize}},
+		{{Key: "$lookup", Value: bson.M{
+			"from":         CollectionCompany,
+			"localField":   "company_id",
+			"foreignField": "_id",
+			"as":           "company",
+		}}},
+		{{Key: "$unwind", Value: bson.M{
+			"path":                       "$company",
+			"preserveNullAndEmptyArrays": true,
+		}}},
+	}
+
+	cursor, err := r.data.db.Collection(CollectionJobPosting).Aggregate(ctx, pipeline)
+	if err != nil {
+		r.log.Errorf("failed to list my created jobs: %v", err)
+		return nil, 0, err
+	}
+	defer cursor.Close(ctx)
+
+	type Result struct {
+		JobPosting JobPosting `bson:",inline"`
+		Company    *Company   `bson:"company,omitempty"`
+	}
+
+	var jobs []*biz.JobPosting
+	for cursor.Next(ctx) {
+		var result Result
+		if err := cursor.Decode(&result); err != nil {
+			r.log.Errorf("failed to decode job posting: %v", err)
+			continue
+		}
+
+		bizJob := r.toBiz(&result.JobPosting)
+		if result.Company != nil {
+			companyRepo := &companyRepo{data: r.data, log: r.log}
+			bizJob.Company = companyRepo.toBiz(result.Company)
+		}
+		jobs = append(jobs, bizJob)
+	}
+
+	return jobs, int32(total), nil
 }

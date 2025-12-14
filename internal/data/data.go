@@ -178,11 +178,29 @@ func (d *Data) initJobPostingIndexes(ctx context.Context, collectionName string)
 			Options: options.Index().SetName("idx_posted_at"),
 		},
 		{
+			Keys:    bson.D{{Key: "active", Value: 1}},
+			Options: options.Index().SetName("idx_active"),
+		},
+		{
 			Keys: bson.D{
 				{Key: "company_id", Value: 1},
 				{Key: "posted_at", Value: -1},
 			},
 			Options: options.Index().SetName("idx_company_posted"),
+		},
+		{
+			Keys: bson.D{
+				{Key: "company_id", Value: 1},
+				{Key: "active", Value: 1},
+			},
+			Options: options.Index().SetName("idx_company_active"),
+		},
+		{
+			Keys: bson.D{
+				{Key: "active", Value: 1},
+				{Key: "posted_at", Value: -1},
+			},
+			Options: options.Index().SetName("idx_active_posted"),
 		},
 	}
 

@@ -25,6 +25,7 @@ type User struct {
 	Password    string // hashed password
 	PhoneNumber string
 	Role        Role
+	CompanyID   string // for HR role - linked company
 	Active      bool
 	LastLogin   *time.Time
 	CreatedAt   time.Time

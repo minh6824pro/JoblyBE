@@ -28,6 +28,8 @@ type RegisterRequest struct {
 	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
 	Password      string                 `protobuf:"bytes,3,opt,name=password,proto3" json:"password,omitempty"`
 	PhoneNumber   string                 `protobuf:"bytes,4,opt,name=phone_number,json=phoneNumber,proto3" json:"phone_number,omitempty"`
+	Role          string                 `protobuf:"bytes,5,opt,name=role,proto3" json:"role,omitempty"`                            // USER, HR, ADMIN
+	CompanyId     string                 `protobuf:"bytes,6,opt,name=company_id,json=companyId,proto3" json:"company_id,omitempty"` // Required for HR role
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -86,6 +88,20 @@ func (x *RegisterRequest) GetPassword() string {
 func (x *RegisterRequest) GetPhoneNumber() string {
 	if x != nil {
 		return x.PhoneNumber
+	}
+	return ""
+}
+
+func (x *RegisterRequest) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *RegisterRequest) GetCompanyId() string {
+	if x != nil {
+		return x.CompanyId
 	}
 	return ""
 }
@@ -704,6 +720,7 @@ type AuthReply_User struct {
 	Email         string                 `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
 	PhoneNumber   string                 `protobuf:"bytes,3,opt,name=phone_number,json=phoneNumber,proto3" json:"phone_number,omitempty"`
 	Role          string                 `protobuf:"bytes,4,opt,name=role,proto3" json:"role,omitempty"`
+	CompanyId     string                 `protobuf:"bytes,5,opt,name=company_id,json=companyId,proto3" json:"company_id,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -766,28 +783,40 @@ func (x *AuthReply_User) GetRole() string {
 	return ""
 }
 
+func (x *AuthReply_User) GetCompanyId() string {
+	if x != nil {
+		return x.CompanyId
+	}
+	return ""
+}
+
 var File_auth_v1_auth_proto protoreflect.FileDescriptor
 
 const file_auth_v1_auth_proto_rawDesc = "" +
 	"\n" +
-	"\x12auth/v1/auth.proto\x12\vapi.auth.v1\x1a\x1cgoogle/api/annotations.proto\"\x83\x01\n" +
+	"\x12auth/v1/auth.proto\x12\vapi.auth.v1\x1a\x1cgoogle/api/annotations.proto\"\xb6\x01\n" +
 	"\x0fRegisterRequest\x12\x1b\n" +
 	"\tfull_name\x18\x01 \x01(\tR\bfullName\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x1a\n" +
 	"\bpassword\x18\x03 \x01(\tR\bpassword\x12!\n" +
-	"\fphone_number\x18\x04 \x01(\tR\vphoneNumber\"@\n" +
+	"\fphone_number\x18\x04 \x01(\tR\vphoneNumber\x12\x12\n" +
+	"\x04role\x18\x05 \x01(\tR\x04role\x12\x1d\n" +
+	"\n" +
+	"company_id\x18\x06 \x01(\tR\tcompanyId\"@\n" +
 	"\fLoginRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\x12\x1a\n" +
-	"\bpassword\x18\x02 \x01(\tR\bpassword\"\xf6\x01\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\"\x96\x02\n" +
 	"\tAuthReply\x12!\n" +
 	"\faccess_token\x18\x01 \x01(\tR\vaccessToken\x12#\n" +
 	"\rrefresh_token\x18\x02 \x01(\tR\frefreshToken\x12/\n" +
-	"\x04user\x18\x03 \x01(\v2\x1b.api.auth.v1.AuthReply.UserR\x04user\x1ap\n" +
+	"\x04user\x18\x03 \x01(\v2\x1b.api.auth.v1.AuthReply.UserR\x04user\x1a\x8f\x01\n" +
 	"\x04User\x12\x1b\n" +
 	"\tfull_name\x18\x01 \x01(\tR\bfullName\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12!\n" +
 	"\fphone_number\x18\x03 \x01(\tR\vphoneNumber\x12\x12\n" +
-	"\x04role\x18\x04 \x01(\tR\x04role\":\n" +
+	"\x04role\x18\x04 \x01(\tR\x04role\x12\x1d\n" +
+	"\n" +
+	"company_id\x18\x05 \x01(\tR\tcompanyId\":\n" +
 	"\x13RefreshTokenRequest\x12#\n" +
 	"\rrefresh_token\x18\x01 \x01(\tR\frefreshToken\"6\n" +
 	"\x11RefreshTokenReply\x12!\n" +

@@ -24,6 +24,8 @@ const (
 	JobPosting_DeleteJobPosting_FullMethodName = "/api.job.v1.JobPosting/DeleteJobPosting"
 	JobPosting_GetJobPosting_FullMethodName    = "/api.job.v1.JobPosting/GetJobPosting"
 	JobPosting_ListJobPostings_FullMethodName  = "/api.job.v1.JobPosting/ListJobPostings"
+	JobPosting_ListMyJobs_FullMethodName       = "/api.job.v1.JobPosting/ListMyJobs"
+	JobPosting_GetMyCreatedJobs_FullMethodName = "/api.job.v1.JobPosting/GetMyCreatedJobs"
 )
 
 // JobPostingClient is the client API for JobPosting service.
@@ -40,6 +42,10 @@ type JobPostingClient interface {
 	GetJobPosting(ctx context.Context, in *GetJobPostingRequest, opts ...grpc.CallOption) (*JobPostingReply, error)
 	// List all job postings with pagination and filters
 	ListJobPostings(ctx context.Context, in *ListJobPostingsRequest, opts ...grpc.CallOption) (*ListJobPostingsReply, error)
+	// List jobs created by current user/company (for HR)
+	ListMyJobs(ctx context.Context, in *ListMyJobsRequest, opts ...grpc.CallOption) (*ListJobPostingsReply, error)
+	// List jobs created by current user (from token)
+	GetMyCreatedJobs(ctx context.Context, in *GetMyCreatedJobsRequest, opts ...grpc.CallOption) (*ListJobPostingsReply, error)
 }
 
 type jobPostingClient struct {
@@ -95,6 +101,24 @@ func (c *jobPostingClient) ListJobPostings(ctx context.Context, in *ListJobPosti
 	return out, nil
 }
 
+func (c *jobPostingClient) ListMyJobs(ctx context.Context, in *ListMyJobsRequest, opts ...grpc.CallOption) (*ListJobPostingsReply, error) {
+	out := new(ListJobPostingsReply)
+	err := c.cc.Invoke(ctx, JobPosting_ListMyJobs_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *jobPostingClient) GetMyCreatedJobs(ctx context.Context, in *GetMyCreatedJobsRequest, opts ...grpc.CallOption) (*ListJobPostingsReply, error) {
+	out := new(ListJobPostingsReply)
+	err := c.cc.Invoke(ctx, JobPosting_GetMyCreatedJobs_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // JobPostingServer is the server API for JobPosting service.
 // All implementations must embed UnimplementedJobPostingServer
 // for forward compatibility
@@ -109,6 +133,10 @@ type JobPostingServer interface {
 	GetJobPosting(context.Context, *GetJobPostingRequest) (*JobPostingReply, error)
 	// List all job postings with pagination and filters
 	ListJobPostings(context.Context, *ListJobPostingsRequest) (*ListJobPostingsReply, error)
+	// List jobs created by current user/company (for HR)
+	ListMyJobs(context.Context, *ListMyJobsRequest) (*ListJobPostingsReply, error)
+	// List jobs created by current user (from token)
+	GetMyCreatedJobs(context.Context, *GetMyCreatedJobsRequest) (*ListJobPostingsReply, error)
 	mustEmbedUnimplementedJobPostingServer()
 }
 
@@ -130,6 +158,12 @@ func (UnimplementedJobPostingServer) GetJobPosting(context.Context, *GetJobPosti
 }
 func (UnimplementedJobPostingServer) ListJobPostings(context.Context, *ListJobPostingsRequest) (*ListJobPostingsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListJobPostings not implemented")
+}
+func (UnimplementedJobPostingServer) ListMyJobs(context.Context, *ListMyJobsRequest) (*ListJobPostingsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListMyJobs not implemented")
+}
+func (UnimplementedJobPostingServer) GetMyCreatedJobs(context.Context, *GetMyCreatedJobsRequest) (*ListJobPostingsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMyCreatedJobs not implemented")
 }
 func (UnimplementedJobPostingServer) mustEmbedUnimplementedJobPostingServer() {}
 
@@ -234,6 +268,42 @@ func _JobPosting_ListJobPostings_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _JobPosting_ListMyJobs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListMyJobsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(JobPostingServer).ListMyJobs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: JobPosting_ListMyJobs_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(JobPostingServer).ListMyJobs(ctx, req.(*ListMyJobsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _JobPosting_GetMyCreatedJobs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMyCreatedJobsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(JobPostingServer).GetMyCreatedJobs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: JobPosting_GetMyCreatedJobs_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(JobPostingServer).GetMyCreatedJobs(ctx, req.(*GetMyCreatedJobsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // JobPosting_ServiceDesc is the grpc.ServiceDesc for JobPosting service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -260,6 +330,14 @@ var JobPosting_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListJobPostings",
 			Handler:    _JobPosting_ListJobPostings_Handler,
+		},
+		{
+			MethodName: "ListMyJobs",
+			Handler:    _JobPosting_ListMyJobs_Handler,
+		},
+		{
+			MethodName: "GetMyCreatedJobs",
+			Handler:    _JobPosting_GetMyCreatedJobs_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

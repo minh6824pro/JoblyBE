@@ -20,6 +20,7 @@ type User struct {
 	Password    string               `bson:"password"` // hashed password
 	PhoneNumber string               `bson:"phone_number"`
 	Role        string               `bson:"role"`
+	CompanyID   string               `bson:"company_id,omitempty"` // for HR role
 	Active      bool                 `bson:"active"`
 	Resume      []Resume             `bson:"resume"`
 	SavedJdID   []primitive.ObjectID `bson:"saved_jd_id,omitempty"`
@@ -51,6 +52,7 @@ func (r *userRepo) CreateUser(ctx context.Context, user *biz.User) (*biz.User, e
 		Password:    user.Password,
 		PhoneNumber: user.PhoneNumber,
 		Role:        string(user.Role),
+		CompanyID:   user.CompanyID,
 		Active:      user.Active,
 		Resume:      []Resume{},
 		CreatedAt:   now,
@@ -269,6 +271,7 @@ func (r *userRepo) toBiz(u *User) *biz.User {
 		Password:    u.Password,
 		PhoneNumber: u.PhoneNumber,
 		Role:        biz.Role(u.Role),
+		CompanyID:   u.CompanyID,
 		Active:      u.Active,
 		LastLogin:   u.LastLogin,
 		CreatedAt:   u.CreatedAt,

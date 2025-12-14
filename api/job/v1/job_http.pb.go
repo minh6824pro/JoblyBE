@@ -22,7 +22,9 @@ const _ = http.SupportPackageIsVersion1
 const OperationJobPostingCreateJobPosting = "/api.job.v1.JobPosting/CreateJobPosting"
 const OperationJobPostingDeleteJobPosting = "/api.job.v1.JobPosting/DeleteJobPosting"
 const OperationJobPostingGetJobPosting = "/api.job.v1.JobPosting/GetJobPosting"
+const OperationJobPostingGetMyCreatedJobs = "/api.job.v1.JobPosting/GetMyCreatedJobs"
 const OperationJobPostingListJobPostings = "/api.job.v1.JobPosting/ListJobPostings"
+const OperationJobPostingListMyJobs = "/api.job.v1.JobPosting/ListMyJobs"
 const OperationJobPostingUpdateJobPosting = "/api.job.v1.JobPosting/UpdateJobPosting"
 
 type JobPostingHTTPServer interface {
@@ -32,8 +34,12 @@ type JobPostingHTTPServer interface {
 	DeleteJobPosting(context.Context, *DeleteJobPostingRequest) (*DeleteJobPostingReply, error)
 	// GetJobPosting Get a single job posting by ID
 	GetJobPosting(context.Context, *GetJobPostingRequest) (*JobPostingReply, error)
+	// GetMyCreatedJobs List jobs created by current user (from token)
+	GetMyCreatedJobs(context.Context, *GetMyCreatedJobsRequest) (*ListJobPostingsReply, error)
 	// ListJobPostings List all job postings with pagination and filters
 	ListJobPostings(context.Context, *ListJobPostingsRequest) (*ListJobPostingsReply, error)
+	// ListMyJobs List jobs created by current user/company (for HR)
+	ListMyJobs(context.Context, *ListMyJobsRequest) (*ListJobPostingsReply, error)
 	// UpdateJobPosting Update an existing job posting
 	UpdateJobPosting(context.Context, *UpdateJobPostingRequest) (*JobPostingReply, error)
 }
@@ -45,6 +51,8 @@ func RegisterJobPostingHTTPServer(s *http.Server, srv JobPostingHTTPServer) {
 	r.DELETE("/api/v1/jobs/{id}", _JobPosting_DeleteJobPosting0_HTTP_Handler(srv))
 	r.GET("/api/v1/jobs/{id}", _JobPosting_GetJobPosting0_HTTP_Handler(srv))
 	r.GET("/api/v1/jobs", _JobPosting_ListJobPostings0_HTTP_Handler(srv))
+	r.GET("/api/v1/my-jobs", _JobPosting_ListMyJobs0_HTTP_Handler(srv))
+	r.GET("/api/v1/my-created-jobs", _JobPosting_GetMyCreatedJobs0_HTTP_Handler(srv))
 }
 
 func _JobPosting_CreateJobPosting0_HTTP_Handler(srv JobPostingHTTPServer) func(ctx http.Context) error {
@@ -157,6 +165,44 @@ func _JobPosting_ListJobPostings0_HTTP_Handler(srv JobPostingHTTPServer) func(ct
 	}
 }
 
+func _JobPosting_ListMyJobs0_HTTP_Handler(srv JobPostingHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ListMyJobsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationJobPostingListMyJobs)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ListMyJobs(ctx, req.(*ListMyJobsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListJobPostingsReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _JobPosting_GetMyCreatedJobs0_HTTP_Handler(srv JobPostingHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetMyCreatedJobsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationJobPostingGetMyCreatedJobs)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetMyCreatedJobs(ctx, req.(*GetMyCreatedJobsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ListJobPostingsReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type JobPostingHTTPClient interface {
 	// CreateJobPosting Create a new job posting
 	CreateJobPosting(ctx context.Context, req *CreateJobPostingRequest, opts ...http.CallOption) (rsp *JobPostingReply, err error)
@@ -164,8 +210,12 @@ type JobPostingHTTPClient interface {
 	DeleteJobPosting(ctx context.Context, req *DeleteJobPostingRequest, opts ...http.CallOption) (rsp *DeleteJobPostingReply, err error)
 	// GetJobPosting Get a single job posting by ID
 	GetJobPosting(ctx context.Context, req *GetJobPostingRequest, opts ...http.CallOption) (rsp *JobPostingReply, err error)
+	// GetMyCreatedJobs List jobs created by current user (from token)
+	GetMyCreatedJobs(ctx context.Context, req *GetMyCreatedJobsRequest, opts ...http.CallOption) (rsp *ListJobPostingsReply, err error)
 	// ListJobPostings List all job postings with pagination and filters
 	ListJobPostings(ctx context.Context, req *ListJobPostingsRequest, opts ...http.CallOption) (rsp *ListJobPostingsReply, err error)
+	// ListMyJobs List jobs created by current user/company (for HR)
+	ListMyJobs(ctx context.Context, req *ListMyJobsRequest, opts ...http.CallOption) (rsp *ListJobPostingsReply, err error)
 	// UpdateJobPosting Update an existing job posting
 	UpdateJobPosting(ctx context.Context, req *UpdateJobPostingRequest, opts ...http.CallOption) (rsp *JobPostingReply, err error)
 }
@@ -220,12 +270,40 @@ func (c *JobPostingHTTPClientImpl) GetJobPosting(ctx context.Context, in *GetJob
 	return &out, nil
 }
 
+// GetMyCreatedJobs List jobs created by current user (from token)
+func (c *JobPostingHTTPClientImpl) GetMyCreatedJobs(ctx context.Context, in *GetMyCreatedJobsRequest, opts ...http.CallOption) (*ListJobPostingsReply, error) {
+	var out ListJobPostingsReply
+	pattern := "/api/v1/my-created-jobs"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationJobPostingGetMyCreatedJobs))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // ListJobPostings List all job postings with pagination and filters
 func (c *JobPostingHTTPClientImpl) ListJobPostings(ctx context.Context, in *ListJobPostingsRequest, opts ...http.CallOption) (*ListJobPostingsReply, error) {
 	var out ListJobPostingsReply
 	pattern := "/api/v1/jobs"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationJobPostingListJobPostings))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ListMyJobs List jobs created by current user/company (for HR)
+func (c *JobPostingHTTPClientImpl) ListMyJobs(ctx context.Context, in *ListMyJobsRequest, opts ...http.CallOption) (*ListJobPostingsReply, error) {
+	var out ListJobPostingsReply
+	pattern := "/api/v1/my-jobs"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationJobPostingListMyJobs))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

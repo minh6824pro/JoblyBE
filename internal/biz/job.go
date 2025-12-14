@@ -56,6 +56,8 @@ type JobPosting struct {
 	Requirements          string
 	Benefits              string
 	JobTech               []string
+	Active                bool
+	CreatedBy             string // User ID who created this job
 	CreatedAt             time.Time
 }
 
@@ -66,16 +68,19 @@ type JobPostingRepo interface {
 	DeleteJobPosting(ctx context.Context, id string) error
 	GetJobPosting(ctx context.Context, id string) (*JobPosting, error)
 	ListJobPostings(ctx context.Context, filter *JobFilter, page, pageSize int32) ([]*JobPosting, int32, error)
+	ListMyJobs(ctx context.Context, companyID string, page, pageSize int32, includeInactive bool) ([]*JobPosting, int32, error)
+	GetMyCreatedJobs(ctx context.Context, userID string, page, pageSize int32, includeInactive bool) ([]*JobPosting, int32, error)
 }
 
 // JobFilter for filtering and searching jobs
 type JobFilter struct {
-	CompanyID  string
-	Location   string
-	JobType    JobType
-	Level      Level
-	Keyword    string
-	JobTech    []string
+	CompanyID       string
+	Location        string
+	JobType         JobType
+	Level           Level
+	Keyword         string
+	JobTech         []string
+	IncludeInactive bool // Include inactive jobs in results
 }
 
 // JobPostingUseCase handles job posting business logic
@@ -210,6 +215,48 @@ func (uc *JobPostingUseCase) ListJobPostings(ctx context.Context, filter *JobFil
 	jobs, total, err := uc.jobRepo.ListJobPostings(ctx, filter, page, pageSize)
 	if err != nil {
 		uc.log.Errorf("failed to list job postings: %v", err)
+		return nil, 0, err
+	}
+
+	return jobs, total, nil
+}
+
+// ListMyJobs lists job postings created by user/company
+func (uc *JobPostingUseCase) ListMyJobs(ctx context.Context, companyID string, page, pageSize int32, includeInactive bool) ([]*JobPosting, int32, error) {
+	uc.log.WithContext(ctx).Infof("ListMyJobs for company: %s", companyID)
+
+	// Validate pagination
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 || pageSize > 100 {
+		pageSize = 20
+	}
+
+	jobs, total, err := uc.jobRepo.ListMyJobs(ctx, companyID, page, pageSize, includeInactive)
+	if err != nil {
+		uc.log.Errorf("failed to list my jobs: %v", err)
+		return nil, 0, err
+	}
+
+	return jobs, total, nil
+}
+
+// GetMyCreatedJobs lists job postings created by a specific user
+func (uc *JobPostingUseCase) GetMyCreatedJobs(ctx context.Context, userID string, page, pageSize int32, includeInactive bool) ([]*JobPosting, int32, error) {
+	uc.log.WithContext(ctx).Infof("GetMyCreatedJobs for user: %s", userID)
+
+	// Validate pagination
+	if page < 1 {
+		page = 1
+	}
+	if pageSize < 1 || pageSize > 100 {
+		pageSize = 20
+	}
+
+	jobs, total, err := uc.jobRepo.GetMyCreatedJobs(ctx, userID, page, pageSize, includeInactive)
+	if err != nil {
+		uc.log.Errorf("failed to get my created jobs: %v", err)
 		return nil, 0, err
 	}
 

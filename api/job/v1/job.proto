@@ -46,6 +46,20 @@ service JobPosting {
 			get: "/api/v1/jobs"
 		};
 	}
+	
+	// List jobs created by current user/company (for HR)
+	rpc ListMyJobs (ListMyJobsRequest) returns (ListJobPostingsReply) {
+		option (google.api.http) = {
+			get: "/api/v1/my-jobs"
+		};
+	}
+
+	// List jobs created by current user (from token)
+	rpc GetMyCreatedJobs (GetMyCreatedJobsRequest) returns (ListJobPostingsReply) {
+		option (google.api.http) = {
+			get: "/api/v1/my-created-jobs"
+		};
+	}
 }
 
 // Company Service
@@ -120,7 +134,9 @@ message JobPostingReply {
 	string requirements = 15;
 	string benefits = 16;
 	repeated string job_tech = 17; // Technologies/skills required
-	string created_at = 18;
+	bool active = 18; // Job is active/recruiting
+	string created_by = 19; // User ID who created this job
+	string created_at = 20;
 }
 
 message CreateJobPostingRequest {
@@ -139,6 +155,7 @@ message CreateJobPostingRequest {
 	string requirements = 13;
 	string benefits = 14;
 	repeated string job_tech = 15;
+	bool active = 16; // Job is active/recruiting (default true)
 }
 
 message UpdateJobPostingRequest {
@@ -157,6 +174,7 @@ message UpdateJobPostingRequest {
 	string requirements = 13;
 	string benefits = 14;
 	repeated string job_tech = 15;
+	bool active = 16; // Job is active/recruiting
 }
 
 message DeleteJobPostingRequest {
@@ -180,6 +198,20 @@ message ListJobPostingsRequest {
 	string level = 6; // Filter by level
 	string keyword = 7; // Search in title and description
 	repeated string job_tech = 8; // Filter by technologies
+	bool include_inactive = 9; // Include inactive jobs (default false)
+}
+
+message ListMyJobsRequest {
+	int32 page = 1;
+	int32 page_size = 2;
+	string company_id = 3; // Optional: filter by specific company (for admin)
+	bool include_inactive = 4; // Include inactive jobs (default true for my jobs)
+}
+
+message GetMyCreatedJobsRequest {
+	int32 page = 1;
+	int32 page_size = 2;
+	bool include_inactive = 3; // Include inactive jobs (default true)
 }
 
 message ListJobPostingsReply {

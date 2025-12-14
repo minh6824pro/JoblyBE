@@ -36,6 +36,7 @@ type JWTClaims struct {
 	FullName    string    `json:"full_name"`
 	PhoneNumber string    `json:"phone_number"`
 	Role        string    `json:"role"`
+	CompanyID   string    `json:"company_id,omitempty"` // for HR role
 	TokenType   TokenType `json:"token_type"`
 	jwt.RegisteredClaims
 }
@@ -47,7 +48,7 @@ type TokenPair struct {
 }
 
 // GenerateAccessToken tạo access token mới
-func GenerateAccessToken(userID, email, fullName, phoneNumber, role, secret string, duration time.Duration) (string, error) {
+func GenerateAccessToken(userID, email, fullName, phoneNumber, role, companyID, secret string, duration time.Duration) (string, error) {
 	now := time.Now()
 	claims := JWTClaims{
 		UserID:      userID,
@@ -55,6 +56,7 @@ func GenerateAccessToken(userID, email, fullName, phoneNumber, role, secret stri
 		FullName:    fullName,
 		PhoneNumber: phoneNumber,
 		Role:        role,
+		CompanyID:   companyID,
 		TokenType:   AccessToken,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(now.Add(duration)),
@@ -75,7 +77,7 @@ func GenerateAccessToken(userID, email, fullName, phoneNumber, role, secret stri
 }
 
 // GenerateRefreshToken tạo refresh token mới
-func GenerateRefreshToken(userID, email, fullName, phoneNumber, role, secret string, duration time.Duration) (string, error) {
+func GenerateRefreshToken(userID, email, fullName, phoneNumber, role, companyID, secret string, duration time.Duration) (string, error) {
 	now := time.Now()
 	claims := JWTClaims{
 		UserID:      userID,
@@ -83,6 +85,7 @@ func GenerateRefreshToken(userID, email, fullName, phoneNumber, role, secret str
 		FullName:    fullName,
 		PhoneNumber: phoneNumber,
 		Role:        role,
+		CompanyID:   companyID,
 		TokenType:   RefreshToken,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(now.Add(duration)),
@@ -103,13 +106,13 @@ func GenerateRefreshToken(userID, email, fullName, phoneNumber, role, secret str
 }
 
 // NewTokenPair tạo cả access token và refresh token
-func NewTokenPair(userID, email, fullName, phoneNumber, role, secret string) (*TokenPair, error) {
-	accessToken, err := GenerateAccessToken(userID, email, fullName, phoneNumber, role, secret, AccessTokenDuration)
+func NewTokenPair(userID, email, fullName, phoneNumber, role, companyID, secret string) (*TokenPair, error) {
+	accessToken, err := GenerateAccessToken(userID, email, fullName, phoneNumber, role, companyID, secret, AccessTokenDuration)
 	if err != nil {
 		return nil, err
 	}
 
-	refreshToken, err := GenerateRefreshToken(userID, email, fullName, phoneNumber, role, secret, RefreshTokenDuration)
+	refreshToken, err := GenerateRefreshToken(userID, email, fullName, phoneNumber, role, companyID, secret, RefreshTokenDuration)
 	if err != nil {
 		return nil, err
 	}

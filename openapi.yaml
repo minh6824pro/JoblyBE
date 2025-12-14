@@ -364,6 +364,10 @@ paths:
                     type: array
                     items:
                         type: string
+                - name: includeInactive
+                  in: query
+                  schema:
+                    type: boolean
             responses:
                 "200":
                     description: OK
@@ -485,6 +489,66 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.application.v1.ListApplicationsReply'
+    /api/v1/my-created-jobs:
+        get:
+            tags:
+                - JobPosting
+            description: List jobs created by current user (from token)
+            operationId: JobPosting_GetMyCreatedJobs
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: includeInactive
+                  in: query
+                  schema:
+                    type: boolean
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.job.v1.ListJobPostingsReply'
+    /api/v1/my-jobs:
+        get:
+            tags:
+                - JobPosting
+            description: List jobs created by current user/company (for HR)
+            operationId: JobPosting_ListMyJobs
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: companyId
+                  in: query
+                  schema:
+                    type: string
+                - name: includeInactive
+                  in: query
+                  schema:
+                    type: boolean
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.job.v1.ListJobPostingsReply'
     /api/v1/resumes:
         get:
             tags:
@@ -918,6 +982,8 @@ components:
                     type: string
                 role:
                     type: string
+                companyId:
+                    type: string
         api.auth.v1.ChangePasswordReply:
             type: object
             properties:
@@ -978,6 +1044,10 @@ components:
                 password:
                     type: string
                 phoneNumber:
+                    type: string
+                role:
+                    type: string
+                companyId:
                     type: string
         api.auth.v1.UpdateProfileReply:
             type: object
@@ -1095,6 +1165,8 @@ components:
                     type: array
                     items:
                         type: string
+                active:
+                    type: boolean
         api.job.v1.DeleteCompanyReply:
             type: object
             properties:
@@ -1146,6 +1218,10 @@ components:
                     type: array
                     items:
                         type: string
+                active:
+                    type: boolean
+                createdBy:
+                    type: string
                 createdAt:
                     type: string
         api.job.v1.ListCompaniesReply:
@@ -1238,6 +1314,8 @@ components:
                     type: array
                     items:
                         type: string
+                active:
+                    type: boolean
         api.resume.v1.CreateResumeRequest:
             type: object
             properties:

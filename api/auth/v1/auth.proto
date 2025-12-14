@@ -63,6 +63,8 @@ message RegisterRequest {
 	string email=2;
 	string password=3;
 	string phone_number=4;
+	string role=5; // USER, HR, ADMIN
+	string company_id=6; // Required for HR role
 }
 
 message LoginRequest {
@@ -78,6 +80,7 @@ message AuthReply {
 		string email=2;
 		string phone_number=3;
 		string role=4;
+		string company_id=5;
 	}
 	User user=3;
 }
