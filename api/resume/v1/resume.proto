@@ -49,7 +49,7 @@ service Resume {
 	// Generate CV description using ChatGPT
 	rpc GenerateCVDescription (GenerateCVDescriptionRequest) returns (GenerateCVDescriptionReply) {
 		option (google.api.http) = {
-			post: "/api/v1/resumes/{resume_id}/generate-description"
+			post: "/api/v1/resumes/generate-description"
 			body:"*"
 		};
 	}
@@ -71,9 +71,10 @@ message ResumeDetail {
 	repeated string skills = 5;
 	repeated Education education = 6;
 	repeated Experience experience = 7;
-	repeated string certifications = 8;
-	repeated string languages = 9;
-	repeated string achievements = 10;
+	repeated Project projects = 8;
+	repeated string certifications = 9;
+	repeated string languages = 10;
+	repeated string achievements = 11;
 }
 
 message Education {
@@ -90,6 +91,16 @@ message Experience {
 	string description = 4;
 	repeated string responsibilities = 5;
 	repeated string achievements = 6;
+}
+
+message Project {
+	string name = 1;
+	string description = 2;
+	repeated string technologies = 3;
+	string url = 4;
+	string duration = 5;
+	string role = 6;
+	repeated string achievements = 7;
 }
 
 // Request/Response messages
@@ -128,7 +139,7 @@ message DeleteResumeReply {
 }
 
 message GenerateCVDescriptionRequest {
-	string resume_id = 1;
+	ResumeDetail resume_detail = 1;
 	string field_tag = 2;
 	string current_input = 3;
 }

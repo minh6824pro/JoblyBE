@@ -344,8 +344,9 @@ type ResumeDetail struct {
 	Skills         []string               `protobuf:"bytes,5,rep,name=skills,proto3" json:"skills,omitempty"`
 	Education      []*Education           `protobuf:"bytes,6,rep,name=education,proto3" json:"education,omitempty"`
 	Experience     []*Experience          `protobuf:"bytes,7,rep,name=experience,proto3" json:"experience,omitempty"`
-	Certifications []string               `protobuf:"bytes,8,rep,name=certifications,proto3" json:"certifications,omitempty"`
-	Languages      []string               `protobuf:"bytes,9,rep,name=languages,proto3" json:"languages,omitempty"`
+	Projects       []*Project             `protobuf:"bytes,8,rep,name=projects,proto3" json:"projects,omitempty"`
+	Certifications []string               `protobuf:"bytes,9,rep,name=certifications,proto3" json:"certifications,omitempty"`
+	Languages      []string               `protobuf:"bytes,10,rep,name=languages,proto3" json:"languages,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -425,6 +426,13 @@ func (x *ResumeDetail) GetEducation() []*Education {
 func (x *ResumeDetail) GetExperience() []*Experience {
 	if x != nil {
 		return x.Experience
+	}
+	return nil
+}
+
+func (x *ResumeDetail) GetProjects() []*Project {
+	if x != nil {
+		return x.Projects
 	}
 	return nil
 }
@@ -595,6 +603,98 @@ func (x *Experience) GetDescription() string {
 	return ""
 }
 
+type Project struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	Technologies  []string               `protobuf:"bytes,3,rep,name=technologies,proto3" json:"technologies,omitempty"`
+	Url           string                 `protobuf:"bytes,4,opt,name=url,proto3" json:"url,omitempty"`
+	Duration      string                 `protobuf:"bytes,5,opt,name=duration,proto3" json:"duration,omitempty"`
+	Role          string                 `protobuf:"bytes,6,opt,name=role,proto3" json:"role,omitempty"`
+	Achievements  []string               `protobuf:"bytes,7,rep,name=achievements,proto3" json:"achievements,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Project) Reset() {
+	*x = Project{}
+	mi := &file_application_v1_application_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Project) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Project) ProtoMessage() {}
+
+func (x *Project) ProtoReflect() protoreflect.Message {
+	mi := &file_application_v1_application_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Project.ProtoReflect.Descriptor instead.
+func (*Project) Descriptor() ([]byte, []int) {
+	return file_application_v1_application_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *Project) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Project) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *Project) GetTechnologies() []string {
+	if x != nil {
+		return x.Technologies
+	}
+	return nil
+}
+
+func (x *Project) GetUrl() string {
+	if x != nil {
+		return x.Url
+	}
+	return ""
+}
+
+func (x *Project) GetDuration() string {
+	if x != nil {
+		return x.Duration
+	}
+	return ""
+}
+
+func (x *Project) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *Project) GetAchievements() []string {
+	if x != nil {
+		return x.Achievements
+	}
+	return nil
+}
+
 type JobInfo struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -607,7 +707,7 @@ type JobInfo struct {
 
 func (x *JobInfo) Reset() {
 	*x = JobInfo{}
-	mi := &file_application_v1_application_proto_msgTypes[5]
+	mi := &file_application_v1_application_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -619,7 +719,7 @@ func (x *JobInfo) String() string {
 func (*JobInfo) ProtoMessage() {}
 
 func (x *JobInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_application_v1_application_proto_msgTypes[5]
+	mi := &file_application_v1_application_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -632,7 +732,7 @@ func (x *JobInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JobInfo.ProtoReflect.Descriptor instead.
 func (*JobInfo) Descriptor() ([]byte, []int) {
-	return file_application_v1_application_proto_rawDescGZIP(), []int{5}
+	return file_application_v1_application_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *JobInfo) GetId() string {
@@ -673,7 +773,7 @@ type ApplyJobRequest struct {
 
 func (x *ApplyJobRequest) Reset() {
 	*x = ApplyJobRequest{}
-	mi := &file_application_v1_application_proto_msgTypes[6]
+	mi := &file_application_v1_application_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -685,7 +785,7 @@ func (x *ApplyJobRequest) String() string {
 func (*ApplyJobRequest) ProtoMessage() {}
 
 func (x *ApplyJobRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_application_v1_application_proto_msgTypes[6]
+	mi := &file_application_v1_application_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -698,7 +798,7 @@ func (x *ApplyJobRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ApplyJobRequest.ProtoReflect.Descriptor instead.
 func (*ApplyJobRequest) Descriptor() ([]byte, []int) {
-	return file_application_v1_application_proto_rawDescGZIP(), []int{6}
+	return file_application_v1_application_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ApplyJobRequest) GetJobId() string {
@@ -724,7 +824,7 @@ type JobApplicationReply struct {
 
 func (x *JobApplicationReply) Reset() {
 	*x = JobApplicationReply{}
-	mi := &file_application_v1_application_proto_msgTypes[7]
+	mi := &file_application_v1_application_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -736,7 +836,7 @@ func (x *JobApplicationReply) String() string {
 func (*JobApplicationReply) ProtoMessage() {}
 
 func (x *JobApplicationReply) ProtoReflect() protoreflect.Message {
-	mi := &file_application_v1_application_proto_msgTypes[7]
+	mi := &file_application_v1_application_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -749,7 +849,7 @@ func (x *JobApplicationReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JobApplicationReply.ProtoReflect.Descriptor instead.
 func (*JobApplicationReply) Descriptor() ([]byte, []int) {
-	return file_application_v1_application_proto_rawDescGZIP(), []int{7}
+	return file_application_v1_application_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *JobApplicationReply) GetApplication() *JobApplicationInfo {
@@ -768,7 +868,7 @@ type JobApplicationDetailReply struct {
 
 func (x *JobApplicationDetailReply) Reset() {
 	*x = JobApplicationDetailReply{}
-	mi := &file_application_v1_application_proto_msgTypes[8]
+	mi := &file_application_v1_application_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -780,7 +880,7 @@ func (x *JobApplicationDetailReply) String() string {
 func (*JobApplicationDetailReply) ProtoMessage() {}
 
 func (x *JobApplicationDetailReply) ProtoReflect() protoreflect.Message {
-	mi := &file_application_v1_application_proto_msgTypes[8]
+	mi := &file_application_v1_application_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -793,7 +893,7 @@ func (x *JobApplicationDetailReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JobApplicationDetailReply.ProtoReflect.Descriptor instead.
 func (*JobApplicationDetailReply) Descriptor() ([]byte, []int) {
-	return file_application_v1_application_proto_rawDescGZIP(), []int{8}
+	return file_application_v1_application_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *JobApplicationDetailReply) GetApplication() *JobApplicationDetail {
@@ -812,7 +912,7 @@ type GetApplicationRequest struct {
 
 func (x *GetApplicationRequest) Reset() {
 	*x = GetApplicationRequest{}
-	mi := &file_application_v1_application_proto_msgTypes[9]
+	mi := &file_application_v1_application_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -824,7 +924,7 @@ func (x *GetApplicationRequest) String() string {
 func (*GetApplicationRequest) ProtoMessage() {}
 
 func (x *GetApplicationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_application_v1_application_proto_msgTypes[9]
+	mi := &file_application_v1_application_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -837,7 +937,7 @@ func (x *GetApplicationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetApplicationRequest.ProtoReflect.Descriptor instead.
 func (*GetApplicationRequest) Descriptor() ([]byte, []int) {
-	return file_application_v1_application_proto_rawDescGZIP(), []int{9}
+	return file_application_v1_application_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *GetApplicationRequest) GetId() string {
@@ -857,7 +957,7 @@ type ListUserApplicationsRequest struct {
 
 func (x *ListUserApplicationsRequest) Reset() {
 	*x = ListUserApplicationsRequest{}
-	mi := &file_application_v1_application_proto_msgTypes[10]
+	mi := &file_application_v1_application_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -869,7 +969,7 @@ func (x *ListUserApplicationsRequest) String() string {
 func (*ListUserApplicationsRequest) ProtoMessage() {}
 
 func (x *ListUserApplicationsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_application_v1_application_proto_msgTypes[10]
+	mi := &file_application_v1_application_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -882,7 +982,7 @@ func (x *ListUserApplicationsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListUserApplicationsRequest.ProtoReflect.Descriptor instead.
 func (*ListUserApplicationsRequest) Descriptor() ([]byte, []int) {
-	return file_application_v1_application_proto_rawDescGZIP(), []int{10}
+	return file_application_v1_application_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ListUserApplicationsRequest) GetPage() int32 {
@@ -912,7 +1012,7 @@ type ListJobApplicationsRequest struct {
 
 func (x *ListJobApplicationsRequest) Reset() {
 	*x = ListJobApplicationsRequest{}
-	mi := &file_application_v1_application_proto_msgTypes[11]
+	mi := &file_application_v1_application_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -924,7 +1024,7 @@ func (x *ListJobApplicationsRequest) String() string {
 func (*ListJobApplicationsRequest) ProtoMessage() {}
 
 func (x *ListJobApplicationsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_application_v1_application_proto_msgTypes[11]
+	mi := &file_application_v1_application_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -937,7 +1037,7 @@ func (x *ListJobApplicationsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListJobApplicationsRequest.ProtoReflect.Descriptor instead.
 func (*ListJobApplicationsRequest) Descriptor() ([]byte, []int) {
-	return file_application_v1_application_proto_rawDescGZIP(), []int{11}
+	return file_application_v1_application_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *ListJobApplicationsRequest) GetJobId() string {
@@ -980,7 +1080,7 @@ type ListApplicationsReply struct {
 
 func (x *ListApplicationsReply) Reset() {
 	*x = ListApplicationsReply{}
-	mi := &file_application_v1_application_proto_msgTypes[12]
+	mi := &file_application_v1_application_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -992,7 +1092,7 @@ func (x *ListApplicationsReply) String() string {
 func (*ListApplicationsReply) ProtoMessage() {}
 
 func (x *ListApplicationsReply) ProtoReflect() protoreflect.Message {
-	mi := &file_application_v1_application_proto_msgTypes[12]
+	mi := &file_application_v1_application_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1005,7 +1105,7 @@ func (x *ListApplicationsReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListApplicationsReply.ProtoReflect.Descriptor instead.
 func (*ListApplicationsReply) Descriptor() ([]byte, []int) {
-	return file_application_v1_application_proto_rawDescGZIP(), []int{12}
+	return file_application_v1_application_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ListApplicationsReply) GetApplications() []*JobApplicationInfo {
@@ -1047,7 +1147,7 @@ type UpdateApplicationStatusRequest struct {
 
 func (x *UpdateApplicationStatusRequest) Reset() {
 	*x = UpdateApplicationStatusRequest{}
-	mi := &file_application_v1_application_proto_msgTypes[13]
+	mi := &file_application_v1_application_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1059,7 +1159,7 @@ func (x *UpdateApplicationStatusRequest) String() string {
 func (*UpdateApplicationStatusRequest) ProtoMessage() {}
 
 func (x *UpdateApplicationStatusRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_application_v1_application_proto_msgTypes[13]
+	mi := &file_application_v1_application_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1072,7 +1172,7 @@ func (x *UpdateApplicationStatusRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateApplicationStatusRequest.ProtoReflect.Descriptor instead.
 func (*UpdateApplicationStatusRequest) Descriptor() ([]byte, []int) {
-	return file_application_v1_application_proto_rawDescGZIP(), []int{13}
+	return file_application_v1_application_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *UpdateApplicationStatusRequest) GetId() string {
@@ -1105,7 +1205,7 @@ type WithdrawApplicationRequest struct {
 
 func (x *WithdrawApplicationRequest) Reset() {
 	*x = WithdrawApplicationRequest{}
-	mi := &file_application_v1_application_proto_msgTypes[14]
+	mi := &file_application_v1_application_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1117,7 +1217,7 @@ func (x *WithdrawApplicationRequest) String() string {
 func (*WithdrawApplicationRequest) ProtoMessage() {}
 
 func (x *WithdrawApplicationRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_application_v1_application_proto_msgTypes[14]
+	mi := &file_application_v1_application_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1130,7 +1230,7 @@ func (x *WithdrawApplicationRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WithdrawApplicationRequest.ProtoReflect.Descriptor instead.
 func (*WithdrawApplicationRequest) Descriptor() ([]byte, []int) {
-	return file_application_v1_application_proto_rawDescGZIP(), []int{14}
+	return file_application_v1_application_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *WithdrawApplicationRequest) GetId() string {
@@ -1150,7 +1250,7 @@ type WithdrawApplicationReply struct {
 
 func (x *WithdrawApplicationReply) Reset() {
 	*x = WithdrawApplicationReply{}
-	mi := &file_application_v1_application_proto_msgTypes[15]
+	mi := &file_application_v1_application_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1162,7 +1262,7 @@ func (x *WithdrawApplicationReply) String() string {
 func (*WithdrawApplicationReply) ProtoMessage() {}
 
 func (x *WithdrawApplicationReply) ProtoReflect() protoreflect.Message {
-	mi := &file_application_v1_application_proto_msgTypes[15]
+	mi := &file_application_v1_application_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1175,7 +1275,7 @@ func (x *WithdrawApplicationReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use WithdrawApplicationReply.ProtoReflect.Descriptor instead.
 func (*WithdrawApplicationReply) Descriptor() ([]byte, []int) {
-	return file_application_v1_application_proto_rawDescGZIP(), []int{15}
+	return file_application_v1_application_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *WithdrawApplicationReply) GetSuccess() bool {
@@ -1231,7 +1331,7 @@ const file_application_v1_application_proto_rawDesc = "" +
 	"\ahr_note\x18\n" +
 	" \x01(\tR\x06hrNote\x12E\n" +
 	"\rresume_detail\x18\v \x01(\v2 .api.application.v1.ResumeDetailR\fresumeDetail\x126\n" +
-	"\bjob_info\x18\f \x01(\v2\x1b.api.application.v1.JobInfoR\ajobInfo\"\xc3\x02\n" +
+	"\bjob_info\x18\f \x01(\v2\x1b.api.application.v1.JobInfoR\ajobInfo\"\xfc\x02\n" +
 	"\fResumeDetail\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x14\n" +
@@ -1241,9 +1341,11 @@ const file_application_v1_application_proto_rawDesc = "" +
 	"\teducation\x18\x06 \x03(\v2\x1d.api.application.v1.EducationR\teducation\x12>\n" +
 	"\n" +
 	"experience\x18\a \x03(\v2\x1e.api.application.v1.ExperienceR\n" +
-	"experience\x12&\n" +
-	"\x0ecertifications\x18\b \x03(\tR\x0ecertifications\x12\x1c\n" +
-	"\tlanguages\x18\t \x03(\tR\tlanguages\"\x90\x01\n" +
+	"experience\x127\n" +
+	"\bprojects\x18\b \x03(\v2\x1b.api.application.v1.ProjectR\bprojects\x12&\n" +
+	"\x0ecertifications\x18\t \x03(\tR\x0ecertifications\x12\x1c\n" +
+	"\tlanguages\x18\n" +
+	" \x03(\tR\tlanguages\"\x90\x01\n" +
 	"\tEducation\x12\x16\n" +
 	"\x06degree\x18\x01 \x01(\tR\x06degree\x12 \n" +
 	"\vinstitution\x18\x02 \x01(\tR\vinstitution\x12'\n" +
@@ -1256,7 +1358,15 @@ const file_application_v1_application_proto_rawDesc = "" +
 	"\bduration\x18\x03 \x01(\tR\bduration\x12*\n" +
 	"\x10responsibilities\x18\x04 \x03(\tR\x10responsibilities\x12\"\n" +
 	"\fachievements\x18\x05 \x03(\tR\fachievements\x12 \n" +
-	"\vdescription\x18\x06 \x01(\tR\vdescription\"n\n" +
+	"\vdescription\x18\x06 \x01(\tR\vdescription\"\xc9\x01\n" +
+	"\aProject\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\"\n" +
+	"\ftechnologies\x18\x03 \x03(\tR\ftechnologies\x12\x10\n" +
+	"\x03url\x18\x04 \x01(\tR\x03url\x12\x1a\n" +
+	"\bduration\x18\x05 \x01(\tR\bduration\x12\x12\n" +
+	"\x04role\x18\x06 \x01(\tR\x04role\x12\"\n" +
+	"\fachievements\x18\a \x03(\tR\fachievements\"n\n" +
 	"\aJobInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
 	"\x05title\x18\x02 \x01(\tR\x05title\x12!\n" +
@@ -1320,7 +1430,7 @@ func file_application_v1_application_proto_rawDescGZIP() []byte {
 }
 
 var file_application_v1_application_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_application_v1_application_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_application_v1_application_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_application_v1_application_proto_goTypes = []any{
 	(ApplicationStatus)(0),                 // 0: api.application.v1.ApplicationStatus
 	(*JobApplicationInfo)(nil),             // 1: api.application.v1.JobApplicationInfo
@@ -1328,48 +1438,50 @@ var file_application_v1_application_proto_goTypes = []any{
 	(*ResumeDetail)(nil),                   // 3: api.application.v1.ResumeDetail
 	(*Education)(nil),                      // 4: api.application.v1.Education
 	(*Experience)(nil),                     // 5: api.application.v1.Experience
-	(*JobInfo)(nil),                        // 6: api.application.v1.JobInfo
-	(*ApplyJobRequest)(nil),                // 7: api.application.v1.ApplyJobRequest
-	(*JobApplicationReply)(nil),            // 8: api.application.v1.JobApplicationReply
-	(*JobApplicationDetailReply)(nil),      // 9: api.application.v1.JobApplicationDetailReply
-	(*GetApplicationRequest)(nil),          // 10: api.application.v1.GetApplicationRequest
-	(*ListUserApplicationsRequest)(nil),    // 11: api.application.v1.ListUserApplicationsRequest
-	(*ListJobApplicationsRequest)(nil),     // 12: api.application.v1.ListJobApplicationsRequest
-	(*ListApplicationsReply)(nil),          // 13: api.application.v1.ListApplicationsReply
-	(*UpdateApplicationStatusRequest)(nil), // 14: api.application.v1.UpdateApplicationStatusRequest
-	(*WithdrawApplicationRequest)(nil),     // 15: api.application.v1.WithdrawApplicationRequest
-	(*WithdrawApplicationReply)(nil),       // 16: api.application.v1.WithdrawApplicationReply
+	(*Project)(nil),                        // 6: api.application.v1.Project
+	(*JobInfo)(nil),                        // 7: api.application.v1.JobInfo
+	(*ApplyJobRequest)(nil),                // 8: api.application.v1.ApplyJobRequest
+	(*JobApplicationReply)(nil),            // 9: api.application.v1.JobApplicationReply
+	(*JobApplicationDetailReply)(nil),      // 10: api.application.v1.JobApplicationDetailReply
+	(*GetApplicationRequest)(nil),          // 11: api.application.v1.GetApplicationRequest
+	(*ListUserApplicationsRequest)(nil),    // 12: api.application.v1.ListUserApplicationsRequest
+	(*ListJobApplicationsRequest)(nil),     // 13: api.application.v1.ListJobApplicationsRequest
+	(*ListApplicationsReply)(nil),          // 14: api.application.v1.ListApplicationsReply
+	(*UpdateApplicationStatusRequest)(nil), // 15: api.application.v1.UpdateApplicationStatusRequest
+	(*WithdrawApplicationRequest)(nil),     // 16: api.application.v1.WithdrawApplicationRequest
+	(*WithdrawApplicationReply)(nil),       // 17: api.application.v1.WithdrawApplicationReply
 }
 var file_application_v1_application_proto_depIdxs = []int32{
 	0,  // 0: api.application.v1.JobApplicationInfo.status:type_name -> api.application.v1.ApplicationStatus
-	6,  // 1: api.application.v1.JobApplicationInfo.job_info:type_name -> api.application.v1.JobInfo
+	7,  // 1: api.application.v1.JobApplicationInfo.job_info:type_name -> api.application.v1.JobInfo
 	0,  // 2: api.application.v1.JobApplicationDetail.status:type_name -> api.application.v1.ApplicationStatus
 	3,  // 3: api.application.v1.JobApplicationDetail.resume_detail:type_name -> api.application.v1.ResumeDetail
-	6,  // 4: api.application.v1.JobApplicationDetail.job_info:type_name -> api.application.v1.JobInfo
+	7,  // 4: api.application.v1.JobApplicationDetail.job_info:type_name -> api.application.v1.JobInfo
 	4,  // 5: api.application.v1.ResumeDetail.education:type_name -> api.application.v1.Education
 	5,  // 6: api.application.v1.ResumeDetail.experience:type_name -> api.application.v1.Experience
-	1,  // 7: api.application.v1.JobApplicationReply.application:type_name -> api.application.v1.JobApplicationInfo
-	2,  // 8: api.application.v1.JobApplicationDetailReply.application:type_name -> api.application.v1.JobApplicationDetail
-	0,  // 9: api.application.v1.ListJobApplicationsRequest.status:type_name -> api.application.v1.ApplicationStatus
-	1,  // 10: api.application.v1.ListApplicationsReply.applications:type_name -> api.application.v1.JobApplicationInfo
-	0,  // 11: api.application.v1.UpdateApplicationStatusRequest.status:type_name -> api.application.v1.ApplicationStatus
-	7,  // 12: api.application.v1.JobApplication.ApplyJob:input_type -> api.application.v1.ApplyJobRequest
-	10, // 13: api.application.v1.JobApplication.GetApplication:input_type -> api.application.v1.GetApplicationRequest
-	11, // 14: api.application.v1.JobApplication.ListUserApplications:input_type -> api.application.v1.ListUserApplicationsRequest
-	12, // 15: api.application.v1.JobApplication.ListJobApplications:input_type -> api.application.v1.ListJobApplicationsRequest
-	14, // 16: api.application.v1.JobApplication.UpdateApplicationStatus:input_type -> api.application.v1.UpdateApplicationStatusRequest
-	15, // 17: api.application.v1.JobApplication.WithdrawApplication:input_type -> api.application.v1.WithdrawApplicationRequest
-	8,  // 18: api.application.v1.JobApplication.ApplyJob:output_type -> api.application.v1.JobApplicationReply
-	9,  // 19: api.application.v1.JobApplication.GetApplication:output_type -> api.application.v1.JobApplicationDetailReply
-	13, // 20: api.application.v1.JobApplication.ListUserApplications:output_type -> api.application.v1.ListApplicationsReply
-	13, // 21: api.application.v1.JobApplication.ListJobApplications:output_type -> api.application.v1.ListApplicationsReply
-	8,  // 22: api.application.v1.JobApplication.UpdateApplicationStatus:output_type -> api.application.v1.JobApplicationReply
-	16, // 23: api.application.v1.JobApplication.WithdrawApplication:output_type -> api.application.v1.WithdrawApplicationReply
-	18, // [18:24] is the sub-list for method output_type
-	12, // [12:18] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	6,  // 7: api.application.v1.ResumeDetail.projects:type_name -> api.application.v1.Project
+	1,  // 8: api.application.v1.JobApplicationReply.application:type_name -> api.application.v1.JobApplicationInfo
+	2,  // 9: api.application.v1.JobApplicationDetailReply.application:type_name -> api.application.v1.JobApplicationDetail
+	0,  // 10: api.application.v1.ListJobApplicationsRequest.status:type_name -> api.application.v1.ApplicationStatus
+	1,  // 11: api.application.v1.ListApplicationsReply.applications:type_name -> api.application.v1.JobApplicationInfo
+	0,  // 12: api.application.v1.UpdateApplicationStatusRequest.status:type_name -> api.application.v1.ApplicationStatus
+	8,  // 13: api.application.v1.JobApplication.ApplyJob:input_type -> api.application.v1.ApplyJobRequest
+	11, // 14: api.application.v1.JobApplication.GetApplication:input_type -> api.application.v1.GetApplicationRequest
+	12, // 15: api.application.v1.JobApplication.ListUserApplications:input_type -> api.application.v1.ListUserApplicationsRequest
+	13, // 16: api.application.v1.JobApplication.ListJobApplications:input_type -> api.application.v1.ListJobApplicationsRequest
+	15, // 17: api.application.v1.JobApplication.UpdateApplicationStatus:input_type -> api.application.v1.UpdateApplicationStatusRequest
+	16, // 18: api.application.v1.JobApplication.WithdrawApplication:input_type -> api.application.v1.WithdrawApplicationRequest
+	9,  // 19: api.application.v1.JobApplication.ApplyJob:output_type -> api.application.v1.JobApplicationReply
+	10, // 20: api.application.v1.JobApplication.GetApplication:output_type -> api.application.v1.JobApplicationDetailReply
+	14, // 21: api.application.v1.JobApplication.ListUserApplications:output_type -> api.application.v1.ListApplicationsReply
+	14, // 22: api.application.v1.JobApplication.ListJobApplications:output_type -> api.application.v1.ListApplicationsReply
+	9,  // 23: api.application.v1.JobApplication.UpdateApplicationStatus:output_type -> api.application.v1.JobApplicationReply
+	17, // 24: api.application.v1.JobApplication.WithdrawApplication:output_type -> api.application.v1.WithdrawApplicationReply
+	19, // [19:25] is the sub-list for method output_type
+	13, // [13:19] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_application_v1_application_proto_init() }
@@ -1383,7 +1495,7 @@ func file_application_v1_application_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_application_v1_application_proto_rawDesc), len(file_application_v1_application_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   16,
+			NumMessages:   17,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

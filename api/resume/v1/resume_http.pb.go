@@ -48,7 +48,7 @@ func RegisterResumeHTTPServer(s *http.Server, srv ResumeHTTPServer) {
 	r.GET("/api/v1/resumes/{id}", _Resume_GetResume0_HTTP_Handler(srv))
 	r.GET("/api/v1/resumes", _Resume_ListResumes0_HTTP_Handler(srv))
 	r.DELETE("/api/v1/resumes/{id}", _Resume_DeleteResume0_HTTP_Handler(srv))
-	r.POST("/api/v1/resumes/{resume_id}/generate-description", _Resume_GenerateCVDescription0_HTTP_Handler(srv))
+	r.POST("/api/v1/resumes/generate-description", _Resume_GenerateCVDescription0_HTTP_Handler(srv))
 }
 
 func _Resume_CreateResume0_HTTP_Handler(srv ResumeHTTPServer) func(ctx http.Context) error {
@@ -170,9 +170,6 @@ func _Resume_GenerateCVDescription0_HTTP_Handler(srv ResumeHTTPServer) func(ctx 
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		if err := ctx.BindVars(&in); err != nil {
-			return err
-		}
 		http.SetOperation(ctx, OperationResumeGenerateCVDescription)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.GenerateCVDescription(ctx, req.(*GenerateCVDescriptionRequest))
@@ -240,7 +237,7 @@ func (c *ResumeHTTPClientImpl) DeleteResume(ctx context.Context, in *DeleteResum
 // GenerateCVDescription Generate CV description using ChatGPT
 func (c *ResumeHTTPClientImpl) GenerateCVDescription(ctx context.Context, in *GenerateCVDescriptionRequest, opts ...http.CallOption) (*GenerateCVDescriptionReply, error) {
 	var out GenerateCVDescriptionReply
-	pattern := "/api/v1/resumes/{resume_id}/generate-description"
+	pattern := "/api/v1/resumes/generate-description"
 	path := binding.EncodeURL(pattern, in, false)
 	opts = append(opts, http.Operation(OperationResumeGenerateCVDescription))
 	opts = append(opts, http.PathTemplate(pattern))

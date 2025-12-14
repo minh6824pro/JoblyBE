@@ -111,8 +111,9 @@ message ResumeDetail {
 	repeated string skills = 5;
 	repeated Education education = 6;
 	repeated Experience experience = 7;
-	repeated string certifications = 8;
-	repeated string languages = 9;
+	repeated Project projects = 8;
+	repeated string certifications = 9;
+	repeated string languages = 10;
 }
 
 message Education {
@@ -129,6 +130,16 @@ message Experience {
 	repeated string responsibilities = 4;
 	repeated string achievements = 5;
 	string description = 6;
+}
+
+message Project {
+	string name = 1;
+	string description = 2;
+	repeated string technologies = 3;
+	string url = 4;
+	string duration = 5;
+	string role = 6;
+	repeated string achievements = 7;
 }
 
 message JobInfo {

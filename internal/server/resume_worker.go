@@ -268,6 +268,20 @@ func (w *ResumeWorker) convertToDataResume(parserResp *ParserResponse) *data.Res
 		})
 	}
 
+	// Convert all projects
+	projectList := make([]data.Project, 0, len(cvData.Projects))
+	for _, proj := range cvData.Projects {
+		projectList = append(projectList, data.Project{
+			Name:         proj.Name,
+			Description:  proj.Description,
+			Technologies: proj.Technologies,
+			Url:          proj.Url,
+			Duration:     proj.Duration,
+			Role:         proj.Role,
+			Achievements: proj.Achievements,
+		})
+	}
+
 	resumeDetail := data.ResumeDetail{
 		Name:           cvData.Name,
 		Email:          cvData.Email,
@@ -276,6 +290,7 @@ func (w *ResumeWorker) convertToDataResume(parserResp *ParserResponse) *data.Res
 		Skills:         cvData.Skills,
 		Education:      educationList,
 		Experience:     experienceList,
+		Projects:       projectList,
 		Certifications: cvData.Certifications,
 		Languages:      cvData.Languages,
 		Achievements:   cvData.Achievements,

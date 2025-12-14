@@ -128,7 +128,10 @@ func (s *ResumeService) GenerateCVDescription(ctx context.Context, req *pb.Gener
 		fieldTag = "summary"
 	}
 
-	content, err := s.uc.GenerateCVDescription(ctx, req.ResumeId, claims.UserID, fieldTag, req.CurrentInput)
+	// Convert proto to biz ResumeDetail
+	resumeDetail := s.protoToResumeDetail(req.ResumeDetail)
+
+	content, err := s.uc.GenerateCVDescription(ctx, resumeDetail, claims.UserID, fieldTag, req.CurrentInput)
 	if err != nil {
 		return nil, err
 	}
@@ -162,6 +165,7 @@ func (s *ResumeService) resumeDetailToPb(detail *biz.ResumeDetail) *pb.ResumeDet
 		Skills:         detail.Skills,
 		Education:      s.educationArrayToPb(detail.Education),
 		Experience:     s.experienceArrayToPb(detail.Experience),
+		Projects:       s.projectArrayToPb(detail.Projects),
 		Certifications: detail.Certifications,
 		Languages:      detail.Languages,
 		Achievements:   detail.Achievements,
@@ -219,6 +223,7 @@ func (s *ResumeService) protoToResumeDetail(detail *pb.ResumeDetail) *biz.Resume
 		Skills:         detail.Skills,
 		Education:      s.protoToEducationArray(detail.Education),
 		Experience:     s.protoToExperienceArray(detail.Experience),
+		Projects:       s.protoToProjectArray(detail.Projects),
 		Certifications: detail.Certifications,
 		Languages:      detail.Languages,
 		Achievements:   detail.Achievements,
@@ -257,6 +262,48 @@ func (s *ResumeService) protoToExperienceArray(expList []*pb.Experience) []*biz.
 				Description:      exp.Description,
 				Responsibilities: exp.Responsibilities,
 				Achievements:     exp.Achievements,
+			})
+		}
+	}
+	return result
+}
+
+func (s *ResumeService) projectArrayToPb(projectList []*biz.Project) []*pb.Project {
+	if projectList == nil {
+		return nil
+	}
+	result := make([]*pb.Project, 0, len(projectList))
+	for _, proj := range projectList {
+		if proj != nil {
+			result = append(result, &pb.Project{
+				Name:         proj.Name,
+				Description:  proj.Description,
+				Technologies: proj.Technologies,
+				Url:          proj.Url,
+				Duration:     proj.Duration,
+				Role:         proj.Role,
+				Achievements: proj.Achievements,
+			})
+		}
+	}
+	return result
+}
+
+func (s *ResumeService) protoToProjectArray(projectList []*pb.Project) []*biz.Project {
+	if projectList == nil {
+		return nil
+	}
+	result := make([]*biz.Project, 0, len(projectList))
+	for _, proj := range projectList {
+		if proj != nil {
+			result = append(result, &biz.Project{
+				Name:         proj.Name,
+				Description:  proj.Description,
+				Technologies: proj.Technologies,
+				Url:          proj.Url,
+				Duration:     proj.Duration,
+				Role:         proj.Role,
+				Achievements: proj.Achievements,
 			})
 		}
 	}

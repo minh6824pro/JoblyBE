@@ -27,6 +27,7 @@ type ResumeDetail struct {
 	Skills         []string
 	Education      []*Education
 	Experience     []*Experience
+	Projects       []*Project
 	Certifications []string
 	Languages      []string
 	Achievements   []string
@@ -46,6 +47,16 @@ type Experience struct {
 	Description      string
 	Responsibilities []string
 	Achievements     []string
+}
+
+type Project struct {
+	Name         string
+	Description  string
+	Technologies []string
+	Url          string
+	Duration     string
+	Role         string
+	Achievements []string
 }
 
 // ResumeRepo is the interface for resume repository
@@ -184,13 +195,7 @@ func (uc *ResumeUseCase) validateResume(resume *Resume) error {
 }
 
 // GenerateCVDescription generates CV content using ChatGPT based on field tag and CV data
-func (uc *ResumeUseCase) GenerateCVDescription(ctx context.Context, resumeID, userID, fieldTag, currentInput string) (string, error) {
-	// Get resume
-	resume, err := uc.GetResume(ctx, resumeID, userID)
-	if err != nil {
-		return "", err
-	}
-
+func (uc *ResumeUseCase) GenerateCVDescription(ctx context.Context, resumeDetail *ResumeDetail, userID, fieldTag, currentInput string) (string, error) {
 	var prompt string
 
 	// Try to get most viewed job for context
@@ -198,10 +203,10 @@ func (uc *ResumeUseCase) GenerateCVDescription(ctx context.Context, resumeID, us
 	if err != nil {
 		// No tracking found, build prompt without job context
 		uc.log.Info("No job tracking found for user, generating content based on CV only")
-		prompt = uc.buildPromptByFieldTag(fieldTag, currentInput, resume.ResumeDetail, nil)
+		prompt = uc.buildPromptByFieldTag(fieldTag, currentInput, resumeDetail, nil)
 	} else {
 		// Build prompt with job context
-		prompt = uc.buildPromptByFieldTag(fieldTag, currentInput, resume.ResumeDetail, job)
+		prompt = uc.buildPromptByFieldTag(fieldTag, currentInput, resumeDetail, job)
 	}
 
 	// Call ChatGPT API
@@ -233,6 +238,8 @@ func (uc *ResumeUseCase) buildPromptByFieldTag(fieldTag, currentInput string, cv
 		prompt = uc.buildExperienceDescriptionPrompt(cvInfo, jobContext, currentInput)
 	case "education_description":
 		prompt = uc.buildEducationDescriptionPrompt(cvInfo, jobContext, currentInput)
+	case "project_description":
+		prompt = uc.buildProjectDescriptionPrompt(cvInfo, jobContext, currentInput)
 	default:
 		// Unsupported field tag
 		return ""
@@ -387,29 +394,6 @@ func (uc *ResumeUseCase) buildSummaryPrompt(cvInfo, jobContext, currentInput str
 	return prompt
 }
 
-// buildSkillsPrompt builds prompt for skills enhancement
-func (uc *ResumeUseCase) buildSkillsPrompt(cvInfo, jobContext, currentInput string) string {
-	prompt := "Suggest relevant professional skills for this candidate.\n\n"
-	prompt += cvInfo
-	prompt += jobContext
-
-	if currentInput != "" {
-		prompt += "\nCurrent Skills: " + currentInput + "\n"
-		prompt += "\nExpand and enhance the skills list based on the candidate's background"
-		if jobContext != "" {
-			prompt += " and target job requirements"
-		}
-		prompt += ".\n"
-	}
-
-	prompt += "\nProvide a comma-separated list of relevant skills (10-15 skills).\n"
-	prompt += "Include both technical and soft skills as appropriate.\n"
-	prompt += "\nIMPORTANT: Write in the SAME LANGUAGE as the CV content (Vietnamese if CV is in Vietnamese, English if CV is in English).\n"
-	prompt += "Provide only the skills list without any additional explanation."
-
-	return prompt
-}
-
 // buildExperienceDescriptionPrompt builds prompt for experience description
 func (uc *ResumeUseCase) buildExperienceDescriptionPrompt(cvInfo, jobContext, currentInput string) string {
 	prompt := "Write professional experience description in FIRST PERSON perspective (using 'I', 'my', 'me').\n\n"
@@ -467,6 +451,40 @@ func (uc *ResumeUseCase) buildEducationDescriptionPrompt(cvInfo, jobContext, cur
 	}
 	prompt += "\n"
 	prompt += "- Uses first person (I studied, I specialized in, My coursework included, etc.)\n"
+	prompt += "\nCRITICAL LANGUAGE REQUIREMENT:\n"
+	prompt += "Carefully analyze the language used in the candidate's CV information above.\n"
+	prompt += "If the CV contains Vietnamese text (e.g., 'Đại học', 'Công ty', 'Kinh nghiệm', Vietnamese names/addresses), write your response in Vietnamese.\n"
+	prompt += "If the CV is in English, write your response in English.\n"
+	prompt += "Match the language of the CV exactly - do not translate or mix languages.\n"
+	prompt += "\nProvide only the description text without any additional explanation."
+
+	return prompt
+}
+
+// buildProjectDescriptionPrompt builds prompt for project description
+func (uc *ResumeUseCase) buildProjectDescriptionPrompt(cvInfo, jobContext, currentInput string) string {
+	prompt := "Write professional project description in FIRST PERSON perspective (using 'I', 'my', 'me').\n\n"
+	prompt += cvInfo
+	prompt += jobContext
+
+	if currentInput != "" {
+		prompt += "\nCurrent Description: " + currentInput + "\n"
+		prompt += "\nImprove and enhance the current project description based on the candidate's information"
+		if jobContext != "" {
+			prompt += " and target job requirements"
+		}
+		prompt += ".\n"
+	}
+
+	prompt += "\nWrite a concise, compelling 2-3 paragraph description that:\n"
+	prompt += "- Highlights project objectives and outcomes\n"
+	prompt += "- Emphasizes technologies used and technical challenges solved\n"
+	prompt += "- Shows your specific role and contributions\n"
+	prompt += "- Includes measurable results and impact where possible\n"
+	if jobContext != "" {
+		prompt += "- Demonstrates relevant skills for the target position\n"
+	}
+	prompt += "- Uses first person (I developed, I implemented, I led, My role was, etc.)\n"
 	prompt += "\nCRITICAL LANGUAGE REQUIREMENT:\n"
 	prompt += "Carefully analyze the language used in the candidate's CV information above.\n"
 	prompt += "If the CV contains Vietnamese text (e.g., 'Đại học', 'Công ty', 'Kinh nghiệm', Vietnamese names/addresses), write your response in Vietnamese.\n"

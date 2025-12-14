@@ -223,6 +223,19 @@ func (s *JobApplicationService) resumeDetailToPb(detail *biz.ResumeDetail) *pb.R
 		}
 	}
 
+	pbProjects := make([]*pb.Project, len(detail.Projects))
+	for i, proj := range detail.Projects {
+		pbProjects[i] = &pb.Project{
+			Name:         proj.Name,
+			Description:  proj.Description,
+			Technologies: proj.Technologies,
+			Url:          proj.Url,
+			Duration:     proj.Duration,
+			Role:         proj.Role,
+			Achievements: proj.Achievements,
+		}
+	}
+
 	return &pb.ResumeDetail{
 		Name:           detail.Name,
 		Email:          detail.Email,
@@ -231,6 +244,7 @@ func (s *JobApplicationService) resumeDetailToPb(detail *biz.ResumeDetail) *pb.R
 		Skills:         detail.Skills,
 		Education:      pbEducation,
 		Experience:     pbExperience,
+		Projects:       pbProjects,
 		Certifications: detail.Certifications,
 		Languages:      detail.Languages,
 	}

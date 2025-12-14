@@ -591,6 +591,25 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.resume.v1.ResumeReply'
+    /api/v1/resumes/generate-description:
+        post:
+            tags:
+                - Resume
+            description: Generate CV description using ChatGPT
+            operationId: Resume_GenerateCVDescription
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.resume.v1.GenerateCVDescriptionRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.resume.v1.GenerateCVDescriptionReply'
     /api/v1/resumes/{id}:
         get:
             tags:
@@ -652,31 +671,6 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.resume.v1.DeleteResumeReply'
-    /api/v1/resumes/{resumeId}/generate-description:
-        post:
-            tags:
-                - Resume
-            description: Generate CV description using ChatGPT
-            operationId: Resume_GenerateCVDescription
-            parameters:
-                - name: resumeId
-                  in: path
-                  required: true
-                  schema:
-                    type: string
-            requestBody:
-                content:
-                    application/json:
-                        schema:
-                            $ref: '#/components/schemas/api.resume.v1.GenerateCVDescriptionRequest'
-                required: true
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/api.resume.v1.GenerateCVDescriptionReply'
     /api/v1/users/applications:
         get:
             tags:
@@ -918,6 +912,27 @@ components:
                 pageSize:
                     type: integer
                     format: int32
+        api.application.v1.Project:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                technologies:
+                    type: array
+                    items:
+                        type: string
+                url:
+                    type: string
+                duration:
+                    type: string
+                role:
+                    type: string
+                achievements:
+                    type: array
+                    items:
+                        type: string
         api.application.v1.ResumeDetail:
             type: object
             properties:
@@ -941,6 +956,10 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.application.v1.Experience'
+                projects:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.application.v1.Project'
                 certifications:
                     type: array
                     items:
@@ -1371,8 +1390,8 @@ components:
         api.resume.v1.GenerateCVDescriptionRequest:
             type: object
             properties:
-                resumeId:
-                    type: string
+                resumeDetail:
+                    $ref: '#/components/schemas/api.resume.v1.ResumeDetail'
                 fieldTag:
                     type: string
                 currentInput:
@@ -1393,6 +1412,27 @@ components:
                 pageSize:
                     type: integer
                     format: int32
+        api.resume.v1.Project:
+            type: object
+            properties:
+                name:
+                    type: string
+                description:
+                    type: string
+                technologies:
+                    type: array
+                    items:
+                        type: string
+                url:
+                    type: string
+                duration:
+                    type: string
+                role:
+                    type: string
+                achievements:
+                    type: array
+                    items:
+                        type: string
         api.resume.v1.ResumeDetail:
             type: object
             properties:
@@ -1416,6 +1456,10 @@ components:
                     type: array
                     items:
                         $ref: '#/components/schemas/api.resume.v1.Experience'
+                projects:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.resume.v1.Project'
                 certifications:
                     type: array
                     items:

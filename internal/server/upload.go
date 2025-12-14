@@ -44,6 +44,7 @@ type CVData struct {
 	Skills         []string     `json:"skills"`
 	Education      []Education  `json:"education"`
 	Experience     []Experience `json:"experience"`
+	Projects       []Project    `json:"projects"`
 	Certifications []string     `json:"certifications"`
 	Languages      []string     `json:"languages"`
 	Achievements   []string     `json:"achievements"`
@@ -64,6 +65,16 @@ type Experience struct {
 	Description      string   `json:"description"`
 	Responsibilities []string `json:"responsibilities"`
 	Achievements     []string `json:"achievements"`
+}
+
+type Project struct {
+	Name         string   `json:"name"`
+	Description  string   `json:"description"`
+	Technologies []string `json:"technologies"`
+	Url          string   `json:"url"`
+	Duration     string   `json:"duration"`
+	Role         string   `json:"role"`
+	Achievements []string `json:"achievements"`
 }
 
 type UploadHandler struct {
@@ -180,8 +191,23 @@ func (h *UploadHandler) convertToDataResume(parserResp *ParserResponse) *data.Re
 			Title:            exp.Title,
 			Company:          exp.Company,
 			Duration:         exp.Duration,
+			Description:      exp.Description,
 			Responsibilities: exp.Responsibilities,
 			Achievements:     exp.Achievements,
+		})
+	}
+
+	// Convert all projects
+	projectList := make([]data.Project, 0, len(cvData.Projects))
+	for _, proj := range cvData.Projects {
+		projectList = append(projectList, data.Project{
+			Name:         proj.Name,
+			Description:  proj.Description,
+			Technologies: proj.Technologies,
+			Url:          proj.Url,
+			Duration:     proj.Duration,
+			Role:         proj.Role,
+			Achievements: proj.Achievements,
 		})
 	}
 
@@ -193,6 +219,7 @@ func (h *UploadHandler) convertToDataResume(parserResp *ParserResponse) *data.Re
 		Skills:         cvData.Skills,
 		Education:      educationList,
 		Experience:     experienceList,
+		Projects:       projectList,
 		Certifications: cvData.Certifications,
 		Languages:      cvData.Languages,
 	}
