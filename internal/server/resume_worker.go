@@ -30,6 +30,7 @@ type ResumeParseMessage struct {
 // ResumeWorker handles resume parsing jobs from Kafka
 type ResumeWorker struct {
 	consumer   *kafkax.Consumer
+	producer   *kafkax.Producer
 	hub        *Hub
 	jobRepo    *data.ResumeParseJobRepo
 	parserURL  string
@@ -55,6 +56,7 @@ type ResumeWorkerConfig struct {
 // NewResumeWorker creates a new resume worker
 func NewResumeWorker(
 	config *ResumeWorkerConfig,
+	producer *kafkax.Producer,
 	hub *Hub,
 	jobRepo *data.ResumeParseJobRepo,
 	db *mongo.Database,
@@ -76,6 +78,7 @@ func NewResumeWorker(
 
 	return &ResumeWorker{
 		consumer:   consumer,
+		producer:   producer,
 		hub:        hub,
 		jobRepo:    jobRepo,
 		parserURL:  config.ParserURL,
@@ -153,6 +156,18 @@ func (w *ResumeWorker) handleMessage(ctx context.Context, msg kafka.Message) err
 	// Clear file data to save space
 	if err := w.jobRepo.ClearFileData(ctx, parseMsg.JobID); err != nil {
 		w.log.Errorf("Failed to clear file data: %v", err)
+	}
+
+	// Push message to Kafka for evaluation
+	evaluateMsg := map[string]interface{}{
+		"resume_id": resumeID,
+		"user_id":   parseMsg.UserID,
+	}
+	if err := w.producer.SendMessage(ctx, "evaluate", resumeID, evaluateMsg); err != nil {
+		w.log.Errorf("Failed to push evaluate message to Kafka: %v", err)
+		// Don't fail the job, just log the error
+	} else {
+		w.log.Infof("Pushed evaluate message to Kafka for resume: %s", resumeID)
 	}
 
 	// Log CVData for debugging

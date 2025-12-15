@@ -63,12 +63,29 @@ type JobApplicationRepo interface {
 	CheckExistingApplication(ctx context.Context, userID, jobID string) (bool, error)
 }
 
+// WebSocketHub interface for sending notifications via WebSocket
+type WebSocketHub interface {
+	SendNotification(userID string, payload interface{})
+}
+
+// NotificationMessage represents notification data for WebSocket
+type NotificationMessage struct {
+	ID        string `json:"id"`
+	Title     string `json:"title"`
+	Content   string `json:"content"`
+	Type      string `json:"type"`
+	ObjectID  string `json:"object_id,omitempty"`
+	CreatedAt string `json:"created_at"`
+}
+
 // JobApplicationUseCase handles job application business logic
 type JobApplicationUseCase struct {
-	repo       JobApplicationRepo
-	resumeRepo ResumeRepo
-	jobRepo    JobPostingRepo
-	log        *log.Helper
+	repo           JobApplicationRepo
+	resumeRepo     ResumeRepo
+	jobRepo        JobPostingRepo
+	notificationUC *NotificationUseCase
+	hub            WebSocketHub
+	log            *log.Helper
 }
 
 // NewJobApplicationUseCase creates a new job application use case
@@ -84,6 +101,12 @@ func NewJobApplicationUseCase(
 		jobRepo:    jobRepo,
 		log:        log.NewHelper(logger),
 	}
+}
+
+// SetNotificationDependencies injects notification dependencies after creation
+func (uc *JobApplicationUseCase) SetNotificationDependencies(notificationUC *NotificationUseCase, hub WebSocketHub) {
+	uc.notificationUC = notificationUC
+	uc.hub = hub
 }
 
 // ApplyJob creates a new job application
@@ -185,7 +208,82 @@ func (uc *JobApplicationUseCase) UpdateApplicationStatus(ctx context.Context, id
 		return ErrInvalidApplicationData
 	}
 
-	return uc.repo.UpdateApplicationStatus(ctx, id, status, hrNote)
+	// Get application info before update
+	app, err := uc.repo.GetApplication(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	// Update status
+	err = uc.repo.UpdateApplicationStatus(ctx, id, status, hrNote)
+	if err != nil {
+		return err
+	}
+
+	// Send notification in background goroutine
+	go func() {
+		bgCtx := context.Background()
+
+		// Get job info for notification content
+		job, jobErr := uc.jobRepo.GetJobPosting(bgCtx, app.JobID)
+		if jobErr != nil {
+			uc.log.Errorf("Failed to get job posting for notification: %v", jobErr)
+			return
+		}
+
+		// Create notification message based on status
+		var title, content string
+		switch status {
+		case StatusReviewing:
+			title = "Hồ sơ đang được xem xét"
+			content = "Hồ sơ ứng tuyển của bạn cho vị trí \"" + job.Title + "\" đang được HR xem xét."
+		case StatusAccepted:
+			title = "Hồ sơ được chấp nhận!"
+			content = "Chúc mừng! Hồ sơ ứng tuyển của bạn cho vị trí \"" + job.Title + "\" đã được chấp nhận."
+		case StatusRejected:
+			title = "Thông báo về hồ sơ ứng tuyển"
+			content = "Hồ sơ ứng tuyển của bạn cho vị trí \"" + job.Title + "\" chưa phù hợp lần này."
+		default:
+			title = "Cập nhật hồ sơ ứng tuyển"
+			content = "Hồ sơ ứng tuyển của bạn cho vị trí \"" + job.Title + "\" đã được cập nhật."
+		}
+
+		if hrNote != "" {
+			content += " Ghi chú từ HR: " + hrNote
+		}
+
+		// Create notification
+		notification := &Notification{
+			UserID:   app.UserID,
+			Title:    title,
+			Content:  content,
+			Type:     NotificationTypeHR,
+			ObjectID: id, // application ID
+		}
+
+		savedNotification, err := uc.notificationUC.CreateNotification(bgCtx, notification)
+		if err != nil {
+			uc.log.Errorf("Failed to create notification: %v", err)
+			return
+		}
+
+		// Send via WebSocket if hub is available
+		if uc.hub != nil {
+			// Create payload matching NotificationPayload structure
+			payload := &NotificationMessage{
+				ID:        savedNotification.ID,
+				Title:     savedNotification.Title,
+				Content:   savedNotification.Content,
+				Type:      savedNotification.Type,
+				ObjectID:  savedNotification.ObjectID,
+				CreatedAt: savedNotification.CreatedAt.Format(time.RFC3339),
+			}
+			uc.hub.SendNotification(app.UserID, payload)
+			uc.log.Infof("Notification sent to user: %s for application status update: %s", app.UserID, status)
+		}
+	}()
+
+	return nil
 }
 
 // WithdrawApplication withdraws an application (for user)

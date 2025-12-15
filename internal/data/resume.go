@@ -19,17 +19,18 @@ type Resume struct {
 }
 
 type ResumeDetail struct {
-	Name           string       `bson:"name"`
-	Email          string       `bson:"email"`
-	Phone          string       `bson:"phone"`
-	Summary        string       `bson:"summary"`
-	Skills         []string     `bson:"skill"`
-	Education      []Education  `bson:"education"`
-	Experience     []Experience `bson:"experience"`
-	Projects       []Project    `bson:"projects"`
-	Certifications []string     `bson:"certifications"`
-	Languages      []string     `bson:"languages"`
-	Achievements   []string     `bson:"achievements"`
+	Name           string             `bson:"name"`
+	Email          string             `bson:"email"`
+	Phone          string             `bson:"phone"`
+	Summary        string             `bson:"summary"`
+	Skills         []string           `bson:"skill"`
+	Education      []Education        `bson:"education"`
+	Experience     []Experience       `bson:"experience"`
+	Projects       []Project          `bson:"projects"`
+	Certifications []string           `bson:"certifications"`
+	Languages      []string           `bson:"languages"`
+	Achievements   []string           `bson:"achievements"`
+	Evaluations    []ResumeEvaluation `bson:"evaluations,omitempty"`
 }
 
 type Education struct {
@@ -56,6 +57,40 @@ type Project struct {
 	Duration     string   `bson:"duration"`
 	Role         string   `bson:"role"`
 	Achievements []string `bson:"achievements"`
+}
+
+type ResumeScoreBreakdown struct {
+	SkillsScore       float64 `bson:"skills_score"`
+	ExperienceScore   float64 `bson:"experience_score"`
+	EducationScore    float64 `bson:"education_score"`
+	CompletenessScore float64 `bson:"completeness_score"`
+	JobAlignmentScore float64 `bson:"job_alignment_score"`
+	PresentationScore float64 `bson:"presentation_score"`
+}
+
+type ResumeCVEdit struct {
+	ID             string  `bson:"id"`
+	FieldPath      string  `bson:"field_path"`
+	Action         string  `bson:"action"`
+	CurrentValue   string  `bson:"current_value"`
+	SuggestedValue string  `bson:"suggested_value"`
+	Reason         string  `bson:"reason"`
+	Priority       string  `bson:"priority"`
+	ImpactScore    float64 `bson:"impact_score"`
+	Status         string  `bson:"status,omitempty"`
+}
+
+type ResumeEvaluation struct {
+	CVName          string               `bson:"cv_name"`
+	OverallScore    float64              `bson:"overall_score"`
+	Grade           string               `bson:"grade"`
+	ScoreBreakdown  ResumeScoreBreakdown `bson:"score_breakdown"`
+	Strengths       []string             `bson:"strengths"`
+	Weaknesses      []string             `bson:"weaknesses"`
+	Recommendations []string             `bson:"recommendations"`
+	CVEdits         []ResumeCVEdit       `bson:"cv_edits"`
+	JobsAnalyzed    int                  `bson:"jobs_analyzed"`
+	EvaluatedAt     time.Time            `bson:"evaluated_at"`
 }
 
 type resumeRepo struct {
@@ -155,6 +190,7 @@ func (r *resumeRepo) UpdateResume(ctx context.Context, resume *biz.Resume) (*biz
 				Certifications: resume.ResumeDetail.Certifications,
 				Languages:      resume.ResumeDetail.Languages,
 				Achievements:   resume.ResumeDetail.Achievements,
+				Evaluations:    r.toEvaluationsArray(resume.ResumeDetail.Evaluations),
 			},
 			"resume.$.version": resume.Version,
 			"updated_at":       time.Now(),
@@ -306,6 +342,7 @@ func (r *resumeRepo) toBiz(doc *Resume, userID string) *biz.Resume {
 			Certifications: doc.ResumeDetail.Certifications,
 			Languages:      doc.ResumeDetail.Languages,
 			Achievements:   doc.ResumeDetail.Achievements,
+			Evaluations:    r.toEvaluationsBizArray(doc.ResumeDetail.Evaluations),
 		},
 		Version:   doc.Version,
 		CreatedAt: doc.CreatedAt,
@@ -420,6 +457,112 @@ func (r *resumeRepo) toProjectDocsArray(projects []*biz.Project) []Project {
 				Achievements: proj.Achievements,
 			})
 		}
+	}
+	return result
+}
+
+func (r *resumeRepo) toEvaluationsArray(evals []*biz.ResumeEvaluation) []ResumeEvaluation {
+	if evals == nil {
+		return []ResumeEvaluation{}
+	}
+	result := make([]ResumeEvaluation, 0, len(evals))
+	for _, eval := range evals {
+		if eval != nil {
+			dataEval := ResumeEvaluation{
+				CVName:          eval.CVName,
+				OverallScore:    eval.OverallScore,
+				Grade:           eval.Grade,
+				Strengths:       eval.Strengths,
+				Weaknesses:      eval.Weaknesses,
+				Recommendations: eval.Recommendations,
+				JobsAnalyzed:    eval.JobsAnalyzed,
+				EvaluatedAt:     eval.EvaluatedAt,
+			}
+
+			// Convert ScoreBreakdown
+			if eval.ScoreBreakdown != nil {
+				dataEval.ScoreBreakdown = ResumeScoreBreakdown{
+					SkillsScore:       eval.ScoreBreakdown.SkillsScore,
+					ExperienceScore:   eval.ScoreBreakdown.ExperienceScore,
+					EducationScore:    eval.ScoreBreakdown.EducationScore,
+					CompletenessScore: eval.ScoreBreakdown.CompletenessScore,
+					JobAlignmentScore: eval.ScoreBreakdown.JobAlignmentScore,
+					PresentationScore: eval.ScoreBreakdown.PresentationScore,
+				}
+			}
+
+			// Convert CVEdits
+			if len(eval.CVEdits) > 0 {
+				dataEval.CVEdits = make([]ResumeCVEdit, 0, len(eval.CVEdits))
+				for _, edit := range eval.CVEdits {
+					if edit != nil {
+						dataEval.CVEdits = append(dataEval.CVEdits, ResumeCVEdit{
+							ID:             edit.ID,
+							FieldPath:      edit.FieldPath,
+							Action:         edit.Action,
+							CurrentValue:   edit.CurrentValue,
+							SuggestedValue: edit.SuggestedValue,
+							Reason:         edit.Reason,
+							Priority:       edit.Priority,
+							ImpactScore:    edit.ImpactScore,
+							Status:         edit.Status,
+						})
+					}
+				}
+			}
+
+			result = append(result, dataEval)
+		}
+	}
+	return result
+}
+
+func (r *resumeRepo) toEvaluationsBizArray(docs []ResumeEvaluation) []*biz.ResumeEvaluation {
+	if docs == nil {
+		return nil
+	}
+	result := make([]*biz.ResumeEvaluation, 0, len(docs))
+	for i := range docs {
+		bizEval := &biz.ResumeEvaluation{
+			CVName:          docs[i].CVName,
+			OverallScore:    docs[i].OverallScore,
+			Grade:           docs[i].Grade,
+			Strengths:       docs[i].Strengths,
+			Weaknesses:      docs[i].Weaknesses,
+			Recommendations: docs[i].Recommendations,
+			JobsAnalyzed:    docs[i].JobsAnalyzed,
+			EvaluatedAt:     docs[i].EvaluatedAt,
+		}
+
+		// Convert ScoreBreakdown
+		bizEval.ScoreBreakdown = &biz.ResumeScoreBreakdown{
+			SkillsScore:       docs[i].ScoreBreakdown.SkillsScore,
+			ExperienceScore:   docs[i].ScoreBreakdown.ExperienceScore,
+			EducationScore:    docs[i].ScoreBreakdown.EducationScore,
+			CompletenessScore: docs[i].ScoreBreakdown.CompletenessScore,
+			JobAlignmentScore: docs[i].ScoreBreakdown.JobAlignmentScore,
+			PresentationScore: docs[i].ScoreBreakdown.PresentationScore,
+		}
+
+		// Convert CVEdits
+		if len(docs[i].CVEdits) > 0 {
+			bizEval.CVEdits = make([]*biz.ResumeCVEdit, 0, len(docs[i].CVEdits))
+			for j := range docs[i].CVEdits {
+				bizEval.CVEdits = append(bizEval.CVEdits, &biz.ResumeCVEdit{
+					ID:             docs[i].CVEdits[j].ID,
+					FieldPath:      docs[i].CVEdits[j].FieldPath,
+					Action:         docs[i].CVEdits[j].Action,
+					CurrentValue:   docs[i].CVEdits[j].CurrentValue,
+					SuggestedValue: docs[i].CVEdits[j].SuggestedValue,
+					Reason:         docs[i].CVEdits[j].Reason,
+					Priority:       docs[i].CVEdits[j].Priority,
+					ImpactScore:    docs[i].CVEdits[j].ImpactScore,
+					Status:         docs[i].CVEdits[j].Status,
+				})
+			}
+		}
+
+		result = append(result, bizEval)
 	}
 	return result
 }

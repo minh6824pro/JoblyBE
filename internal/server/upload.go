@@ -541,6 +541,18 @@ func (h *UploadHandler) HandleUploadResume(w http.ResponseWriter, r *http.Reques
 
 	h.log.Infof("Resume saved to database with ID: %v", resume.ID.Hex())
 
+	// Push message to Kafka for evaluation
+	evaluateMsg := map[string]interface{}{
+		"resume_id": resume.ID.Hex(),
+		"user_id":   userID,
+	}
+	if err := h.producer.SendMessage(ctx, "evaluate", resume.ID.Hex(), evaluateMsg); err != nil {
+		h.log.Errorf("Failed to push evaluate message to Kafka: %v", err)
+		// Don't fail the request, just log the error
+	} else {
+		h.log.Infof("Pushed evaluate message to Kafka for resume: %s", resume.ID.Hex())
+	}
+
 	// Return success response
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

@@ -4,8 +4,10 @@ import (
 	applicationv1 "JobblyBE/api/application/v1"
 	authv1 "JobblyBE/api/auth/v1"
 	jobv1 "JobblyBE/api/job/v1"
+	notificationv1 "JobblyBE/api/notification/v1"
 	resumev1 "JobblyBE/api/resume/v1"
 	userv1 "JobblyBE/api/user/v1"
+	"JobblyBE/internal/biz"
 	"JobblyBE/internal/conf"
 	"JobblyBE/internal/data"
 	"JobblyBE/internal/service"
@@ -35,7 +37,11 @@ func NewHTTPServer(
 	resumeSvc *service.ResumeService,
 	userSvc *service.UserService,
 	applicationSvc *service.JobApplicationService,
+	notificationSvc *service.NotificationService,
 	dataLayer *data.Data,
+	resumeUC *biz.ResumeUseCase,
+	notificationUC *biz.NotificationUseCase,
+	applicationUC *biz.JobApplicationUseCase,
 	logger log.Logger,
 ) *http.Server {
 	// JWT secret from config
@@ -78,6 +84,7 @@ func NewHTTPServer(
 	resumev1.RegisterResumeHTTPServer(srv, resumeSvc)
 	userv1.RegisterUserHTTPServer(srv, userSvc)
 	applicationv1.RegisterJobApplicationHTTPServer(srv, applicationSvc)
+	notificationv1.RegisterNotificationHTTPServer(srv, notificationSvc)
 
 	// Get config values
 	resumeParserURL := configx.GetEnvOrString("RESUME_PARSER_URL", c.ResumeParserUrl)
@@ -87,6 +94,12 @@ func NewHTTPServer(
 	// Create WebSocket hub
 	hub := NewHub(logger)
 	go hub.Run()
+
+	// Wrap hub with adapter to match biz.WebSocketHub interface
+	hubAdapter := NewHubAdapter(hub)
+
+	// Inject hub into application use case for sending notifications
+	applicationUC.SetNotificationDependencies(notificationUC, hubAdapter)
 
 	// Create Kafka producer
 	kafkaBrokers := getKafkaBrokers(cKafka)
@@ -139,8 +152,24 @@ func NewHTTPServer(
 		ParserURL:     resumeParserURL,
 	}
 
-	resumeWorker := NewResumeWorker(workerConfig, hub, jobRepo, dataLayer.DB(), logger)
+	resumeWorker := NewResumeWorker(workerConfig, producer, hub, jobRepo, dataLayer.DB(), logger)
 	go resumeWorker.Start()
+
+	// Create and start evaluate worker
+	evaluateWorkerConfig := &EvaluateWorkerConfig{
+		Brokers:       kafkaBrokers,
+		Username:      configx.GetEnvOrString("KAFKA_USERNAME", cKafka.Username),
+		Password:      configx.GetEnvOrString("KAFKA_PASSWORD", cKafka.Password),
+		EnableSASL:    cKafka.EnableSasl,
+		Timeout:       kafkaTimeout,
+		Topic:         "evaluate", // Topic for resume evaluation
+		GroupID:       configx.GetEnvOrString("KAFKA_CONSUMER_GROUP", cKafka.ConsumerGroup) + "-evaluate",
+		NumPartitions: int(cKafka.NumPartitions),
+		NumWorkers:    int(cKafka.NumWorkers),
+	}
+
+	evaluateWorker := NewEvaluateWorker(evaluateWorkerConfig, resumeUC, notificationUC, hub, logger)
+	go evaluateWorker.Start()
 
 	// Register custom HTTP handlers
 	// Note: CORS is automatically handled by the handlers.CORS filter above

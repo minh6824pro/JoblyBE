@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package api.notification.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "JobblyBE/api/notification/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.notification.v1";
+
+service Notification {
+	// Get user notifications with pagination
+	rpc GetNotifications (GetNotificationsRequest) returns (GetNotificationsReply) {
+		option (google.api.http) = {
+			get: "/api/v1/notifications"
+		};
+	}
+	
+	// Get unread notification count
+	rpc GetUnreadCount (GetUnreadCountRequest) returns (GetUnreadCountReply) {
+		option (google.api.http) = {
+			get: "/api/v1/notifications/unread-count"
+		};
+	}
+	
+	// Mark a notification as read
+	rpc MarkAsRead (MarkAsReadRequest) returns (MarkAsReadReply) {
+		option (google.api.http) = {
+			put: "/api/v1/notifications/{notification_id}/read"
+		};
+	}
+	
+	// Mark all notifications as read
+	rpc MarkAllAsRead (MarkAllAsReadRequest) returns (MarkAllAsReadReply) {
+		option (google.api.http) = {
+			put: "/api/v1/notifications/read-all"
+		};
+	}
+}
+
+// Notification message
+message NotificationItem {
+	string id = 1;
+	string user_id = 2;
+	string title = 3;
+	string content = 4;
+	string type = 5;
+	string object_id = 6;
+	bool is_read = 7;
+	string created_at = 8;
+}
+
+// Request/Response messages
+message GetNotificationsRequest {
+	int32 page = 1;
+	int32 page_size = 2;
+}
+
+message GetNotificationsReply {
+	repeated NotificationItem notifications = 1;
+	int32 total = 2;
+	int32 page = 3;
+	int32 page_size = 4;
+}
+
+message GetUnreadCountRequest {}
+
+message GetUnreadCountReply {
+	int32 count = 1;
+}
+
+message MarkAsReadRequest {
+	string notification_id = 1;
+}
+
+message MarkAsReadReply {
+	bool success = 1;
+}
+
+message MarkAllAsReadRequest {}
+
+message MarkAllAsReadReply {
+	bool success = 1;
+}

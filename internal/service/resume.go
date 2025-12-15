@@ -141,6 +141,24 @@ func (s *ResumeService) GenerateCVDescription(ctx context.Context, req *pb.Gener
 	}, nil
 }
 
+func (s *ResumeService) UpdateCVEditStatus(ctx context.Context, req *pb.UpdateCVEditStatusRequest) (*pb.UpdateCVEditStatusReply, error) {
+	// Get user ID from JWT claims
+	claims, err := auth.GetClaimsFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Update CV edit status
+	if err := s.uc.UpdateCVEditStatus(ctx, req.ResumeId, req.EditId, req.Status, claims.UserID); err != nil {
+		return nil, err
+	}
+
+	return &pb.UpdateCVEditStatusReply{
+		Success: true,
+		Message: "CV edit status updated successfully",
+	}, nil
+}
+
 // Helper functions to convert between proto and biz models
 func (s *ResumeService) resumeToPb(resume *biz.Resume) *pb.ResumeReply {
 	return &pb.ResumeReply{
@@ -169,6 +187,7 @@ func (s *ResumeService) resumeDetailToPb(detail *biz.ResumeDetail) *pb.ResumeDet
 		Certifications: detail.Certifications,
 		Languages:      detail.Languages,
 		Achievements:   detail.Achievements,
+		Evaluations:    s.evaluationsArrayToPb(detail.Evaluations),
 	}
 }
 
@@ -305,6 +324,62 @@ func (s *ResumeService) protoToProjectArray(projectList []*pb.Project) []*biz.Pr
 				Role:         proj.Role,
 				Achievements: proj.Achievements,
 			})
+		}
+	}
+	return result
+}
+
+func (s *ResumeService) evaluationsArrayToPb(evalList []*biz.ResumeEvaluation) []*pb.ResumeEvaluation {
+	if evalList == nil {
+		return nil
+	}
+	result := make([]*pb.ResumeEvaluation, 0, len(evalList))
+	for _, eval := range evalList {
+		if eval != nil {
+			pbEval := &pb.ResumeEvaluation{
+				CvName:          eval.CVName,
+				OverallScore:    eval.OverallScore,
+				Grade:           eval.Grade,
+				Strengths:       eval.Strengths,
+				Weaknesses:      eval.Weaknesses,
+				Recommendations: eval.Recommendations,
+				JobsAnalyzed:    int32(eval.JobsAnalyzed),
+				EvaluatedAt:     eval.EvaluatedAt.Format("2006-01-02T15:04:05Z07:00"),
+			}
+
+			// Convert ScoreBreakdown
+			if eval.ScoreBreakdown != nil {
+				pbEval.ScoreBreakdown = &pb.ResumeScoreBreakdown{
+					SkillsScore:       eval.ScoreBreakdown.SkillsScore,
+					ExperienceScore:   eval.ScoreBreakdown.ExperienceScore,
+					EducationScore:    eval.ScoreBreakdown.EducationScore,
+					CompletenessScore: eval.ScoreBreakdown.CompletenessScore,
+					JobAlignmentScore: eval.ScoreBreakdown.JobAlignmentScore,
+					PresentationScore: eval.ScoreBreakdown.PresentationScore,
+				}
+			}
+
+			// Convert CVEdits
+			if len(eval.CVEdits) > 0 {
+				pbEval.CvEdits = make([]*pb.ResumeCVEdit, 0, len(eval.CVEdits))
+				for _, edit := range eval.CVEdits {
+					if edit != nil {
+						pbEval.CvEdits = append(pbEval.CvEdits, &pb.ResumeCVEdit{
+							Id:             edit.ID,
+							FieldPath:      edit.FieldPath,
+							Action:         edit.Action,
+							CurrentValue:   edit.CurrentValue,
+							SuggestedValue: edit.SuggestedValue,
+							Reason:         edit.Reason,
+							Priority:       edit.Priority,
+							ImpactScore:    edit.ImpactScore,
+							Status:         edit.Status,
+						})
+					}
+				}
+			}
+
+			result = append(result, pbEval)
 		}
 	}
 	return result

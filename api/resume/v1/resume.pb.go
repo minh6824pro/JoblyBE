@@ -112,6 +112,7 @@ type ResumeDetail struct {
 	Certifications []string               `protobuf:"bytes,9,rep,name=certifications,proto3" json:"certifications,omitempty"`
 	Languages      []string               `protobuf:"bytes,10,rep,name=languages,proto3" json:"languages,omitempty"`
 	Achievements   []string               `protobuf:"bytes,11,rep,name=achievements,proto3" json:"achievements,omitempty"`
+	Evaluations    []*ResumeEvaluation    `protobuf:"bytes,12,rep,name=evaluations,proto3" json:"evaluations,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
@@ -219,6 +220,13 @@ func (x *ResumeDetail) GetLanguages() []string {
 func (x *ResumeDetail) GetAchievements() []string {
 	if x != nil {
 		return x.Achievements
+	}
+	return nil
+}
+
+func (x *ResumeDetail) GetEvaluations() []*ResumeEvaluation {
+	if x != nil {
+		return x.Evaluations
 	}
 	return nil
 }
@@ -467,6 +475,314 @@ func (x *Project) GetAchievements() []string {
 	return nil
 }
 
+type ResumeScoreBreakdown struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	SkillsScore       float64                `protobuf:"fixed64,1,opt,name=skills_score,json=skillsScore,proto3" json:"skills_score,omitempty"`
+	ExperienceScore   float64                `protobuf:"fixed64,2,opt,name=experience_score,json=experienceScore,proto3" json:"experience_score,omitempty"`
+	EducationScore    float64                `protobuf:"fixed64,3,opt,name=education_score,json=educationScore,proto3" json:"education_score,omitempty"`
+	CompletenessScore float64                `protobuf:"fixed64,4,opt,name=completeness_score,json=completenessScore,proto3" json:"completeness_score,omitempty"`
+	JobAlignmentScore float64                `protobuf:"fixed64,5,opt,name=job_alignment_score,json=jobAlignmentScore,proto3" json:"job_alignment_score,omitempty"`
+	PresentationScore float64                `protobuf:"fixed64,6,opt,name=presentation_score,json=presentationScore,proto3" json:"presentation_score,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *ResumeScoreBreakdown) Reset() {
+	*x = ResumeScoreBreakdown{}
+	mi := &file_resume_v1_resume_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ResumeScoreBreakdown) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResumeScoreBreakdown) ProtoMessage() {}
+
+func (x *ResumeScoreBreakdown) ProtoReflect() protoreflect.Message {
+	mi := &file_resume_v1_resume_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResumeScoreBreakdown.ProtoReflect.Descriptor instead.
+func (*ResumeScoreBreakdown) Descriptor() ([]byte, []int) {
+	return file_resume_v1_resume_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ResumeScoreBreakdown) GetSkillsScore() float64 {
+	if x != nil {
+		return x.SkillsScore
+	}
+	return 0
+}
+
+func (x *ResumeScoreBreakdown) GetExperienceScore() float64 {
+	if x != nil {
+		return x.ExperienceScore
+	}
+	return 0
+}
+
+func (x *ResumeScoreBreakdown) GetEducationScore() float64 {
+	if x != nil {
+		return x.EducationScore
+	}
+	return 0
+}
+
+func (x *ResumeScoreBreakdown) GetCompletenessScore() float64 {
+	if x != nil {
+		return x.CompletenessScore
+	}
+	return 0
+}
+
+func (x *ResumeScoreBreakdown) GetJobAlignmentScore() float64 {
+	if x != nil {
+		return x.JobAlignmentScore
+	}
+	return 0
+}
+
+func (x *ResumeScoreBreakdown) GetPresentationScore() float64 {
+	if x != nil {
+		return x.PresentationScore
+	}
+	return 0
+}
+
+type ResumeCVEdit struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	FieldPath      string                 `protobuf:"bytes,1,opt,name=field_path,json=fieldPath,proto3" json:"field_path,omitempty"`
+	Action         string                 `protobuf:"bytes,2,opt,name=action,proto3" json:"action,omitempty"`
+	CurrentValue   string                 `protobuf:"bytes,3,opt,name=current_value,json=currentValue,proto3" json:"current_value,omitempty"`
+	SuggestedValue string                 `protobuf:"bytes,4,opt,name=suggested_value,json=suggestedValue,proto3" json:"suggested_value,omitempty"`
+	Reason         string                 `protobuf:"bytes,5,opt,name=reason,proto3" json:"reason,omitempty"`
+	Priority       string                 `protobuf:"bytes,6,opt,name=priority,proto3" json:"priority,omitempty"`
+	ImpactScore    float64                `protobuf:"fixed64,7,opt,name=impact_score,json=impactScore,proto3" json:"impact_score,omitempty"`
+	Status         string                 `protobuf:"bytes,8,opt,name=status,proto3" json:"status,omitempty"` // null/empty: new, "rejected": user rejected, "accepted": user accepted
+	Id             string                 `protobuf:"bytes,9,opt,name=id,proto3" json:"id,omitempty"`         // unique identifier for the edit
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *ResumeCVEdit) Reset() {
+	*x = ResumeCVEdit{}
+	mi := &file_resume_v1_resume_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ResumeCVEdit) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResumeCVEdit) ProtoMessage() {}
+
+func (x *ResumeCVEdit) ProtoReflect() protoreflect.Message {
+	mi := &file_resume_v1_resume_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResumeCVEdit.ProtoReflect.Descriptor instead.
+func (*ResumeCVEdit) Descriptor() ([]byte, []int) {
+	return file_resume_v1_resume_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ResumeCVEdit) GetFieldPath() string {
+	if x != nil {
+		return x.FieldPath
+	}
+	return ""
+}
+
+func (x *ResumeCVEdit) GetAction() string {
+	if x != nil {
+		return x.Action
+	}
+	return ""
+}
+
+func (x *ResumeCVEdit) GetCurrentValue() string {
+	if x != nil {
+		return x.CurrentValue
+	}
+	return ""
+}
+
+func (x *ResumeCVEdit) GetSuggestedValue() string {
+	if x != nil {
+		return x.SuggestedValue
+	}
+	return ""
+}
+
+func (x *ResumeCVEdit) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+func (x *ResumeCVEdit) GetPriority() string {
+	if x != nil {
+		return x.Priority
+	}
+	return ""
+}
+
+func (x *ResumeCVEdit) GetImpactScore() float64 {
+	if x != nil {
+		return x.ImpactScore
+	}
+	return 0
+}
+
+func (x *ResumeCVEdit) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *ResumeCVEdit) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type ResumeEvaluation struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	CvName          string                 `protobuf:"bytes,1,opt,name=cv_name,json=cvName,proto3" json:"cv_name,omitempty"`
+	OverallScore    float64                `protobuf:"fixed64,2,opt,name=overall_score,json=overallScore,proto3" json:"overall_score,omitempty"`
+	Grade           string                 `protobuf:"bytes,3,opt,name=grade,proto3" json:"grade,omitempty"`
+	ScoreBreakdown  *ResumeScoreBreakdown  `protobuf:"bytes,4,opt,name=score_breakdown,json=scoreBreakdown,proto3" json:"score_breakdown,omitempty"`
+	Strengths       []string               `protobuf:"bytes,5,rep,name=strengths,proto3" json:"strengths,omitempty"`
+	Weaknesses      []string               `protobuf:"bytes,6,rep,name=weaknesses,proto3" json:"weaknesses,omitempty"`
+	Recommendations []string               `protobuf:"bytes,7,rep,name=recommendations,proto3" json:"recommendations,omitempty"`
+	CvEdits         []*ResumeCVEdit        `protobuf:"bytes,8,rep,name=cv_edits,json=cvEdits,proto3" json:"cv_edits,omitempty"`
+	JobsAnalyzed    int32                  `protobuf:"varint,9,opt,name=jobs_analyzed,json=jobsAnalyzed,proto3" json:"jobs_analyzed,omitempty"`
+	EvaluatedAt     string                 `protobuf:"bytes,10,opt,name=evaluated_at,json=evaluatedAt,proto3" json:"evaluated_at,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *ResumeEvaluation) Reset() {
+	*x = ResumeEvaluation{}
+	mi := &file_resume_v1_resume_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ResumeEvaluation) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResumeEvaluation) ProtoMessage() {}
+
+func (x *ResumeEvaluation) ProtoReflect() protoreflect.Message {
+	mi := &file_resume_v1_resume_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResumeEvaluation.ProtoReflect.Descriptor instead.
+func (*ResumeEvaluation) Descriptor() ([]byte, []int) {
+	return file_resume_v1_resume_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *ResumeEvaluation) GetCvName() string {
+	if x != nil {
+		return x.CvName
+	}
+	return ""
+}
+
+func (x *ResumeEvaluation) GetOverallScore() float64 {
+	if x != nil {
+		return x.OverallScore
+	}
+	return 0
+}
+
+func (x *ResumeEvaluation) GetGrade() string {
+	if x != nil {
+		return x.Grade
+	}
+	return ""
+}
+
+func (x *ResumeEvaluation) GetScoreBreakdown() *ResumeScoreBreakdown {
+	if x != nil {
+		return x.ScoreBreakdown
+	}
+	return nil
+}
+
+func (x *ResumeEvaluation) GetStrengths() []string {
+	if x != nil {
+		return x.Strengths
+	}
+	return nil
+}
+
+func (x *ResumeEvaluation) GetWeaknesses() []string {
+	if x != nil {
+		return x.Weaknesses
+	}
+	return nil
+}
+
+func (x *ResumeEvaluation) GetRecommendations() []string {
+	if x != nil {
+		return x.Recommendations
+	}
+	return nil
+}
+
+func (x *ResumeEvaluation) GetCvEdits() []*ResumeCVEdit {
+	if x != nil {
+		return x.CvEdits
+	}
+	return nil
+}
+
+func (x *ResumeEvaluation) GetJobsAnalyzed() int32 {
+	if x != nil {
+		return x.JobsAnalyzed
+	}
+	return 0
+}
+
+func (x *ResumeEvaluation) GetEvaluatedAt() string {
+	if x != nil {
+		return x.EvaluatedAt
+	}
+	return ""
+}
+
 // Request/Response messages
 type CreateResumeRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -477,7 +793,7 @@ type CreateResumeRequest struct {
 
 func (x *CreateResumeRequest) Reset() {
 	*x = CreateResumeRequest{}
-	mi := &file_resume_v1_resume_proto_msgTypes[5]
+	mi := &file_resume_v1_resume_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -489,7 +805,7 @@ func (x *CreateResumeRequest) String() string {
 func (*CreateResumeRequest) ProtoMessage() {}
 
 func (x *CreateResumeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_resume_v1_resume_proto_msgTypes[5]
+	mi := &file_resume_v1_resume_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -502,7 +818,7 @@ func (x *CreateResumeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateResumeRequest.ProtoReflect.Descriptor instead.
 func (*CreateResumeRequest) Descriptor() ([]byte, []int) {
-	return file_resume_v1_resume_proto_rawDescGZIP(), []int{5}
+	return file_resume_v1_resume_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *CreateResumeRequest) GetResumeDetail() *ResumeDetail {
@@ -522,7 +838,7 @@ type UpdateResumeRequest struct {
 
 func (x *UpdateResumeRequest) Reset() {
 	*x = UpdateResumeRequest{}
-	mi := &file_resume_v1_resume_proto_msgTypes[6]
+	mi := &file_resume_v1_resume_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -534,7 +850,7 @@ func (x *UpdateResumeRequest) String() string {
 func (*UpdateResumeRequest) ProtoMessage() {}
 
 func (x *UpdateResumeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_resume_v1_resume_proto_msgTypes[6]
+	mi := &file_resume_v1_resume_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -547,7 +863,7 @@ func (x *UpdateResumeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateResumeRequest.ProtoReflect.Descriptor instead.
 func (*UpdateResumeRequest) Descriptor() ([]byte, []int) {
-	return file_resume_v1_resume_proto_rawDescGZIP(), []int{6}
+	return file_resume_v1_resume_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *UpdateResumeRequest) GetId() string {
@@ -573,7 +889,7 @@ type GetResumeRequest struct {
 
 func (x *GetResumeRequest) Reset() {
 	*x = GetResumeRequest{}
-	mi := &file_resume_v1_resume_proto_msgTypes[7]
+	mi := &file_resume_v1_resume_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -585,7 +901,7 @@ func (x *GetResumeRequest) String() string {
 func (*GetResumeRequest) ProtoMessage() {}
 
 func (x *GetResumeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_resume_v1_resume_proto_msgTypes[7]
+	mi := &file_resume_v1_resume_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -598,7 +914,7 @@ func (x *GetResumeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetResumeRequest.ProtoReflect.Descriptor instead.
 func (*GetResumeRequest) Descriptor() ([]byte, []int) {
-	return file_resume_v1_resume_proto_rawDescGZIP(), []int{7}
+	return file_resume_v1_resume_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *GetResumeRequest) GetId() string {
@@ -618,7 +934,7 @@ type ListResumesRequest struct {
 
 func (x *ListResumesRequest) Reset() {
 	*x = ListResumesRequest{}
-	mi := &file_resume_v1_resume_proto_msgTypes[8]
+	mi := &file_resume_v1_resume_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -630,7 +946,7 @@ func (x *ListResumesRequest) String() string {
 func (*ListResumesRequest) ProtoMessage() {}
 
 func (x *ListResumesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_resume_v1_resume_proto_msgTypes[8]
+	mi := &file_resume_v1_resume_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -643,7 +959,7 @@ func (x *ListResumesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListResumesRequest.ProtoReflect.Descriptor instead.
 func (*ListResumesRequest) Descriptor() ([]byte, []int) {
-	return file_resume_v1_resume_proto_rawDescGZIP(), []int{8}
+	return file_resume_v1_resume_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ListResumesRequest) GetPage() int32 {
@@ -672,7 +988,7 @@ type ListResumesReply struct {
 
 func (x *ListResumesReply) Reset() {
 	*x = ListResumesReply{}
-	mi := &file_resume_v1_resume_proto_msgTypes[9]
+	mi := &file_resume_v1_resume_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -684,7 +1000,7 @@ func (x *ListResumesReply) String() string {
 func (*ListResumesReply) ProtoMessage() {}
 
 func (x *ListResumesReply) ProtoReflect() protoreflect.Message {
-	mi := &file_resume_v1_resume_proto_msgTypes[9]
+	mi := &file_resume_v1_resume_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -697,7 +1013,7 @@ func (x *ListResumesReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListResumesReply.ProtoReflect.Descriptor instead.
 func (*ListResumesReply) Descriptor() ([]byte, []int) {
-	return file_resume_v1_resume_proto_rawDescGZIP(), []int{9}
+	return file_resume_v1_resume_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *ListResumesReply) GetResumes() []*ResumeReply {
@@ -737,7 +1053,7 @@ type DeleteResumeRequest struct {
 
 func (x *DeleteResumeRequest) Reset() {
 	*x = DeleteResumeRequest{}
-	mi := &file_resume_v1_resume_proto_msgTypes[10]
+	mi := &file_resume_v1_resume_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -749,7 +1065,7 @@ func (x *DeleteResumeRequest) String() string {
 func (*DeleteResumeRequest) ProtoMessage() {}
 
 func (x *DeleteResumeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_resume_v1_resume_proto_msgTypes[10]
+	mi := &file_resume_v1_resume_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -762,7 +1078,7 @@ func (x *DeleteResumeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteResumeRequest.ProtoReflect.Descriptor instead.
 func (*DeleteResumeRequest) Descriptor() ([]byte, []int) {
-	return file_resume_v1_resume_proto_rawDescGZIP(), []int{10}
+	return file_resume_v1_resume_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *DeleteResumeRequest) GetId() string {
@@ -782,7 +1098,7 @@ type DeleteResumeReply struct {
 
 func (x *DeleteResumeReply) Reset() {
 	*x = DeleteResumeReply{}
-	mi := &file_resume_v1_resume_proto_msgTypes[11]
+	mi := &file_resume_v1_resume_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -794,7 +1110,7 @@ func (x *DeleteResumeReply) String() string {
 func (*DeleteResumeReply) ProtoMessage() {}
 
 func (x *DeleteResumeReply) ProtoReflect() protoreflect.Message {
-	mi := &file_resume_v1_resume_proto_msgTypes[11]
+	mi := &file_resume_v1_resume_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -807,7 +1123,7 @@ func (x *DeleteResumeReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteResumeReply.ProtoReflect.Descriptor instead.
 func (*DeleteResumeReply) Descriptor() ([]byte, []int) {
-	return file_resume_v1_resume_proto_rawDescGZIP(), []int{11}
+	return file_resume_v1_resume_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *DeleteResumeReply) GetSuccess() bool {
@@ -835,7 +1151,7 @@ type GenerateCVDescriptionRequest struct {
 
 func (x *GenerateCVDescriptionRequest) Reset() {
 	*x = GenerateCVDescriptionRequest{}
-	mi := &file_resume_v1_resume_proto_msgTypes[12]
+	mi := &file_resume_v1_resume_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -847,7 +1163,7 @@ func (x *GenerateCVDescriptionRequest) String() string {
 func (*GenerateCVDescriptionRequest) ProtoMessage() {}
 
 func (x *GenerateCVDescriptionRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_resume_v1_resume_proto_msgTypes[12]
+	mi := &file_resume_v1_resume_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -860,7 +1176,7 @@ func (x *GenerateCVDescriptionRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GenerateCVDescriptionRequest.ProtoReflect.Descriptor instead.
 func (*GenerateCVDescriptionRequest) Descriptor() ([]byte, []int) {
-	return file_resume_v1_resume_proto_rawDescGZIP(), []int{12}
+	return file_resume_v1_resume_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *GenerateCVDescriptionRequest) GetResumeDetail() *ResumeDetail {
@@ -893,7 +1209,7 @@ type GenerateCVDescriptionReply struct {
 
 func (x *GenerateCVDescriptionReply) Reset() {
 	*x = GenerateCVDescriptionReply{}
-	mi := &file_resume_v1_resume_proto_msgTypes[13]
+	mi := &file_resume_v1_resume_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -905,7 +1221,7 @@ func (x *GenerateCVDescriptionReply) String() string {
 func (*GenerateCVDescriptionReply) ProtoMessage() {}
 
 func (x *GenerateCVDescriptionReply) ProtoReflect() protoreflect.Message {
-	mi := &file_resume_v1_resume_proto_msgTypes[13]
+	mi := &file_resume_v1_resume_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -918,12 +1234,124 @@ func (x *GenerateCVDescriptionReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GenerateCVDescriptionReply.ProtoReflect.Descriptor instead.
 func (*GenerateCVDescriptionReply) Descriptor() ([]byte, []int) {
-	return file_resume_v1_resume_proto_rawDescGZIP(), []int{13}
+	return file_resume_v1_resume_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *GenerateCVDescriptionReply) GetContent() string {
 	if x != nil {
 		return x.Content
+	}
+	return ""
+}
+
+type UpdateCVEditStatusRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ResumeId      string                 `protobuf:"bytes,1,opt,name=resume_id,json=resumeId,proto3" json:"resume_id,omitempty"`
+	EditId        string                 `protobuf:"bytes,2,opt,name=edit_id,json=editId,proto3" json:"edit_id,omitempty"`
+	Status        string                 `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"` // "accepted" or "rejected"
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateCVEditStatusRequest) Reset() {
+	*x = UpdateCVEditStatusRequest{}
+	mi := &file_resume_v1_resume_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateCVEditStatusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateCVEditStatusRequest) ProtoMessage() {}
+
+func (x *UpdateCVEditStatusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_resume_v1_resume_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateCVEditStatusRequest.ProtoReflect.Descriptor instead.
+func (*UpdateCVEditStatusRequest) Descriptor() ([]byte, []int) {
+	return file_resume_v1_resume_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *UpdateCVEditStatusRequest) GetResumeId() string {
+	if x != nil {
+		return x.ResumeId
+	}
+	return ""
+}
+
+func (x *UpdateCVEditStatusRequest) GetEditId() string {
+	if x != nil {
+		return x.EditId
+	}
+	return ""
+}
+
+func (x *UpdateCVEditStatusRequest) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+type UpdateCVEditStatusReply struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateCVEditStatusReply) Reset() {
+	*x = UpdateCVEditStatusReply{}
+	mi := &file_resume_v1_resume_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateCVEditStatusReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateCVEditStatusReply) ProtoMessage() {}
+
+func (x *UpdateCVEditStatusReply) ProtoReflect() protoreflect.Message {
+	mi := &file_resume_v1_resume_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateCVEditStatusReply.ProtoReflect.Descriptor instead.
+func (*UpdateCVEditStatusReply) Descriptor() ([]byte, []int) {
+	return file_resume_v1_resume_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *UpdateCVEditStatusReply) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
+func (x *UpdateCVEditStatusReply) GetMessage() string {
+	if x != nil {
+		return x.Message
 	}
 	return ""
 }
@@ -939,7 +1367,7 @@ const file_resume_v1_resume_proto_rawDesc = "" +
 	"\rresume_detail\x18\x03 \x01(\v2\x1b.api.resume.v1.ResumeDetailR\fresumeDetail\x12\x18\n" +
 	"\aversion\x18\x04 \x01(\x05R\aversion\x12\x1d\n" +
 	"\n" +
-	"created_at\x18\x05 \x01(\tR\tcreatedAt\"\x91\x03\n" +
+	"created_at\x18\x05 \x01(\tR\tcreatedAt\"\xd4\x03\n" +
 	"\fResumeDetail\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
 	"\x05email\x18\x02 \x01(\tR\x05email\x12\x14\n" +
@@ -954,7 +1382,8 @@ const file_resume_v1_resume_proto_rawDesc = "" +
 	"\x0ecertifications\x18\t \x03(\tR\x0ecertifications\x12\x1c\n" +
 	"\tlanguages\x18\n" +
 	" \x03(\tR\tlanguages\x12\"\n" +
-	"\fachievements\x18\v \x03(\tR\fachievements\"\x90\x01\n" +
+	"\fachievements\x18\v \x03(\tR\fachievements\x12A\n" +
+	"\vevaluations\x18\f \x03(\v2\x1f.api.resume.v1.ResumeEvaluationR\vevaluations\"\x90\x01\n" +
 	"\tEducation\x12\x16\n" +
 	"\x06degree\x18\x01 \x01(\tR\x06degree\x12 \n" +
 	"\vinstitution\x18\x02 \x01(\tR\vinstitution\x12'\n" +
@@ -975,7 +1404,39 @@ const file_resume_v1_resume_proto_rawDesc = "" +
 	"\x03url\x18\x04 \x01(\tR\x03url\x12\x1a\n" +
 	"\bduration\x18\x05 \x01(\tR\bduration\x12\x12\n" +
 	"\x04role\x18\x06 \x01(\tR\x04role\x12\"\n" +
-	"\fachievements\x18\a \x03(\tR\fachievements\"W\n" +
+	"\fachievements\x18\a \x03(\tR\fachievements\"\x9b\x02\n" +
+	"\x14ResumeScoreBreakdown\x12!\n" +
+	"\fskills_score\x18\x01 \x01(\x01R\vskillsScore\x12)\n" +
+	"\x10experience_score\x18\x02 \x01(\x01R\x0fexperienceScore\x12'\n" +
+	"\x0feducation_score\x18\x03 \x01(\x01R\x0eeducationScore\x12-\n" +
+	"\x12completeness_score\x18\x04 \x01(\x01R\x11completenessScore\x12.\n" +
+	"\x13job_alignment_score\x18\x05 \x01(\x01R\x11jobAlignmentScore\x12-\n" +
+	"\x12presentation_score\x18\x06 \x01(\x01R\x11presentationScore\"\x92\x02\n" +
+	"\fResumeCVEdit\x12\x1d\n" +
+	"\n" +
+	"field_path\x18\x01 \x01(\tR\tfieldPath\x12\x16\n" +
+	"\x06action\x18\x02 \x01(\tR\x06action\x12#\n" +
+	"\rcurrent_value\x18\x03 \x01(\tR\fcurrentValue\x12'\n" +
+	"\x0fsuggested_value\x18\x04 \x01(\tR\x0esuggestedValue\x12\x16\n" +
+	"\x06reason\x18\x05 \x01(\tR\x06reason\x12\x1a\n" +
+	"\bpriority\x18\x06 \x01(\tR\bpriority\x12!\n" +
+	"\fimpact_score\x18\a \x01(\x01R\vimpactScore\x12\x16\n" +
+	"\x06status\x18\b \x01(\tR\x06status\x12\x0e\n" +
+	"\x02id\x18\t \x01(\tR\x02id\"\x9c\x03\n" +
+	"\x10ResumeEvaluation\x12\x17\n" +
+	"\acv_name\x18\x01 \x01(\tR\x06cvName\x12#\n" +
+	"\roverall_score\x18\x02 \x01(\x01R\foverallScore\x12\x14\n" +
+	"\x05grade\x18\x03 \x01(\tR\x05grade\x12L\n" +
+	"\x0fscore_breakdown\x18\x04 \x01(\v2#.api.resume.v1.ResumeScoreBreakdownR\x0escoreBreakdown\x12\x1c\n" +
+	"\tstrengths\x18\x05 \x03(\tR\tstrengths\x12\x1e\n" +
+	"\n" +
+	"weaknesses\x18\x06 \x03(\tR\n" +
+	"weaknesses\x12(\n" +
+	"\x0frecommendations\x18\a \x03(\tR\x0frecommendations\x126\n" +
+	"\bcv_edits\x18\b \x03(\v2\x1b.api.resume.v1.ResumeCVEditR\acvEdits\x12#\n" +
+	"\rjobs_analyzed\x18\t \x01(\x05R\fjobsAnalyzed\x12!\n" +
+	"\fevaluated_at\x18\n" +
+	" \x01(\tR\vevaluatedAt\"W\n" +
 	"\x13CreateResumeRequest\x12@\n" +
 	"\rresume_detail\x18\x01 \x01(\v2\x1b.api.resume.v1.ResumeDetailR\fresumeDetail\"g\n" +
 	"\x13UpdateResumeRequest\x12\x0e\n" +
@@ -1001,14 +1462,22 @@ const file_resume_v1_resume_proto_rawDesc = "" +
 	"\tfield_tag\x18\x02 \x01(\tR\bfieldTag\x12#\n" +
 	"\rcurrent_input\x18\x03 \x01(\tR\fcurrentInput\"6\n" +
 	"\x1aGenerateCVDescriptionReply\x12\x18\n" +
-	"\acontent\x18\x01 \x01(\tR\acontent2\xd0\x05\n" +
+	"\acontent\x18\x01 \x01(\tR\acontent\"i\n" +
+	"\x19UpdateCVEditStatusRequest\x12\x1b\n" +
+	"\tresume_id\x18\x01 \x01(\tR\bresumeId\x12\x17\n" +
+	"\aedit_id\x18\x02 \x01(\tR\x06editId\x12\x16\n" +
+	"\x06status\x18\x03 \x01(\tR\x06status\"M\n" +
+	"\x17UpdateCVEditStatusReply\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage2\xfb\x06\n" +
 	"\x06Resume\x12j\n" +
 	"\fCreateResume\x12\".api.resume.v1.CreateResumeRequest\x1a\x1a.api.resume.v1.ResumeReply\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/api/v1/resumes\x12o\n" +
 	"\fUpdateResume\x12\".api.resume.v1.UpdateResumeRequest\x1a\x1a.api.resume.v1.ResumeReply\"\x1f\x82\xd3\xe4\x93\x02\x19:\x01*\x1a\x14/api/v1/resumes/{id}\x12f\n" +
 	"\tGetResume\x12\x1f.api.resume.v1.GetResumeRequest\x1a\x1a.api.resume.v1.ResumeReply\"\x1c\x82\xd3\xe4\x93\x02\x16\x12\x14/api/v1/resumes/{id}\x12j\n" +
 	"\vListResumes\x12!.api.resume.v1.ListResumesRequest\x1a\x1f.api.resume.v1.ListResumesReply\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/api/v1/resumes\x12r\n" +
 	"\fDeleteResume\x12\".api.resume.v1.DeleteResumeRequest\x1a .api.resume.v1.DeleteResumeReply\"\x1c\x82\xd3\xe4\x93\x02\x16*\x14/api/v1/resumes/{id}\x12\xa0\x01\n" +
-	"\x15GenerateCVDescription\x12+.api.resume.v1.GenerateCVDescriptionRequest\x1a).api.resume.v1.GenerateCVDescriptionReply\"/\x82\xd3\xe4\x93\x02):\x01*\"$/api/v1/resumes/generate-descriptionB,\n" +
+	"\x15GenerateCVDescription\x12+.api.resume.v1.GenerateCVDescriptionRequest\x1a).api.resume.v1.GenerateCVDescriptionReply\"/\x82\xd3\xe4\x93\x02):\x01*\"$/api/v1/resumes/generate-description\x12\xa8\x01\n" +
+	"\x12UpdateCVEditStatus\x12(.api.resume.v1.UpdateCVEditStatusRequest\x1a&.api.resume.v1.UpdateCVEditStatusReply\"@\x82\xd3\xe4\x93\x02::\x01*\x1a5/api/v1/resumes/{resume_id}/cv-edits/{edit_id}/statusB,\n" +
 	"\rapi.resume.v1P\x01Z\x19JobblyBE/api/resume/v1;v1b\x06proto3"
 
 var (
@@ -1023,49 +1492,59 @@ func file_resume_v1_resume_proto_rawDescGZIP() []byte {
 	return file_resume_v1_resume_proto_rawDescData
 }
 
-var file_resume_v1_resume_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
+var file_resume_v1_resume_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_resume_v1_resume_proto_goTypes = []any{
 	(*ResumeReply)(nil),                  // 0: api.resume.v1.ResumeReply
 	(*ResumeDetail)(nil),                 // 1: api.resume.v1.ResumeDetail
 	(*Education)(nil),                    // 2: api.resume.v1.Education
 	(*Experience)(nil),                   // 3: api.resume.v1.Experience
 	(*Project)(nil),                      // 4: api.resume.v1.Project
-	(*CreateResumeRequest)(nil),          // 5: api.resume.v1.CreateResumeRequest
-	(*UpdateResumeRequest)(nil),          // 6: api.resume.v1.UpdateResumeRequest
-	(*GetResumeRequest)(nil),             // 7: api.resume.v1.GetResumeRequest
-	(*ListResumesRequest)(nil),           // 8: api.resume.v1.ListResumesRequest
-	(*ListResumesReply)(nil),             // 9: api.resume.v1.ListResumesReply
-	(*DeleteResumeRequest)(nil),          // 10: api.resume.v1.DeleteResumeRequest
-	(*DeleteResumeReply)(nil),            // 11: api.resume.v1.DeleteResumeReply
-	(*GenerateCVDescriptionRequest)(nil), // 12: api.resume.v1.GenerateCVDescriptionRequest
-	(*GenerateCVDescriptionReply)(nil),   // 13: api.resume.v1.GenerateCVDescriptionReply
+	(*ResumeScoreBreakdown)(nil),         // 5: api.resume.v1.ResumeScoreBreakdown
+	(*ResumeCVEdit)(nil),                 // 6: api.resume.v1.ResumeCVEdit
+	(*ResumeEvaluation)(nil),             // 7: api.resume.v1.ResumeEvaluation
+	(*CreateResumeRequest)(nil),          // 8: api.resume.v1.CreateResumeRequest
+	(*UpdateResumeRequest)(nil),          // 9: api.resume.v1.UpdateResumeRequest
+	(*GetResumeRequest)(nil),             // 10: api.resume.v1.GetResumeRequest
+	(*ListResumesRequest)(nil),           // 11: api.resume.v1.ListResumesRequest
+	(*ListResumesReply)(nil),             // 12: api.resume.v1.ListResumesReply
+	(*DeleteResumeRequest)(nil),          // 13: api.resume.v1.DeleteResumeRequest
+	(*DeleteResumeReply)(nil),            // 14: api.resume.v1.DeleteResumeReply
+	(*GenerateCVDescriptionRequest)(nil), // 15: api.resume.v1.GenerateCVDescriptionRequest
+	(*GenerateCVDescriptionReply)(nil),   // 16: api.resume.v1.GenerateCVDescriptionReply
+	(*UpdateCVEditStatusRequest)(nil),    // 17: api.resume.v1.UpdateCVEditStatusRequest
+	(*UpdateCVEditStatusReply)(nil),      // 18: api.resume.v1.UpdateCVEditStatusReply
 }
 var file_resume_v1_resume_proto_depIdxs = []int32{
 	1,  // 0: api.resume.v1.ResumeReply.resume_detail:type_name -> api.resume.v1.ResumeDetail
 	2,  // 1: api.resume.v1.ResumeDetail.education:type_name -> api.resume.v1.Education
 	3,  // 2: api.resume.v1.ResumeDetail.experience:type_name -> api.resume.v1.Experience
 	4,  // 3: api.resume.v1.ResumeDetail.projects:type_name -> api.resume.v1.Project
-	1,  // 4: api.resume.v1.CreateResumeRequest.resume_detail:type_name -> api.resume.v1.ResumeDetail
-	1,  // 5: api.resume.v1.UpdateResumeRequest.resume_detail:type_name -> api.resume.v1.ResumeDetail
-	0,  // 6: api.resume.v1.ListResumesReply.resumes:type_name -> api.resume.v1.ResumeReply
-	1,  // 7: api.resume.v1.GenerateCVDescriptionRequest.resume_detail:type_name -> api.resume.v1.ResumeDetail
-	5,  // 8: api.resume.v1.Resume.CreateResume:input_type -> api.resume.v1.CreateResumeRequest
-	6,  // 9: api.resume.v1.Resume.UpdateResume:input_type -> api.resume.v1.UpdateResumeRequest
-	7,  // 10: api.resume.v1.Resume.GetResume:input_type -> api.resume.v1.GetResumeRequest
-	8,  // 11: api.resume.v1.Resume.ListResumes:input_type -> api.resume.v1.ListResumesRequest
-	10, // 12: api.resume.v1.Resume.DeleteResume:input_type -> api.resume.v1.DeleteResumeRequest
-	12, // 13: api.resume.v1.Resume.GenerateCVDescription:input_type -> api.resume.v1.GenerateCVDescriptionRequest
-	0,  // 14: api.resume.v1.Resume.CreateResume:output_type -> api.resume.v1.ResumeReply
-	0,  // 15: api.resume.v1.Resume.UpdateResume:output_type -> api.resume.v1.ResumeReply
-	0,  // 16: api.resume.v1.Resume.GetResume:output_type -> api.resume.v1.ResumeReply
-	9,  // 17: api.resume.v1.Resume.ListResumes:output_type -> api.resume.v1.ListResumesReply
-	11, // 18: api.resume.v1.Resume.DeleteResume:output_type -> api.resume.v1.DeleteResumeReply
-	13, // 19: api.resume.v1.Resume.GenerateCVDescription:output_type -> api.resume.v1.GenerateCVDescriptionReply
-	14, // [14:20] is the sub-list for method output_type
-	8,  // [8:14] is the sub-list for method input_type
-	8,  // [8:8] is the sub-list for extension type_name
-	8,  // [8:8] is the sub-list for extension extendee
-	0,  // [0:8] is the sub-list for field type_name
+	7,  // 4: api.resume.v1.ResumeDetail.evaluations:type_name -> api.resume.v1.ResumeEvaluation
+	5,  // 5: api.resume.v1.ResumeEvaluation.score_breakdown:type_name -> api.resume.v1.ResumeScoreBreakdown
+	6,  // 6: api.resume.v1.ResumeEvaluation.cv_edits:type_name -> api.resume.v1.ResumeCVEdit
+	1,  // 7: api.resume.v1.CreateResumeRequest.resume_detail:type_name -> api.resume.v1.ResumeDetail
+	1,  // 8: api.resume.v1.UpdateResumeRequest.resume_detail:type_name -> api.resume.v1.ResumeDetail
+	0,  // 9: api.resume.v1.ListResumesReply.resumes:type_name -> api.resume.v1.ResumeReply
+	1,  // 10: api.resume.v1.GenerateCVDescriptionRequest.resume_detail:type_name -> api.resume.v1.ResumeDetail
+	8,  // 11: api.resume.v1.Resume.CreateResume:input_type -> api.resume.v1.CreateResumeRequest
+	9,  // 12: api.resume.v1.Resume.UpdateResume:input_type -> api.resume.v1.UpdateResumeRequest
+	10, // 13: api.resume.v1.Resume.GetResume:input_type -> api.resume.v1.GetResumeRequest
+	11, // 14: api.resume.v1.Resume.ListResumes:input_type -> api.resume.v1.ListResumesRequest
+	13, // 15: api.resume.v1.Resume.DeleteResume:input_type -> api.resume.v1.DeleteResumeRequest
+	15, // 16: api.resume.v1.Resume.GenerateCVDescription:input_type -> api.resume.v1.GenerateCVDescriptionRequest
+	17, // 17: api.resume.v1.Resume.UpdateCVEditStatus:input_type -> api.resume.v1.UpdateCVEditStatusRequest
+	0,  // 18: api.resume.v1.Resume.CreateResume:output_type -> api.resume.v1.ResumeReply
+	0,  // 19: api.resume.v1.Resume.UpdateResume:output_type -> api.resume.v1.ResumeReply
+	0,  // 20: api.resume.v1.Resume.GetResume:output_type -> api.resume.v1.ResumeReply
+	12, // 21: api.resume.v1.Resume.ListResumes:output_type -> api.resume.v1.ListResumesReply
+	14, // 22: api.resume.v1.Resume.DeleteResume:output_type -> api.resume.v1.DeleteResumeReply
+	16, // 23: api.resume.v1.Resume.GenerateCVDescription:output_type -> api.resume.v1.GenerateCVDescriptionReply
+	18, // 24: api.resume.v1.Resume.UpdateCVEditStatus:output_type -> api.resume.v1.UpdateCVEditStatusReply
+	18, // [18:25] is the sub-list for method output_type
+	11, // [11:18] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_resume_v1_resume_proto_init() }
@@ -1079,7 +1558,7 @@ func file_resume_v1_resume_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_resume_v1_resume_proto_rawDesc), len(file_resume_v1_resume_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   14,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

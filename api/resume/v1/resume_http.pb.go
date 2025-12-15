@@ -24,6 +24,7 @@ const OperationResumeDeleteResume = "/api.resume.v1.Resume/DeleteResume"
 const OperationResumeGenerateCVDescription = "/api.resume.v1.Resume/GenerateCVDescription"
 const OperationResumeGetResume = "/api.resume.v1.Resume/GetResume"
 const OperationResumeListResumes = "/api.resume.v1.Resume/ListResumes"
+const OperationResumeUpdateCVEditStatus = "/api.resume.v1.Resume/UpdateCVEditStatus"
 const OperationResumeUpdateResume = "/api.resume.v1.Resume/UpdateResume"
 
 type ResumeHTTPServer interface {
@@ -37,6 +38,8 @@ type ResumeHTTPServer interface {
 	GetResume(context.Context, *GetResumeRequest) (*ResumeReply, error)
 	// ListResumes List all resumes for the authenticated user
 	ListResumes(context.Context, *ListResumesRequest) (*ListResumesReply, error)
+	// UpdateCVEditStatus Update CV edit status
+	UpdateCVEditStatus(context.Context, *UpdateCVEditStatusRequest) (*UpdateCVEditStatusReply, error)
 	// UpdateResume Update an existing resume
 	UpdateResume(context.Context, *UpdateResumeRequest) (*ResumeReply, error)
 }
@@ -49,6 +52,7 @@ func RegisterResumeHTTPServer(s *http.Server, srv ResumeHTTPServer) {
 	r.GET("/api/v1/resumes", _Resume_ListResumes0_HTTP_Handler(srv))
 	r.DELETE("/api/v1/resumes/{id}", _Resume_DeleteResume0_HTTP_Handler(srv))
 	r.POST("/api/v1/resumes/generate-description", _Resume_GenerateCVDescription0_HTTP_Handler(srv))
+	r.PUT("/api/v1/resumes/{resume_id}/cv-edits/{edit_id}/status", _Resume_UpdateCVEditStatus0_HTTP_Handler(srv))
 }
 
 func _Resume_CreateResume0_HTTP_Handler(srv ResumeHTTPServer) func(ctx http.Context) error {
@@ -183,6 +187,31 @@ func _Resume_GenerateCVDescription0_HTTP_Handler(srv ResumeHTTPServer) func(ctx 
 	}
 }
 
+func _Resume_UpdateCVEditStatus0_HTTP_Handler(srv ResumeHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in UpdateCVEditStatusRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationResumeUpdateCVEditStatus)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.UpdateCVEditStatus(ctx, req.(*UpdateCVEditStatusRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*UpdateCVEditStatusReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type ResumeHTTPClient interface {
 	// CreateResume Create a new resume
 	CreateResume(ctx context.Context, req *CreateResumeRequest, opts ...http.CallOption) (rsp *ResumeReply, err error)
@@ -194,6 +223,8 @@ type ResumeHTTPClient interface {
 	GetResume(ctx context.Context, req *GetResumeRequest, opts ...http.CallOption) (rsp *ResumeReply, err error)
 	// ListResumes List all resumes for the authenticated user
 	ListResumes(ctx context.Context, req *ListResumesRequest, opts ...http.CallOption) (rsp *ListResumesReply, err error)
+	// UpdateCVEditStatus Update CV edit status
+	UpdateCVEditStatus(ctx context.Context, req *UpdateCVEditStatusRequest, opts ...http.CallOption) (rsp *UpdateCVEditStatusReply, err error)
 	// UpdateResume Update an existing resume
 	UpdateResume(ctx context.Context, req *UpdateResumeRequest, opts ...http.CallOption) (rsp *ResumeReply, err error)
 }
@@ -270,6 +301,20 @@ func (c *ResumeHTTPClientImpl) ListResumes(ctx context.Context, in *ListResumesR
 	opts = append(opts, http.Operation(OperationResumeListResumes))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// UpdateCVEditStatus Update CV edit status
+func (c *ResumeHTTPClientImpl) UpdateCVEditStatus(ctx context.Context, in *UpdateCVEditStatusRequest, opts ...http.CallOption) (*UpdateCVEditStatusReply, error) {
+	var out UpdateCVEditStatusReply
+	pattern := "/api/v1/resumes/{resume_id}/cv-edits/{edit_id}/status"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationResumeUpdateCVEditStatus))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "PUT", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

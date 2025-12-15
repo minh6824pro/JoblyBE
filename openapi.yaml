@@ -549,6 +549,75 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.job.v1.ListJobPostingsReply'
+    /api/v1/notifications:
+        get:
+            tags:
+                - Notification
+            description: Get user notifications with pagination
+            operationId: Notification_GetNotifications
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.notification.v1.GetNotificationsReply'
+    /api/v1/notifications/read-all:
+        put:
+            tags:
+                - Notification
+            description: Mark all notifications as read
+            operationId: Notification_MarkAllAsRead
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.notification.v1.MarkAllAsReadReply'
+    /api/v1/notifications/unread-count:
+        get:
+            tags:
+                - Notification
+            description: Get unread notification count
+            operationId: Notification_GetUnreadCount
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.notification.v1.GetUnreadCountReply'
+    /api/v1/notifications/{notificationId}/read:
+        put:
+            tags:
+                - Notification
+            description: Mark a notification as read
+            operationId: Notification_MarkAsRead
+            parameters:
+                - name: notificationId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.notification.v1.MarkAsReadReply'
     /api/v1/resumes:
         get:
             tags:
@@ -671,6 +740,36 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.resume.v1.DeleteResumeReply'
+    /api/v1/resumes/{resumeId}/cv-edits/{editId}/status:
+        put:
+            tags:
+                - Resume
+            description: Update CV edit status
+            operationId: Resume_UpdateCVEditStatus
+            parameters:
+                - name: resumeId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: editId
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.resume.v1.UpdateCVEditStatusRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.resume.v1.UpdateCVEditStatusReply'
     /api/v1/users/applications:
         get:
             tags:
@@ -1339,6 +1438,58 @@ components:
                         type: string
                 active:
                     type: boolean
+        api.notification.v1.GetNotificationsReply:
+            type: object
+            properties:
+                notifications:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.notification.v1.NotificationItem'
+                total:
+                    type: integer
+                    format: int32
+                page:
+                    type: integer
+                    format: int32
+                pageSize:
+                    type: integer
+                    format: int32
+        api.notification.v1.GetUnreadCountReply:
+            type: object
+            properties:
+                count:
+                    type: integer
+                    format: int32
+        api.notification.v1.MarkAllAsReadReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+        api.notification.v1.MarkAsReadReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+        api.notification.v1.NotificationItem:
+            type: object
+            properties:
+                id:
+                    type: string
+                userId:
+                    type: string
+                title:
+                    type: string
+                content:
+                    type: string
+                type:
+                    type: string
+                objectId:
+                    type: string
+                isRead:
+                    type: boolean
+                createdAt:
+                    type: string
+            description: Notification message
         api.resume.v1.CreateResumeRequest:
             type: object
             properties:
@@ -1433,6 +1584,28 @@ components:
                     type: array
                     items:
                         type: string
+        api.resume.v1.ResumeCVEdit:
+            type: object
+            properties:
+                fieldPath:
+                    type: string
+                action:
+                    type: string
+                currentValue:
+                    type: string
+                suggestedValue:
+                    type: string
+                reason:
+                    type: string
+                priority:
+                    type: string
+                impactScore:
+                    type: number
+                    format: double
+                status:
+                    type: string
+                id:
+                    type: string
         api.resume.v1.ResumeDetail:
             type: object
             properties:
@@ -1472,6 +1645,43 @@ components:
                     type: array
                     items:
                         type: string
+                evaluations:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.resume.v1.ResumeEvaluation'
+        api.resume.v1.ResumeEvaluation:
+            type: object
+            properties:
+                cvName:
+                    type: string
+                overallScore:
+                    type: number
+                    format: double
+                grade:
+                    type: string
+                scoreBreakdown:
+                    $ref: '#/components/schemas/api.resume.v1.ResumeScoreBreakdown'
+                strengths:
+                    type: array
+                    items:
+                        type: string
+                weaknesses:
+                    type: array
+                    items:
+                        type: string
+                recommendations:
+                    type: array
+                    items:
+                        type: string
+                cvEdits:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.resume.v1.ResumeCVEdit'
+                jobsAnalyzed:
+                    type: integer
+                    format: int32
+                evaluatedAt:
+                    type: string
         api.resume.v1.ResumeReply:
             type: object
             properties:
@@ -1487,6 +1697,43 @@ components:
                 createdAt:
                     type: string
             description: Resume messages
+        api.resume.v1.ResumeScoreBreakdown:
+            type: object
+            properties:
+                skillsScore:
+                    type: number
+                    format: double
+                experienceScore:
+                    type: number
+                    format: double
+                educationScore:
+                    type: number
+                    format: double
+                completenessScore:
+                    type: number
+                    format: double
+                jobAlignmentScore:
+                    type: number
+                    format: double
+                presentationScore:
+                    type: number
+                    format: double
+        api.resume.v1.UpdateCVEditStatusReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                message:
+                    type: string
+        api.resume.v1.UpdateCVEditStatusRequest:
+            type: object
+            properties:
+                resumeId:
+                    type: string
+                editId:
+                    type: string
+                status:
+                    type: string
         api.resume.v1.UpdateResumeRequest:
             type: object
             properties:
@@ -1590,5 +1837,6 @@ tags:
       description: Job Application Service
     - name: JobPosting
       description: Job Posting Service
+    - name: Notification
     - name: Resume
     - name: User

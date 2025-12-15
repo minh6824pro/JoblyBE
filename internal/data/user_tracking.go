@@ -141,3 +141,78 @@ func (r *userTrackingRepo) GetMostViewedJobByUser(ctx context.Context, userID pr
 		TimeOnSight: timeOnSight,
 	}, nil
 }
+
+// GetTopViewedJobsInLastWeek gets the top N trackings with highest time_on_sight in the last week
+func (r *userTrackingRepo) GetTopViewedJobsInLastWeek(ctx context.Context, userID primitive.ObjectID, limit int) ([]*biz.UserJDTOS, error) {
+	// Get date one week ago
+	oneWeekAgo := time.Now().AddDate(0, 0, -7)
+
+	// Find all JDTOS trackings for this user in the last week
+	filter := bson.M{
+		"user_id":       userID,
+		"tracking_type": biz.TrackingJDTOS,
+		"created_at":    bson.M{"$gte": oneWeekAgo},
+	}
+
+	// Sort by time_on_sight descending
+	opts := options.Find().
+		SetSort(bson.M{"metadata.time_on_sight": -1}).
+		SetLimit(int64(limit))
+
+	cursor, err := r.data.db.Collection(CollectionUserTracking).Find(ctx, filter, opts)
+	if err != nil {
+		r.log.Errorf("failed to get top viewed jobs: %v", err)
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var results []*biz.UserJDTOS
+	for cursor.Next(ctx) {
+		var ut UserTracking
+		if err := cursor.Decode(&ut); err != nil {
+			r.log.Errorf("failed to decode tracking: %v", err)
+			continue
+		}
+
+		// Extract metadata
+		var metadata primitive.M
+		switch m := ut.Metadata.(type) {
+		case primitive.M:
+			metadata = m
+		case primitive.D:
+			metadata = m.Map()
+		default:
+			r.log.Errorf("unexpected metadata type: %T", ut.Metadata)
+			continue
+		}
+
+		jobID, ok := metadata["job_id"].(primitive.ObjectID)
+		if !ok {
+			r.log.Errorf("invalid job_id in metadata")
+			continue
+		}
+
+		timeOnSight, ok := metadata["time_on_sight"].(int32)
+		if !ok {
+			// Try int64 and convert
+			if timeInt64, ok := metadata["time_on_sight"].(int64); ok {
+				timeOnSight = int32(timeInt64)
+			} else {
+				r.log.Errorf("invalid time_on_sight in metadata")
+				continue
+			}
+		}
+
+		results = append(results, &biz.UserJDTOS{
+			JobID:       jobID,
+			TimeOnSight: timeOnSight,
+		})
+	}
+
+	if err := cursor.Err(); err != nil {
+		r.log.Errorf("cursor error: %v", err)
+		return nil, err
+	}
+
+	return results, nil
+}

@@ -53,6 +53,14 @@ service Resume {
 			body:"*"
 		};
 	}
+	
+	// Update CV edit status
+	rpc UpdateCVEditStatus (UpdateCVEditStatusRequest) returns (UpdateCVEditStatusReply) {
+		option (google.api.http) = {
+			put: "/api/v1/resumes/{resume_id}/cv-edits/{edit_id}/status"
+			body: "*"
+		};
+	}
 }
 // Resume messages
 message ResumeReply {
@@ -75,6 +83,7 @@ message ResumeDetail {
 	repeated string certifications = 9;
 	repeated string languages = 10;
 	repeated string achievements = 11;
+	repeated ResumeEvaluation evaluations = 12;
 }
 
 message Education {
@@ -101,6 +110,40 @@ message Project {
 	string duration = 5;
 	string role = 6;
 	repeated string achievements = 7;
+}
+
+message ResumeScoreBreakdown {
+	double skills_score = 1;
+	double experience_score = 2;
+	double education_score = 3;
+	double completeness_score = 4;
+	double job_alignment_score = 5;
+	double presentation_score = 6;
+}
+
+message ResumeCVEdit {
+	string field_path = 1;
+	string action = 2;
+	string current_value = 3;
+	string suggested_value = 4;
+	string reason = 5;
+	string priority = 6;
+	double impact_score = 7;
+	string status = 8; // null/empty: new, "rejected": user rejected, "accepted": user accepted
+	string id = 9; // unique identifier for the edit
+}
+
+message ResumeEvaluation {
+	string cv_name = 1;
+	double overall_score = 2;
+	string grade = 3;
+	ResumeScoreBreakdown score_breakdown = 4;
+	repeated string strengths = 5;
+	repeated string weaknesses = 6;
+	repeated string recommendations = 7;
+	repeated ResumeCVEdit cv_edits = 8;
+	int32 jobs_analyzed = 9;
+	string evaluated_at = 10;
 }
 
 // Request/Response messages
@@ -146,5 +189,16 @@ message GenerateCVDescriptionRequest {
 
 message GenerateCVDescriptionReply {
 	string content = 1;
+}
+
+message UpdateCVEditStatusRequest {
+	string resume_id = 1;
+	string edit_id = 2;
+	string status = 3; // "accepted" or "rejected"
+}
+
+message UpdateCVEditStatusReply {
+	bool success = 1;
+	string message = 2;
 }
 

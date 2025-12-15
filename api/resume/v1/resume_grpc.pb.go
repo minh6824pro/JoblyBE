@@ -25,6 +25,7 @@ const (
 	Resume_ListResumes_FullMethodName           = "/api.resume.v1.Resume/ListResumes"
 	Resume_DeleteResume_FullMethodName          = "/api.resume.v1.Resume/DeleteResume"
 	Resume_GenerateCVDescription_FullMethodName = "/api.resume.v1.Resume/GenerateCVDescription"
+	Resume_UpdateCVEditStatus_FullMethodName    = "/api.resume.v1.Resume/UpdateCVEditStatus"
 )
 
 // ResumeClient is the client API for Resume service.
@@ -43,6 +44,8 @@ type ResumeClient interface {
 	DeleteResume(ctx context.Context, in *DeleteResumeRequest, opts ...grpc.CallOption) (*DeleteResumeReply, error)
 	// Generate CV description using ChatGPT
 	GenerateCVDescription(ctx context.Context, in *GenerateCVDescriptionRequest, opts ...grpc.CallOption) (*GenerateCVDescriptionReply, error)
+	// Update CV edit status
+	UpdateCVEditStatus(ctx context.Context, in *UpdateCVEditStatusRequest, opts ...grpc.CallOption) (*UpdateCVEditStatusReply, error)
 }
 
 type resumeClient struct {
@@ -107,6 +110,15 @@ func (c *resumeClient) GenerateCVDescription(ctx context.Context, in *GenerateCV
 	return out, nil
 }
 
+func (c *resumeClient) UpdateCVEditStatus(ctx context.Context, in *UpdateCVEditStatusRequest, opts ...grpc.CallOption) (*UpdateCVEditStatusReply, error) {
+	out := new(UpdateCVEditStatusReply)
+	err := c.cc.Invoke(ctx, Resume_UpdateCVEditStatus_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ResumeServer is the server API for Resume service.
 // All implementations must embed UnimplementedResumeServer
 // for forward compatibility
@@ -123,6 +135,8 @@ type ResumeServer interface {
 	DeleteResume(context.Context, *DeleteResumeRequest) (*DeleteResumeReply, error)
 	// Generate CV description using ChatGPT
 	GenerateCVDescription(context.Context, *GenerateCVDescriptionRequest) (*GenerateCVDescriptionReply, error)
+	// Update CV edit status
+	UpdateCVEditStatus(context.Context, *UpdateCVEditStatusRequest) (*UpdateCVEditStatusReply, error)
 	mustEmbedUnimplementedResumeServer()
 }
 
@@ -147,6 +161,9 @@ func (UnimplementedResumeServer) DeleteResume(context.Context, *DeleteResumeRequ
 }
 func (UnimplementedResumeServer) GenerateCVDescription(context.Context, *GenerateCVDescriptionRequest) (*GenerateCVDescriptionReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GenerateCVDescription not implemented")
+}
+func (UnimplementedResumeServer) UpdateCVEditStatus(context.Context, *UpdateCVEditStatusRequest) (*UpdateCVEditStatusReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateCVEditStatus not implemented")
 }
 func (UnimplementedResumeServer) mustEmbedUnimplementedResumeServer() {}
 
@@ -269,6 +286,24 @@ func _Resume_GenerateCVDescription_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Resume_UpdateCVEditStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateCVEditStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ResumeServer).UpdateCVEditStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Resume_UpdateCVEditStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ResumeServer).UpdateCVEditStatus(ctx, req.(*UpdateCVEditStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Resume_ServiceDesc is the grpc.ServiceDesc for Resume service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -299,6 +334,10 @@ var Resume_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GenerateCVDescription",
 			Handler:    _Resume_GenerateCVDescription_Handler,
+		},
+		{
+			MethodName: "UpdateCVEditStatus",
+			Handler:    _Resume_UpdateCVEditStatus_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

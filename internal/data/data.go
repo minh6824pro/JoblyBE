@@ -3,6 +3,7 @@ package data
 import (
 	"JobblyBE/internal/conf"
 	"JobblyBE/pkg/configx"
+	"JobblyBE/pkg/kafkax"
 	"context"
 	"time"
 
@@ -16,12 +17,14 @@ import (
 // ProviderSet is data providers.
 var ProviderSet = wire.NewSet(
 	NewData,
+	NewKafkaProducer,
 	NewUserRepo,
 	NewJobPostingRepo,
 	NewCompanyRepo,
 	NewUserTrackingRepo,
 	NewResumeRepo,
 	NewJobApplicationRepo,
+	NewNotificationRepo,
 )
 
 // Data .
@@ -316,7 +319,73 @@ func (d *Data) InitAllIndexes(ctx context.Context) error {
 	d.initJobPostingIndexes(ctx, CollectionJobPosting)
 	d.initApplicationIndexes(ctx, CollectionApplication)
 	d.initUserTrackingIndexes(ctx, CollectionUserTracking)
+	d.initNotificationIndexes(ctx, "notifications")
 
 	d.log.Info("Database indexes initialization completed")
 	return nil
+}
+
+// initNotificationIndexes creates indexes for notifications collection
+func (d *Data) initNotificationIndexes(ctx context.Context, collectionName string) {
+	col := d.GetCollection(collectionName)
+
+	indexes := []mongo.IndexModel{
+		{
+			Keys:    bson.D{{Key: "user_id", Value: 1}},
+			Options: options.Index().SetName("idx_user_id"),
+		},
+		{
+			Keys: bson.D{
+				{Key: "user_id", Value: 1},
+				{Key: "is_read", Value: 1},
+			},
+			Options: options.Index().SetName("idx_user_id_is_read"),
+		},
+		{
+			Keys: bson.D{
+				{Key: "user_id", Value: 1},
+				{Key: "created_at", Value: -1},
+			},
+			Options: options.Index().SetName("idx_user_id_created_at"),
+		},
+	}
+
+	for _, index := range indexes {
+		_, err := col.Indexes().CreateOne(ctx, index)
+		if err != nil {
+			d.log.Warnf("Failed to create index %s on %s: %v", *index.Options.Name, collectionName, err)
+		} else {
+			d.log.Infof("Created index %s on %s", *index.Options.Name, collectionName)
+		}
+	}
+}
+
+// NewKafkaProducer creates a new Kafka producer
+func NewKafkaProducer(cKafka *conf.Kafka, logger log.Logger) *kafkax.Producer {
+	kafkaBrokers := getKafkaBrokers(cKafka)
+	kafkaTimeout := 30 * time.Second
+	if cKafka.Timeout != nil {
+		kafkaTimeout = cKafka.Timeout.AsDuration()
+	}
+
+	producerConfig := &kafkax.ProducerConfig{
+		Brokers:    kafkaBrokers,
+		Username:   configx.GetEnvOrString("KAFKA_USERNAME", cKafka.Username),
+		Password:   configx.GetEnvOrString("KAFKA_PASSWORD", cKafka.Password),
+		EnableSASL: cKafka.EnableSasl,
+		Timeout:    kafkaTimeout,
+	}
+
+	return kafkax.NewProducer(producerConfig, logger)
+}
+
+func getKafkaBrokers(cKafka *conf.Kafka) []string {
+	envBrokers := configx.GetEnvOrString("KAFKA_BROKERS", "")
+	if envBrokers != "" {
+		return []string{envBrokers}
+	}
+	if len(cKafka.Brokers) > 0 {
+		return cKafka.Brokers
+	}
+	return []string{"localhost:9092"}
 }

@@ -12,7 +12,7 @@ type TrackingType string
 
 const (
 	TrackingJobFilter TrackingType = "tracking_job_filter"
-	TrackingJDTOS                  = "tracking_user_jd_tos"
+	TrackingJDTOS     TrackingType = "tracking_user_jd_tos"
 )
 
 type UserTracking struct {
@@ -31,6 +31,7 @@ type UserTrackingRepo interface {
 	CreateUserTracking(ctx context.Context, userTracking *UserTracking) (*UserTracking, error)
 	FindAndUpdateUserTrackingJDTOS(ctx context.Context, userID, jobID primitive.ObjectID, additionalTime int32) (*UserTracking, error)
 	GetMostViewedJobByUser(ctx context.Context, userID primitive.ObjectID) (*UserJDTOS, error)
+	GetTopViewedJobsInLastWeek(ctx context.Context, userID primitive.ObjectID, limit int) ([]*UserJDTOS, error)
 }
 
 type UserTrackingUseCase struct {

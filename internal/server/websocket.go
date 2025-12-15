@@ -41,10 +41,11 @@ var upgrader = websocket.Upgrader{
 type WSMessageType string
 
 const (
-	WSMessageTypeJobStatus WSMessageType = "job_status"
-	WSMessageTypeError     WSMessageType = "error"
-	WSMessageTypePing      WSMessageType = "ping"
-	WSMessageTypePong      WSMessageType = "pong"
+	WSMessageTypeJobStatus    WSMessageType = "job_status"
+	WSMessageTypeError        WSMessageType = "error"
+	WSMessageTypePing         WSMessageType = "ping"
+	WSMessageTypePong         WSMessageType = "pong"
+	WSMessageTypeNotification WSMessageType = "notification"
 )
 
 // WSMessage represents a WebSocket message
@@ -60,6 +61,16 @@ type JobStatusPayload struct {
 	ErrorMessage string      `json:"error_message,omitempty"`
 	ResumeID     string      `json:"resume_id,omitempty"`
 	CVData       interface{} `json:"cv_data,omitempty"`
+}
+
+// NotificationPayload represents the payload for notification messages
+type NotificationPayload struct {
+	ID        string `json:"id"`
+	Title     string `json:"title"`
+	Content   string `json:"content"`
+	Type      string `json:"type"`
+	ObjectID  string `json:"object_id,omitempty"`
+	CreatedAt string `json:"created_at"`
 }
 
 // Client represents a WebSocket client
@@ -169,6 +180,52 @@ func (h *Hub) SendJobStatus(userID string, payload *JobStatusPayload) {
 		Payload: payload,
 	}
 	h.SendToUser(userID, message)
+}
+
+// SendNotification sends a notification to a user
+func (h *Hub) SendNotification(userID string, payload *NotificationPayload) {
+	h.log.Infof("SendNotification: Sending notification to user %s - %s", userID, payload.Title)
+
+	message := &WSMessage{
+		Type:    WSMessageTypeNotification,
+		Payload: payload,
+	}
+	h.SendToUser(userID, message)
+}
+
+// GetConnectedUsers returns a list of all connected user IDs
+func (h *Hub) GetConnectedUsers() []string {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+
+	users := make([]string, 0, len(h.clients))
+	for userID := range h.clients {
+		users = append(users, userID)
+	}
+	return users
+}
+
+// GetUserConnectionCount returns the number of connections for a specific user
+func (h *Hub) GetUserConnectionCount(userID string) int {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+
+	if clients, ok := h.clients[userID]; ok {
+		return len(clients)
+	}
+	return 0
+}
+
+// GetTotalConnections returns the total number of active connections
+func (h *Hub) GetTotalConnections() int {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+
+	total := 0
+	for _, clients := range h.clients {
+		total += len(clients)
+	}
+	return total
 }
 
 // readPump pumps messages from the websocket connection to the hub.

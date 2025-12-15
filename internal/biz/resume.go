@@ -2,8 +2,10 @@ package biz
 
 import (
 	"JobblyBE/pkg/configx"
+	"JobblyBE/pkg/kafkax"
 	"JobblyBE/pkg/openai"
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/go-kratos/kratos/v2/errors"
@@ -31,6 +33,7 @@ type ResumeDetail struct {
 	Certifications []string
 	Languages      []string
 	Achievements   []string
+	Evaluations    []*ResumeEvaluation
 }
 
 type Education struct {
@@ -59,6 +62,40 @@ type Project struct {
 	Achievements []string
 }
 
+type ResumeScoreBreakdown struct {
+	SkillsScore       float64 `json:"skills_score"`
+	ExperienceScore   float64 `json:"experience_score"`
+	EducationScore    float64 `json:"education_score"`
+	CompletenessScore float64 `json:"completeness_score"`
+	JobAlignmentScore float64 `json:"job_alignment_score"`
+	PresentationScore float64 `json:"presentation_score"`
+}
+
+type ResumeCVEdit struct {
+	ID             string  `json:"id"`
+	FieldPath      string  `json:"field_path"`
+	Action         string  `json:"action"`
+	CurrentValue   string  `json:"current_value"`
+	SuggestedValue string  `json:"suggested_value"`
+	Reason         string  `json:"reason"`
+	Priority       string  `json:"priority"`
+	ImpactScore    float64 `json:"impact_score"`
+	Status         string  `json:"status"` // empty/null: new, "rejected", "accepted"
+}
+
+type ResumeEvaluation struct {
+	CVName          string                `json:"cv_name"`
+	OverallScore    float64               `json:"overall_score"`
+	Grade           string                `json:"grade"`
+	ScoreBreakdown  *ResumeScoreBreakdown `json:"score_breakdown"`
+	Strengths       []string              `json:"strengths"`
+	Weaknesses      []string              `json:"weaknesses"`
+	Recommendations []string              `json:"recommendations"`
+	CVEdits         []*ResumeCVEdit       `json:"cv_edits"`
+	JobsAnalyzed    int                   `json:"jobs_analyzed"`
+	EvaluatedAt     time.Time             `json:"evaluated_at"`
+}
+
 // ResumeRepo is the interface for resume repository
 type ResumeRepo interface {
 	CreateResume(ctx context.Context, resume *Resume) (*Resume, error)
@@ -70,19 +107,23 @@ type ResumeRepo interface {
 
 // ResumeUseCase is the use case for resume operations
 type ResumeUseCase struct {
-	repo       ResumeRepo
-	trackingUC *UserTrackingUseCase
-	openAIKey  string
-	log        *log.Helper
+	repo         ResumeRepo
+	trackingUC   *UserTrackingUseCase
+	parserClient *ParserClient
+	producer     *kafkax.Producer
+	openAIKey    string
+	log          *log.Helper
 }
 
 // NewResumeUseCase creates a new resume use case
-func NewResumeUseCase(repo ResumeRepo, trackingUC *UserTrackingUseCase, logger log.Logger) *ResumeUseCase {
+func NewResumeUseCase(repo ResumeRepo, trackingUC *UserTrackingUseCase, parserClient *ParserClient, producer *kafkax.Producer, logger log.Logger) *ResumeUseCase {
 	return &ResumeUseCase{
-		repo:       repo,
-		trackingUC: trackingUC,
-		openAIKey:  configx.GetEnvOrString("OPENAI_API_KEY", ""),
-		log:        log.NewHelper(logger),
+		repo:         repo,
+		trackingUC:   trackingUC,
+		parserClient: parserClient,
+		producer:     producer,
+		openAIKey:    configx.GetEnvOrString("OPENAI_API_KEY", ""),
+		log:          log.NewHelper(logger),
 	}
 }
 
@@ -97,7 +138,26 @@ func (uc *ResumeUseCase) CreateResume(ctx context.Context, resume *Resume) (*Res
 	resume.CreatedAt = time.Now()
 	resume.Version = 1
 
-	return uc.repo.CreateResume(ctx, resume)
+	createdResume, err := uc.repo.CreateResume(ctx, resume)
+	if err != nil {
+		return nil, err
+	}
+
+	// Push evaluate event to Kafka
+	if uc.producer != nil {
+		evaluateMsg := map[string]interface{}{
+			"resume_id": createdResume.ID,
+			"user_id":   createdResume.UserID,
+		}
+		if err := uc.producer.SendMessage(ctx, "evaluate", createdResume.ID, evaluateMsg); err != nil {
+			uc.log.Errorf("Failed to push evaluate message after create: %v", err)
+			// Don't fail the request, just log
+		} else {
+			uc.log.Infof("Pushed evaluate message for new resume: %s", createdResume.ID)
+		}
+	}
+
+	return createdResume, nil
 }
 
 // UpdateResume updates an existing resume
@@ -125,7 +185,26 @@ func (uc *ResumeUseCase) UpdateResume(ctx context.Context, resume *Resume) (*Res
 	resume.Version = existing.Version + 1
 	resume.CreatedAt = existing.CreatedAt
 
-	return uc.repo.UpdateResume(ctx, resume)
+	updatedResume, err := uc.repo.UpdateResume(ctx, resume)
+	if err != nil {
+		return nil, err
+	}
+
+	// Push evaluate event to Kafka
+	if uc.producer != nil {
+		evaluateMsg := map[string]interface{}{
+			"resume_id": updatedResume.ID,
+			"user_id":   updatedResume.UserID,
+		}
+		if err := uc.producer.SendMessage(ctx, "evaluate", updatedResume.ID, evaluateMsg); err != nil {
+			uc.log.Errorf("Failed to push evaluate message after update: %v", err)
+			// Don't fail the request, just log
+		} else {
+			uc.log.Infof("Pushed evaluate message for updated resume: %s", updatedResume.ID)
+		}
+	}
+
+	return updatedResume, nil
 }
 
 // GetResume retrieves a resume by ID
@@ -514,6 +593,164 @@ func (uc *ResumeUseCase) callChatGPT(ctx context.Context, prompt string) (string
 	}
 
 	return response, nil
+}
+
+// EvaluateAndSaveResume evaluates a resume using parser service and saves the result
+func (uc *ResumeUseCase) EvaluateAndSaveResume(ctx context.Context, resumeID, userID string) (*Resume, error) {
+	// Get the resume
+	resume, err := uc.repo.GetResume(ctx, resumeID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if resume exists
+	if resume == nil {
+		return nil, ErrResumeNotFound
+	}
+
+	// Verify user owns this resume
+	if resume.UserID != userID {
+		return nil, ErrUnauthorized
+	}
+
+	// Check if parser client is available
+	if uc.parserClient == nil {
+		return nil, errors.InternalServer("PARSER_CLIENT_NOT_AVAILABLE", "Parser client is not initialized")
+	}
+
+	// Call evaluate service
+	evaluateResp, err := uc.parserClient.EvaluateResume(ctx, userID, resume.ResumeDetail)
+	if err != nil {
+		uc.log.Errorf("Failed to evaluate resume: %v", err)
+		return nil, errors.InternalServer("EVALUATE_FAILED", "Failed to evaluate resume")
+	}
+
+	// Check if evaluation was successful
+	if !evaluateResp.Success {
+		errMsg := "Evaluation failed"
+		if evaluateResp.Error != "" {
+			errMsg = evaluateResp.Error
+		}
+		return nil, errors.InternalServer("EVALUATE_FAILED", errMsg)
+	}
+
+	// Convert EvaluateResponse to ResumeEvaluation
+	evaluation := &ResumeEvaluation{
+		CVName:          evaluateResp.CVName,
+		OverallScore:    evaluateResp.OverallScore,
+		Grade:           evaluateResp.Grade,
+		Strengths:       evaluateResp.Strengths,
+		Weaknesses:      evaluateResp.Weaknesses,
+		Recommendations: evaluateResp.Recommendations,
+		JobsAnalyzed:    evaluateResp.JobsAnalyzed,
+		EvaluatedAt:     time.Now(),
+	}
+
+	// Convert ScoreBreakdown
+	if evaluateResp.ScoreBreakdown != nil {
+		evaluation.ScoreBreakdown = &ResumeScoreBreakdown{
+			SkillsScore:       evaluateResp.ScoreBreakdown.SkillsScore,
+			ExperienceScore:   evaluateResp.ScoreBreakdown.ExperienceScore,
+			EducationScore:    evaluateResp.ScoreBreakdown.EducationScore,
+			CompletenessScore: evaluateResp.ScoreBreakdown.CompletenessScore,
+			JobAlignmentScore: evaluateResp.ScoreBreakdown.JobAlignmentScore,
+			PresentationScore: evaluateResp.ScoreBreakdown.PresentationScore,
+		}
+	}
+
+	// Convert CVEdits
+	if len(evaluateResp.CVEdits) > 0 {
+		evaluation.CVEdits = make([]*ResumeCVEdit, 0, len(evaluateResp.CVEdits))
+		for i, edit := range evaluateResp.CVEdits {
+			// Generate unique ID for each edit
+			editID := fmt.Sprintf("%s-%d-%d", resumeID, time.Now().Unix(), i)
+			evaluation.CVEdits = append(evaluation.CVEdits, &ResumeCVEdit{
+				ID:             editID,
+				FieldPath:      edit.FieldPath,
+				Action:         edit.Action,
+				CurrentValue:   edit.CurrentValue,
+				SuggestedValue: edit.SuggestedValue,
+				Reason:         edit.Reason,
+				Priority:       edit.Priority,
+				ImpactScore:    edit.ImpactScore,
+				Status:         "", // Empty means new/pending
+			})
+		}
+	}
+
+	// Initialize Evaluations array if nil
+	if resume.ResumeDetail.Evaluations == nil {
+		resume.ResumeDetail.Evaluations = make([]*ResumeEvaluation, 0)
+	}
+
+	// Append new evaluation to the array
+	resume.ResumeDetail.Evaluations = append(resume.ResumeDetail.Evaluations, evaluation)
+
+	// Update resume in database
+	updatedResume, err := uc.repo.UpdateResume(ctx, resume)
+	if err != nil {
+		uc.log.Errorf("Failed to update resume with evaluation: %v", err)
+		return nil, errors.InternalServer("UPDATE_FAILED", "Failed to save evaluation result")
+	}
+
+	uc.log.Infof("Successfully evaluated and saved resume %s with score: %.2f", resumeID, evaluation.OverallScore)
+	return updatedResume, nil
+}
+
+// UpdateCVEditStatus updates the status of a specific CV edit
+func (uc *ResumeUseCase) UpdateCVEditStatus(ctx context.Context, resumeID, editID, status, userID string) error {
+	// Validate status
+	if status != "accepted" && status != "rejected" {
+		return errors.BadRequest("INVALID_STATUS", "Status must be 'accepted' or 'rejected'")
+	}
+
+	// Get resume
+	resume, err := uc.repo.GetResume(ctx, resumeID)
+	if err != nil {
+		return err
+	}
+
+	if resume == nil {
+		return ErrResumeNotFound
+	}
+
+	// Verify ownership
+	if resume.UserID != userID {
+		return ErrUnauthorized
+	}
+
+	// Find and update the CV edit
+	found := false
+	if resume.ResumeDetail != nil && resume.ResumeDetail.Evaluations != nil {
+		for _, evaluation := range resume.ResumeDetail.Evaluations {
+			if evaluation.CVEdits != nil {
+				for _, edit := range evaluation.CVEdits {
+					if edit.ID == editID {
+						edit.Status = status
+						found = true
+						break
+					}
+				}
+			}
+			if found {
+				break
+			}
+		}
+	}
+
+	if !found {
+		return errors.NotFound("CV_EDIT_NOT_FOUND", "CV edit not found")
+	}
+
+	// Update resume
+	_, err = uc.repo.UpdateResume(ctx, resume)
+	if err != nil {
+		uc.log.Errorf("Failed to update CV edit status: %v", err)
+		return errors.InternalServer("UPDATE_FAILED", "Failed to update CV edit status")
+	}
+
+	uc.log.Infof("Updated CV edit status: resume=%s, edit=%s, status=%s", resumeID, editID, status)
+	return nil
 }
 
 // Error definitions
