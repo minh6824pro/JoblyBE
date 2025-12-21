@@ -475,7 +475,7 @@ func (uc *ResumeUseCase) buildSummaryPrompt(cvInfo, jobContext, currentInput str
 
 // buildExperienceDescriptionPrompt builds prompt for experience description
 func (uc *ResumeUseCase) buildExperienceDescriptionPrompt(cvInfo, jobContext, currentInput string) string {
-	prompt := "Write professional experience description in FIRST PERSON perspective (using 'I', 'my', 'me').\n\n"
+	prompt := "You are an expert CV/resume writer. Generate a professional experience description paragraph for a CV.\n\n"
 	prompt += cvInfo
 	prompt += jobContext
 
@@ -488,20 +488,19 @@ func (uc *ResumeUseCase) buildExperienceDescriptionPrompt(cvInfo, jobContext, cu
 		prompt += ".\n"
 	}
 
-	prompt += "\nWrite a concise, compelling 2-3 paragraph description that:\n"
-	prompt += "- Highlights key responsibilities and achievements\n"
-	prompt += "- Emphasizes relevant skills and impact\n"
-	prompt += "- Includes specific metrics and results where possible\n"
+	prompt += "\nWrite a SHORT, CONCISE description (2-3 sentences MAX) that:\n"
+	prompt += "- Summarizes the key responsibility and main achievement in this role\n"
+	prompt += "- Uses action verbs without first person (no 'I', 'my', 'me')\n"
+	prompt += "- Includes one key metric or result if available\n"
 	if jobContext != "" {
-		prompt += "- Shows alignment with the target position\n"
+		prompt += "- Emphasizes skills relevant to the target position\n"
 	}
-	prompt += "- Uses first person (I was responsible for, I developed, I led, etc.)\n"
 	prompt += "\nCRITICAL LANGUAGE REQUIREMENT:\n"
 	prompt += "Carefully analyze the language used in the candidate's CV information above.\n"
 	prompt += "If the CV contains Vietnamese text (e.g., 'Đại học', 'Công ty', 'Kinh nghiệm', Vietnamese names/addresses), write your response in Vietnamese.\n"
 	prompt += "If the CV is in English, write your response in English.\n"
 	prompt += "Match the language of the CV exactly - do not translate or mix languages.\n"
-	prompt += "\nProvide only the description text without any additional explanation."
+	prompt += "\nProvide only the paragraph text without any headers, labels, or additional explanation."
 
 	return prompt
 }
@@ -542,7 +541,7 @@ func (uc *ResumeUseCase) buildEducationDescriptionPrompt(cvInfo, jobContext, cur
 
 // buildProjectDescriptionPrompt builds prompt for project description
 func (uc *ResumeUseCase) buildProjectDescriptionPrompt(cvInfo, jobContext, currentInput string) string {
-	prompt := "Write professional project description in FIRST PERSON perspective (using 'I', 'my', 'me').\n\n"
+	prompt := "You are an expert CV/resume writer. Generate a professional project description paragraph for a CV.\n\n"
 	prompt += cvInfo
 	prompt += jobContext
 
@@ -555,21 +554,20 @@ func (uc *ResumeUseCase) buildProjectDescriptionPrompt(cvInfo, jobContext, curre
 		prompt += ".\n"
 	}
 
-	prompt += "\nWrite a concise, compelling 2-3 paragraph description that:\n"
-	prompt += "- Highlights project objectives and outcomes\n"
-	prompt += "- Emphasizes technologies used and technical challenges solved\n"
-	prompt += "- Shows your specific role and contributions\n"
-	prompt += "- Includes measurable results and impact where possible\n"
+	prompt += "\nWrite a SHORT, CONCISE description (2-3 sentences MAX) that:\n"
+	prompt += "- Briefly describes the project purpose and your role\n"
+	prompt += "- Mentions key technologies used\n"
+	prompt += "- Includes one measurable result or impact\n"
+	prompt += "- Uses action verbs without first person (no 'I', 'my', 'me')\n"
 	if jobContext != "" {
-		prompt += "- Demonstrates relevant skills for the target position\n"
+		prompt += "- Emphasizes technologies and skills relevant to the target position\n"
 	}
-	prompt += "- Uses first person (I developed, I implemented, I led, My role was, etc.)\n"
 	prompt += "\nCRITICAL LANGUAGE REQUIREMENT:\n"
 	prompt += "Carefully analyze the language used in the candidate's CV information above.\n"
 	prompt += "If the CV contains Vietnamese text (e.g., 'Đại học', 'Công ty', 'Kinh nghiệm', Vietnamese names/addresses), write your response in Vietnamese.\n"
 	prompt += "If the CV is in English, write your response in English.\n"
 	prompt += "Match the language of the CV exactly - do not translate or mix languages.\n"
-	prompt += "\nProvide only the description text without any additional explanation."
+	prompt += "\nProvide only the paragraph text without any headers, labels, or additional explanation."
 
 	return prompt
 }
