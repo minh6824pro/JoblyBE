@@ -314,3 +314,73 @@ func (pc *ParserClient) convertResumeToEvaluateCV(detail *ResumeDetail) *Evaluat
 
 	return cv
 }
+
+// EvaluateResumeWithJD evaluates a resume against a specific job description (synchronous)
+func (pc *ParserClient) EvaluateResumeWithJD(ctx context.Context, resumeDetail *ResumeDetail, job *JobPosting) (*EvaluateResponse, error) {
+	// Extract requirements and responsibilities
+	requirements := []string{}
+	if job.Requirements != "" {
+		requirements = append(requirements, job.Requirements)
+	}
+
+	responsibilities := []string{}
+	if job.Responsibilities != "" {
+		responsibilities = append(responsibilities, job.Responsibilities)
+	}
+
+	companyName := ""
+	if job.Company != nil {
+		companyName = job.Company.Name
+	}
+
+	// Build single job description
+	jobDesc := &JobDescription{
+		Title:                   job.Title,
+		Company:                 companyName,
+		Requirements:            requirements,
+		Responsibilities:        responsibilities,
+		PreferredQualifications: []string{},
+		RequiredSkills:          job.JobTech,
+	}
+
+	// Convert resume detail to evaluate CV format
+	evaluateCV := pc.convertResumeToEvaluateCV(resumeDetail)
+
+	// Build request with single JD
+	request := &EvaluateRequest{
+		CV: evaluateCV,
+		InteractionHistory: &InteractionHistory{
+			JobDescriptions:  []*JobDescription{jobDesc},
+			InteractionCount: 1,
+		},
+	}
+
+	// Log request for debugging
+	pc.log.Infof("Calling evaluate API with specific JD: %s - %s", job.Title, companyName)
+
+	// Call parser service
+	var response EvaluateResponse
+	var errorResp ErrorResponse
+	resp, err := pc.client.R().
+		SetContext(ctx).
+		SetBody(request).
+		SetSuccessResult(&response).
+		SetErrorResult(&errorResp).
+		Post("/evaluate")
+
+	if err != nil {
+		pc.log.Errorf("Failed to call evaluate API: %v", err)
+		return nil, fmt.Errorf("failed to call evaluate API: %w", err)
+	}
+
+	if !resp.IsSuccessState() {
+		// Log detailed error
+		pc.log.Errorf("Evaluate API error - Status: %d, Error: %+v, Body: %s",
+			resp.StatusCode, errorResp, string(resp.Bytes()))
+		return nil, fmt.Errorf("evaluate API returned error: status %d, reason: %s, message: %s",
+			resp.StatusCode, errorResp.Reason, errorResp.Message)
+	}
+
+	pc.log.Infof("Evaluate API with JD success - Score: %.2f, Grade: %s", response.OverallScore, response.Grade)
+	return &response, nil
+}

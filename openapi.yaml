@@ -321,6 +321,38 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.job.v1.DeleteCompanyReply'
+    /api/v1/evaluation/evaluate-with-jd:
+        post:
+            tags:
+                - Resume
+            description: Evaluate resume with selected JD (synchronous)
+            operationId: Resume_EvaluateWithJD
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.resume.v1.EvaluateWithJDRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.resume.v1.EvaluateWithJDReply'
+    /api/v1/evaluation/jobs:
+        get:
+            tags:
+                - Resume
+            description: Get jobs for evaluation selection (viewed jobs and saved jobs)
+            operationId: Resume_GetJobsForEvaluation
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.resume.v1.GetJobsForEvaluationReply'
     /api/v1/jobs:
         get:
             tags:
@@ -1514,6 +1546,18 @@ components:
                     type: string
                 description:
                     type: string
+        api.resume.v1.EvaluateWithJDReply:
+            type: object
+            properties:
+                evaluation:
+                    $ref: '#/components/schemas/api.resume.v1.ResumeEvaluation'
+        api.resume.v1.EvaluateWithJDRequest:
+            type: object
+            properties:
+                resumeId:
+                    type: string
+                jobId:
+                    type: string
         api.resume.v1.Experience:
             type: object
             properties:
@@ -1547,6 +1591,32 @@ components:
                     type: string
                 currentInput:
                     type: string
+        api.resume.v1.GetJobsForEvaluationReply:
+            type: object
+            properties:
+                viewedJobs:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.resume.v1.JobForEvaluation'
+                savedJobs:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.resume.v1.JobForEvaluation'
+        api.resume.v1.JobForEvaluation:
+            type: object
+            properties:
+                id:
+                    type: string
+                title:
+                    type: string
+                companyName:
+                    type: string
+                location:
+                    type: string
+                timeOnSight:
+                    type: integer
+                    format: int32
+            description: Job info for evaluation selection
         api.resume.v1.ListResumesReply:
             type: object
             properties:
@@ -1681,6 +1751,12 @@ components:
                     type: integer
                     format: int32
                 evaluatedAt:
+                    type: string
+                type:
+                    type: string
+                jobId:
+                    type: string
+                jobTitle:
                     type: string
         api.resume.v1.ResumeReply:
             type: object

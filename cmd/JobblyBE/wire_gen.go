@@ -12,11 +12,10 @@ import (
 	"JobblyBE/internal/data"
 	"JobblyBE/internal/server"
 	"JobblyBE/internal/service"
+
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
-)
 
-import (
 	_ "go.uber.org/automaxprocs"
 )
 
@@ -44,7 +43,7 @@ func wireApp(confServer *conf.Server, confData *conf.Data, kafka *conf.Kafka, lo
 	resumeRepo := data.NewResumeRepo(dataData, logger)
 	parserClient := biz.NewParserClient(userTrackingUseCase, jobPostingRepo, logger)
 	producer := data.NewKafkaProducer(kafka, logger)
-	resumeUseCase := biz.NewResumeUseCase(resumeRepo, userTrackingUseCase, parserClient, producer, logger)
+	resumeUseCase := biz.NewResumeUseCase(resumeRepo, userRepo, jobPostingRepo, userTrackingUseCase, parserClient, producer, logger)
 	resumeService := service.NewResumeService(resumeUseCase)
 	userUseCase := biz.NewUserUseCase(userRepo, jobPostingRepo, logger)
 	userService := service.NewUserService(userUseCase, userTrackingUseCase)

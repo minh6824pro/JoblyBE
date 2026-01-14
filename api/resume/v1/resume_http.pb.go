@@ -21,7 +21,9 @@ const _ = http.SupportPackageIsVersion1
 
 const OperationResumeCreateResume = "/api.resume.v1.Resume/CreateResume"
 const OperationResumeDeleteResume = "/api.resume.v1.Resume/DeleteResume"
+const OperationResumeEvaluateWithJD = "/api.resume.v1.Resume/EvaluateWithJD"
 const OperationResumeGenerateCVDescription = "/api.resume.v1.Resume/GenerateCVDescription"
+const OperationResumeGetJobsForEvaluation = "/api.resume.v1.Resume/GetJobsForEvaluation"
 const OperationResumeGetResume = "/api.resume.v1.Resume/GetResume"
 const OperationResumeListResumes = "/api.resume.v1.Resume/ListResumes"
 const OperationResumeUpdateCVEditStatus = "/api.resume.v1.Resume/UpdateCVEditStatus"
@@ -32,8 +34,12 @@ type ResumeHTTPServer interface {
 	CreateResume(context.Context, *CreateResumeRequest) (*ResumeReply, error)
 	// DeleteResume Delete a resume
 	DeleteResume(context.Context, *DeleteResumeRequest) (*DeleteResumeReply, error)
+	// EvaluateWithJD Evaluate resume with selected JD (synchronous)
+	EvaluateWithJD(context.Context, *EvaluateWithJDRequest) (*EvaluateWithJDReply, error)
 	// GenerateCVDescription Generate CV description using ChatGPT
 	GenerateCVDescription(context.Context, *GenerateCVDescriptionRequest) (*GenerateCVDescriptionReply, error)
+	// GetJobsForEvaluation Get jobs for evaluation selection (viewed jobs and saved jobs)
+	GetJobsForEvaluation(context.Context, *GetJobsForEvaluationRequest) (*GetJobsForEvaluationReply, error)
 	// GetResume Get a resume by ID
 	GetResume(context.Context, *GetResumeRequest) (*ResumeReply, error)
 	// ListResumes List all resumes for the authenticated user
@@ -53,6 +59,8 @@ func RegisterResumeHTTPServer(s *http.Server, srv ResumeHTTPServer) {
 	r.DELETE("/api/v1/resumes/{id}", _Resume_DeleteResume0_HTTP_Handler(srv))
 	r.POST("/api/v1/resumes/generate-description", _Resume_GenerateCVDescription0_HTTP_Handler(srv))
 	r.PUT("/api/v1/resumes/{resume_id}/cv-edits/{edit_id}/status", _Resume_UpdateCVEditStatus0_HTTP_Handler(srv))
+	r.GET("/api/v1/evaluation/jobs", _Resume_GetJobsForEvaluation0_HTTP_Handler(srv))
+	r.POST("/api/v1/evaluation/evaluate-with-jd", _Resume_EvaluateWithJD0_HTTP_Handler(srv))
 }
 
 func _Resume_CreateResume0_HTTP_Handler(srv ResumeHTTPServer) func(ctx http.Context) error {
@@ -212,13 +220,58 @@ func _Resume_UpdateCVEditStatus0_HTTP_Handler(srv ResumeHTTPServer) func(ctx htt
 	}
 }
 
+func _Resume_GetJobsForEvaluation0_HTTP_Handler(srv ResumeHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in GetJobsForEvaluationRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationResumeGetJobsForEvaluation)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.GetJobsForEvaluation(ctx, req.(*GetJobsForEvaluationRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*GetJobsForEvaluationReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _Resume_EvaluateWithJD0_HTTP_Handler(srv ResumeHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in EvaluateWithJDRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationResumeEvaluateWithJD)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.EvaluateWithJD(ctx, req.(*EvaluateWithJDRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*EvaluateWithJDReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type ResumeHTTPClient interface {
 	// CreateResume Create a new resume
 	CreateResume(ctx context.Context, req *CreateResumeRequest, opts ...http.CallOption) (rsp *ResumeReply, err error)
 	// DeleteResume Delete a resume
 	DeleteResume(ctx context.Context, req *DeleteResumeRequest, opts ...http.CallOption) (rsp *DeleteResumeReply, err error)
+	// EvaluateWithJD Evaluate resume with selected JD (synchronous)
+	EvaluateWithJD(ctx context.Context, req *EvaluateWithJDRequest, opts ...http.CallOption) (rsp *EvaluateWithJDReply, err error)
 	// GenerateCVDescription Generate CV description using ChatGPT
 	GenerateCVDescription(ctx context.Context, req *GenerateCVDescriptionRequest, opts ...http.CallOption) (rsp *GenerateCVDescriptionReply, err error)
+	// GetJobsForEvaluation Get jobs for evaluation selection (viewed jobs and saved jobs)
+	GetJobsForEvaluation(ctx context.Context, req *GetJobsForEvaluationRequest, opts ...http.CallOption) (rsp *GetJobsForEvaluationReply, err error)
 	// GetResume Get a resume by ID
 	GetResume(ctx context.Context, req *GetResumeRequest, opts ...http.CallOption) (rsp *ResumeReply, err error)
 	// ListResumes List all resumes for the authenticated user
@@ -265,6 +318,20 @@ func (c *ResumeHTTPClientImpl) DeleteResume(ctx context.Context, in *DeleteResum
 	return &out, nil
 }
 
+// EvaluateWithJD Evaluate resume with selected JD (synchronous)
+func (c *ResumeHTTPClientImpl) EvaluateWithJD(ctx context.Context, in *EvaluateWithJDRequest, opts ...http.CallOption) (*EvaluateWithJDReply, error) {
+	var out EvaluateWithJDReply
+	pattern := "/api/v1/evaluation/evaluate-with-jd"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationResumeEvaluateWithJD))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // GenerateCVDescription Generate CV description using ChatGPT
 func (c *ResumeHTTPClientImpl) GenerateCVDescription(ctx context.Context, in *GenerateCVDescriptionRequest, opts ...http.CallOption) (*GenerateCVDescriptionReply, error) {
 	var out GenerateCVDescriptionReply
@@ -273,6 +340,20 @@ func (c *ResumeHTTPClientImpl) GenerateCVDescription(ctx context.Context, in *Ge
 	opts = append(opts, http.Operation(OperationResumeGenerateCVDescription))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// GetJobsForEvaluation Get jobs for evaluation selection (viewed jobs and saved jobs)
+func (c *ResumeHTTPClientImpl) GetJobsForEvaluation(ctx context.Context, in *GetJobsForEvaluationRequest, opts ...http.CallOption) (*GetJobsForEvaluationReply, error) {
+	var out GetJobsForEvaluationReply
+	pattern := "/api/v1/evaluation/jobs"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationResumeGetJobsForEvaluation))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

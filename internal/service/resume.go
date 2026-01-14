@@ -336,6 +336,12 @@ func (s *ResumeService) evaluationsArrayToPb(evalList []*biz.ResumeEvaluation) [
 	result := make([]*pb.ResumeEvaluation, 0, len(evalList))
 	for _, eval := range evalList {
 		if eval != nil {
+			// Set default type to "auto" if empty
+			evalType := eval.Type
+			if evalType == "" {
+				evalType = "auto"
+			}
+
 			pbEval := &pb.ResumeEvaluation{
 				CvName:          eval.CVName,
 				OverallScore:    eval.OverallScore,
@@ -345,6 +351,9 @@ func (s *ResumeService) evaluationsArrayToPb(evalList []*biz.ResumeEvaluation) [
 				Recommendations: eval.Recommendations,
 				JobsAnalyzed:    int32(eval.JobsAnalyzed),
 				EvaluatedAt:     eval.EvaluatedAt.Format("2006-01-02T15:04:05Z07:00"),
+				Type:            evalType,
+				JobId:           eval.JobID,
+				JobTitle:        eval.JobTitle,
 			}
 
 			// Convert ScoreBreakdown
@@ -383,4 +392,128 @@ func (s *ResumeService) evaluationsArrayToPb(evalList []*biz.ResumeEvaluation) [
 		}
 	}
 	return result
+}
+
+// GetJobsForEvaluation returns viewed jobs and saved jobs for evaluation selection
+func (s *ResumeService) GetJobsForEvaluation(ctx context.Context, req *pb.GetJobsForEvaluationRequest) (*pb.GetJobsForEvaluationReply, error) {
+	// Get user ID from JWT claims
+	claims, err := auth.GetClaimsFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	viewedJobs, savedJobs, err := s.uc.GetJobsForEvaluation(ctx, claims.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert to proto
+	pbViewedJobs := make([]*pb.JobForEvaluation, 0, len(viewedJobs))
+	for _, job := range viewedJobs {
+		pbViewedJobs = append(pbViewedJobs, &pb.JobForEvaluation{
+			Id:          job.ID,
+			Title:       job.Title,
+			CompanyName: job.CompanyName,
+			Location:    job.Location,
+			TimeOnSight: job.TimeOnSight,
+		})
+	}
+
+	pbSavedJobs := make([]*pb.JobForEvaluation, 0, len(savedJobs))
+	for _, job := range savedJobs {
+		pbSavedJobs = append(pbSavedJobs, &pb.JobForEvaluation{
+			Id:          job.ID,
+			Title:       job.Title,
+			CompanyName: job.CompanyName,
+			Location:    job.Location,
+			TimeOnSight: 0,
+		})
+	}
+
+	return &pb.GetJobsForEvaluationReply{
+		ViewedJobs: pbViewedJobs,
+		SavedJobs:  pbSavedJobs,
+	}, nil
+}
+
+// EvaluateWithJD evaluates a resume with a specific JD (synchronous)
+func (s *ResumeService) EvaluateWithJD(ctx context.Context, req *pb.EvaluateWithJDRequest) (*pb.EvaluateWithJDReply, error) {
+	// Get user ID from JWT claims
+	claims, err := auth.GetClaimsFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	_, evaluation, err := s.uc.EvaluateWithJD(ctx, req.ResumeId, req.JobId, claims.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert evaluation to proto
+	pbEval := s.evaluationToPb(evaluation)
+
+	return &pb.EvaluateWithJDReply{
+		Evaluation: pbEval,
+	}, nil
+}
+
+// Helper function to convert single evaluation to proto
+func (s *ResumeService) evaluationToPb(eval *biz.ResumeEvaluation) *pb.ResumeEvaluation {
+	if eval == nil {
+		return nil
+	}
+
+	// Set default type to "auto" if empty
+	evalType := eval.Type
+	if evalType == "" {
+		evalType = "auto"
+	}
+
+	pbEval := &pb.ResumeEvaluation{
+		CvName:          eval.CVName,
+		OverallScore:    eval.OverallScore,
+		Grade:           eval.Grade,
+		Strengths:       eval.Strengths,
+		Weaknesses:      eval.Weaknesses,
+		Recommendations: eval.Recommendations,
+		JobsAnalyzed:    int32(eval.JobsAnalyzed),
+		EvaluatedAt:     eval.EvaluatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		Type:            evalType,
+		JobId:           eval.JobID,
+		JobTitle:        eval.JobTitle,
+	}
+
+	// Convert ScoreBreakdown
+	if eval.ScoreBreakdown != nil {
+		pbEval.ScoreBreakdown = &pb.ResumeScoreBreakdown{
+			SkillsScore:       eval.ScoreBreakdown.SkillsScore,
+			ExperienceScore:   eval.ScoreBreakdown.ExperienceScore,
+			EducationScore:    eval.ScoreBreakdown.EducationScore,
+			CompletenessScore: eval.ScoreBreakdown.CompletenessScore,
+			JobAlignmentScore: eval.ScoreBreakdown.JobAlignmentScore,
+			PresentationScore: eval.ScoreBreakdown.PresentationScore,
+		}
+	}
+
+	// Convert CVEdits
+	if len(eval.CVEdits) > 0 {
+		pbEval.CvEdits = make([]*pb.ResumeCVEdit, 0, len(eval.CVEdits))
+		for _, edit := range eval.CVEdits {
+			if edit != nil {
+				pbEval.CvEdits = append(pbEval.CvEdits, &pb.ResumeCVEdit{
+					Id:             edit.ID,
+					FieldPath:      edit.FieldPath,
+					Action:         edit.Action,
+					CurrentValue:   edit.CurrentValue,
+					SuggestedValue: edit.SuggestedValue,
+					Reason:         edit.Reason,
+					Priority:       edit.Priority,
+					ImpactScore:    edit.ImpactScore,
+					Status:         edit.Status,
+				})
+			}
+		}
+	}
+
+	return pbEval
 }

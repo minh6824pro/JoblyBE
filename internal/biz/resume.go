@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // Resume represents a user's resume
@@ -94,6 +95,9 @@ type ResumeEvaluation struct {
 	CVEdits         []*ResumeCVEdit       `json:"cv_edits"`
 	JobsAnalyzed    int                   `json:"jobs_analyzed"`
 	EvaluatedAt     time.Time             `json:"evaluated_at"`
+	Type            string                `json:"type"`      // "auto" (default) or "manual"
+	JobID           string                `json:"job_id"`    // Job ID used for manual evaluation
+	JobTitle        string                `json:"job_title"` // Job title for display
 }
 
 // ResumeRepo is the interface for resume repository
@@ -108,6 +112,8 @@ type ResumeRepo interface {
 // ResumeUseCase is the use case for resume operations
 type ResumeUseCase struct {
 	repo         ResumeRepo
+	userRepo     UserRepo
+	jobRepo      JobPostingRepo
 	trackingUC   *UserTrackingUseCase
 	parserClient *ParserClient
 	producer     *kafkax.Producer
@@ -116,9 +122,11 @@ type ResumeUseCase struct {
 }
 
 // NewResumeUseCase creates a new resume use case
-func NewResumeUseCase(repo ResumeRepo, trackingUC *UserTrackingUseCase, parserClient *ParserClient, producer *kafkax.Producer, logger log.Logger) *ResumeUseCase {
+func NewResumeUseCase(repo ResumeRepo, userRepo UserRepo, jobRepo JobPostingRepo, trackingUC *UserTrackingUseCase, parserClient *ParserClient, producer *kafkax.Producer, logger log.Logger) *ResumeUseCase {
 	return &ResumeUseCase{
 		repo:         repo,
+		userRepo:     userRepo,
+		jobRepo:      jobRepo,
 		trackingUC:   trackingUC,
 		parserClient: parserClient,
 		producer:     producer,
@@ -642,6 +650,9 @@ func (uc *ResumeUseCase) EvaluateAndSaveResume(ctx context.Context, resumeID, us
 		Recommendations: evaluateResp.Recommendations,
 		JobsAnalyzed:    evaluateResp.JobsAnalyzed,
 		EvaluatedAt:     time.Now(),
+		Type:            "auto", // Auto evaluation based on interaction history
+		JobID:           "",
+		JobTitle:        "",
 	}
 
 	// Convert ScoreBreakdown
@@ -749,6 +760,191 @@ func (uc *ResumeUseCase) UpdateCVEditStatus(ctx context.Context, resumeID, editI
 
 	uc.log.Infof("Updated CV edit status: resume=%s, edit=%s, status=%s", resumeID, editID, status)
 	return nil
+}
+
+// JobForEvaluation represents a job for evaluation selection
+type JobForEvaluation struct {
+	ID          string
+	Title       string
+	CompanyName string
+	Location    string
+	TimeOnSight int32 // Only for viewed jobs, 0 for saved jobs
+}
+
+// GetJobsForEvaluation returns viewed jobs (from tracking) and saved jobs for evaluation selection
+func (uc *ResumeUseCase) GetJobsForEvaluation(ctx context.Context, userID string) ([]*JobForEvaluation, []*JobForEvaluation, error) {
+	userIDObject, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, nil, errors.BadRequest("INVALID_USER_ID", "Invalid user ID")
+	}
+
+	// Get top 10 viewed jobs from tracking
+	viewedJobs := make([]*JobForEvaluation, 0)
+	topViewedJobs, err := uc.trackingUC.UserTrackingRepo.GetTopViewedJobsInLastWeek(ctx, userIDObject, 10)
+	if err == nil && len(topViewedJobs) > 0 {
+		for _, tracking := range topViewedJobs {
+			job, err := uc.jobRepo.GetJobPosting(ctx, tracking.JobID.Hex())
+			if err != nil || job == nil {
+				continue
+			}
+			companyName := ""
+			if job.Company != nil {
+				companyName = job.Company.Name
+			}
+			viewedJobs = append(viewedJobs, &JobForEvaluation{
+				ID:          job.ID,
+				Title:       job.Title,
+				CompanyName: companyName,
+				Location:    job.Location,
+				TimeOnSight: tracking.TimeOnSight,
+			})
+		}
+	}
+
+	// Get saved jobs from user
+	savedJobs := make([]*JobForEvaluation, 0)
+	savedJobIDs, err := uc.userRepo.GetSavedJobIDs(ctx, userID)
+	if err == nil && len(savedJobIDs) > 0 {
+		for _, jobID := range savedJobIDs {
+			job, err := uc.jobRepo.GetJobPosting(ctx, jobID)
+			if err != nil || job == nil {
+				continue
+			}
+			companyName := ""
+			if job.Company != nil {
+				companyName = job.Company.Name
+			}
+			savedJobs = append(savedJobs, &JobForEvaluation{
+				ID:          job.ID,
+				Title:       job.Title,
+				CompanyName: companyName,
+				Location:    job.Location,
+				TimeOnSight: 0,
+			})
+		}
+	}
+
+	return viewedJobs, savedJobs, nil
+}
+
+// EvaluateWithJD evaluates a resume with a specific JD (synchronous)
+func (uc *ResumeUseCase) EvaluateWithJD(ctx context.Context, resumeID, jobID, userID string) (*Resume, *ResumeEvaluation, error) {
+	// Get the resume
+	resume, err := uc.repo.GetResume(ctx, resumeID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Check if resume exists
+	if resume == nil {
+		return nil, nil, ErrResumeNotFound
+	}
+
+	// Verify user owns this resume
+	if resume.UserID != userID {
+		return nil, nil, ErrUnauthorized
+	}
+
+	// Get the job posting
+	job, err := uc.jobRepo.GetJobPosting(ctx, jobID)
+	if err != nil {
+		return nil, nil, errors.InternalServer("JOB_FETCH_ERROR", "Failed to get job posting")
+	}
+	if job == nil {
+		return nil, nil, errors.NotFound("JOB_NOT_FOUND", "Job posting not found")
+	}
+
+	// Check if parser client is available
+	if uc.parserClient == nil {
+		return nil, nil, errors.InternalServer("PARSER_CLIENT_NOT_AVAILABLE", "Parser client is not initialized")
+	}
+
+	// Call evaluate service with specific JD
+	evaluateResp, err := uc.parserClient.EvaluateResumeWithJD(ctx, resume.ResumeDetail, job)
+	if err != nil {
+		uc.log.Errorf("Failed to evaluate resume with JD: %v", err)
+		return nil, nil, errors.InternalServer("EVALUATE_FAILED", "Failed to evaluate resume")
+	}
+
+	// Check if evaluation was successful
+	if !evaluateResp.Success {
+		errMsg := "Evaluation failed"
+		if evaluateResp.Error != "" {
+			errMsg = evaluateResp.Error
+		}
+		return nil, nil, errors.InternalServer("EVALUATE_FAILED", errMsg)
+	}
+
+	// Get company name
+	companyName := ""
+	if job.Company != nil {
+		companyName = job.Company.Name
+	}
+
+	// Convert EvaluateResponse to ResumeEvaluation
+	evaluation := &ResumeEvaluation{
+		CVName:          evaluateResp.CVName,
+		OverallScore:    evaluateResp.OverallScore,
+		Grade:           evaluateResp.Grade,
+		Strengths:       evaluateResp.Strengths,
+		Weaknesses:      evaluateResp.Weaknesses,
+		Recommendations: evaluateResp.Recommendations,
+		JobsAnalyzed:    1,
+		EvaluatedAt:     time.Now(),
+		Type:            "manual",
+		JobID:           jobID,
+		JobTitle:        job.Title + " - " + companyName,
+	}
+
+	// Convert ScoreBreakdown
+	if evaluateResp.ScoreBreakdown != nil {
+		evaluation.ScoreBreakdown = &ResumeScoreBreakdown{
+			SkillsScore:       evaluateResp.ScoreBreakdown.SkillsScore,
+			ExperienceScore:   evaluateResp.ScoreBreakdown.ExperienceScore,
+			EducationScore:    evaluateResp.ScoreBreakdown.EducationScore,
+			CompletenessScore: evaluateResp.ScoreBreakdown.CompletenessScore,
+			JobAlignmentScore: evaluateResp.ScoreBreakdown.JobAlignmentScore,
+			PresentationScore: evaluateResp.ScoreBreakdown.PresentationScore,
+		}
+	}
+
+	// Convert CVEdits
+	if len(evaluateResp.CVEdits) > 0 {
+		evaluation.CVEdits = make([]*ResumeCVEdit, 0, len(evaluateResp.CVEdits))
+		for i, edit := range evaluateResp.CVEdits {
+			// Generate unique ID for each edit
+			editID := fmt.Sprintf("%s-manual-%d-%d", resumeID, time.Now().Unix(), i)
+			evaluation.CVEdits = append(evaluation.CVEdits, &ResumeCVEdit{
+				ID:             editID,
+				FieldPath:      edit.FieldPath,
+				Action:         edit.Action,
+				CurrentValue:   edit.CurrentValue,
+				SuggestedValue: edit.SuggestedValue,
+				Reason:         edit.Reason,
+				Priority:       edit.Priority,
+				ImpactScore:    edit.ImpactScore,
+				Status:         "", // Empty means new/pending
+			})
+		}
+	}
+
+	// Initialize Evaluations array if nil
+	if resume.ResumeDetail.Evaluations == nil {
+		resume.ResumeDetail.Evaluations = make([]*ResumeEvaluation, 0)
+	}
+
+	// Append new evaluation to the array
+	resume.ResumeDetail.Evaluations = append(resume.ResumeDetail.Evaluations, evaluation)
+
+	// Update resume in database
+	updatedResume, err := uc.repo.UpdateResume(ctx, resume)
+	if err != nil {
+		uc.log.Errorf("Failed to update resume with evaluation: %v", err)
+		return nil, nil, errors.InternalServer("UPDATE_FAILED", "Failed to save evaluation result")
+	}
+
+	uc.log.Infof("Successfully evaluated resume %s with JD %s, score: %.2f", resumeID, jobID, evaluation.OverallScore)
+	return updatedResume, evaluation, nil
 }
 
 // Error definitions

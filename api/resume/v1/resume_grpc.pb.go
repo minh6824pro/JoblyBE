@@ -26,6 +26,8 @@ const (
 	Resume_DeleteResume_FullMethodName          = "/api.resume.v1.Resume/DeleteResume"
 	Resume_GenerateCVDescription_FullMethodName = "/api.resume.v1.Resume/GenerateCVDescription"
 	Resume_UpdateCVEditStatus_FullMethodName    = "/api.resume.v1.Resume/UpdateCVEditStatus"
+	Resume_GetJobsForEvaluation_FullMethodName  = "/api.resume.v1.Resume/GetJobsForEvaluation"
+	Resume_EvaluateWithJD_FullMethodName        = "/api.resume.v1.Resume/EvaluateWithJD"
 )
 
 // ResumeClient is the client API for Resume service.
@@ -46,6 +48,10 @@ type ResumeClient interface {
 	GenerateCVDescription(ctx context.Context, in *GenerateCVDescriptionRequest, opts ...grpc.CallOption) (*GenerateCVDescriptionReply, error)
 	// Update CV edit status
 	UpdateCVEditStatus(ctx context.Context, in *UpdateCVEditStatusRequest, opts ...grpc.CallOption) (*UpdateCVEditStatusReply, error)
+	// Get jobs for evaluation selection (viewed jobs and saved jobs)
+	GetJobsForEvaluation(ctx context.Context, in *GetJobsForEvaluationRequest, opts ...grpc.CallOption) (*GetJobsForEvaluationReply, error)
+	// Evaluate resume with selected JD (synchronous)
+	EvaluateWithJD(ctx context.Context, in *EvaluateWithJDRequest, opts ...grpc.CallOption) (*EvaluateWithJDReply, error)
 }
 
 type resumeClient struct {
@@ -119,6 +125,24 @@ func (c *resumeClient) UpdateCVEditStatus(ctx context.Context, in *UpdateCVEditS
 	return out, nil
 }
 
+func (c *resumeClient) GetJobsForEvaluation(ctx context.Context, in *GetJobsForEvaluationRequest, opts ...grpc.CallOption) (*GetJobsForEvaluationReply, error) {
+	out := new(GetJobsForEvaluationReply)
+	err := c.cc.Invoke(ctx, Resume_GetJobsForEvaluation_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *resumeClient) EvaluateWithJD(ctx context.Context, in *EvaluateWithJDRequest, opts ...grpc.CallOption) (*EvaluateWithJDReply, error) {
+	out := new(EvaluateWithJDReply)
+	err := c.cc.Invoke(ctx, Resume_EvaluateWithJD_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ResumeServer is the server API for Resume service.
 // All implementations must embed UnimplementedResumeServer
 // for forward compatibility
@@ -137,6 +161,10 @@ type ResumeServer interface {
 	GenerateCVDescription(context.Context, *GenerateCVDescriptionRequest) (*GenerateCVDescriptionReply, error)
 	// Update CV edit status
 	UpdateCVEditStatus(context.Context, *UpdateCVEditStatusRequest) (*UpdateCVEditStatusReply, error)
+	// Get jobs for evaluation selection (viewed jobs and saved jobs)
+	GetJobsForEvaluation(context.Context, *GetJobsForEvaluationRequest) (*GetJobsForEvaluationReply, error)
+	// Evaluate resume with selected JD (synchronous)
+	EvaluateWithJD(context.Context, *EvaluateWithJDRequest) (*EvaluateWithJDReply, error)
 	mustEmbedUnimplementedResumeServer()
 }
 
@@ -164,6 +192,12 @@ func (UnimplementedResumeServer) GenerateCVDescription(context.Context, *Generat
 }
 func (UnimplementedResumeServer) UpdateCVEditStatus(context.Context, *UpdateCVEditStatusRequest) (*UpdateCVEditStatusReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateCVEditStatus not implemented")
+}
+func (UnimplementedResumeServer) GetJobsForEvaluation(context.Context, *GetJobsForEvaluationRequest) (*GetJobsForEvaluationReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetJobsForEvaluation not implemented")
+}
+func (UnimplementedResumeServer) EvaluateWithJD(context.Context, *EvaluateWithJDRequest) (*EvaluateWithJDReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EvaluateWithJD not implemented")
 }
 func (UnimplementedResumeServer) mustEmbedUnimplementedResumeServer() {}
 
@@ -304,6 +338,42 @@ func _Resume_UpdateCVEditStatus_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Resume_GetJobsForEvaluation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetJobsForEvaluationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ResumeServer).GetJobsForEvaluation(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Resume_GetJobsForEvaluation_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ResumeServer).GetJobsForEvaluation(ctx, req.(*GetJobsForEvaluationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Resume_EvaluateWithJD_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EvaluateWithJDRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ResumeServer).EvaluateWithJD(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Resume_EvaluateWithJD_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ResumeServer).EvaluateWithJD(ctx, req.(*EvaluateWithJDRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Resume_ServiceDesc is the grpc.ServiceDesc for Resume service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -338,6 +408,14 @@ var Resume_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateCVEditStatus",
 			Handler:    _Resume_UpdateCVEditStatus_Handler,
+		},
+		{
+			MethodName: "GetJobsForEvaluation",
+			Handler:    _Resume_GetJobsForEvaluation_Handler,
+		},
+		{
+			MethodName: "EvaluateWithJD",
+			Handler:    _Resume_EvaluateWithJD_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
