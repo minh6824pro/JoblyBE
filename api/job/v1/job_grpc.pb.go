@@ -26,6 +26,7 @@ const (
 	JobPosting_ListJobPostings_FullMethodName  = "/api.job.v1.JobPosting/ListJobPostings"
 	JobPosting_ListMyJobs_FullMethodName       = "/api.job.v1.JobPosting/ListMyJobs"
 	JobPosting_GetMyCreatedJobs_FullMethodName = "/api.job.v1.JobPosting/GetMyCreatedJobs"
+	JobPosting_FindSimilarJobs_FullMethodName  = "/api.job.v1.JobPosting/FindSimilarJobs"
 )
 
 // JobPostingClient is the client API for JobPosting service.
@@ -46,6 +47,8 @@ type JobPostingClient interface {
 	ListMyJobs(ctx context.Context, in *ListMyJobsRequest, opts ...grpc.CallOption) (*ListJobPostingsReply, error)
 	// List jobs created by current user (from token)
 	GetMyCreatedJobs(ctx context.Context, in *GetMyCreatedJobsRequest, opts ...grpc.CallOption) (*ListJobPostingsReply, error)
+	// Find similar jobs by job ID using vector embeddings
+	FindSimilarJobs(ctx context.Context, in *FindSimilarJobsRequest, opts ...grpc.CallOption) (*FindSimilarJobsReply, error)
 }
 
 type jobPostingClient struct {
@@ -119,6 +122,15 @@ func (c *jobPostingClient) GetMyCreatedJobs(ctx context.Context, in *GetMyCreate
 	return out, nil
 }
 
+func (c *jobPostingClient) FindSimilarJobs(ctx context.Context, in *FindSimilarJobsRequest, opts ...grpc.CallOption) (*FindSimilarJobsReply, error) {
+	out := new(FindSimilarJobsReply)
+	err := c.cc.Invoke(ctx, JobPosting_FindSimilarJobs_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // JobPostingServer is the server API for JobPosting service.
 // All implementations must embed UnimplementedJobPostingServer
 // for forward compatibility
@@ -137,6 +149,8 @@ type JobPostingServer interface {
 	ListMyJobs(context.Context, *ListMyJobsRequest) (*ListJobPostingsReply, error)
 	// List jobs created by current user (from token)
 	GetMyCreatedJobs(context.Context, *GetMyCreatedJobsRequest) (*ListJobPostingsReply, error)
+	// Find similar jobs by job ID using vector embeddings
+	FindSimilarJobs(context.Context, *FindSimilarJobsRequest) (*FindSimilarJobsReply, error)
 	mustEmbedUnimplementedJobPostingServer()
 }
 
@@ -164,6 +178,9 @@ func (UnimplementedJobPostingServer) ListMyJobs(context.Context, *ListMyJobsRequ
 }
 func (UnimplementedJobPostingServer) GetMyCreatedJobs(context.Context, *GetMyCreatedJobsRequest) (*ListJobPostingsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMyCreatedJobs not implemented")
+}
+func (UnimplementedJobPostingServer) FindSimilarJobs(context.Context, *FindSimilarJobsRequest) (*FindSimilarJobsReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FindSimilarJobs not implemented")
 }
 func (UnimplementedJobPostingServer) mustEmbedUnimplementedJobPostingServer() {}
 
@@ -304,6 +321,24 @@ func _JobPosting_GetMyCreatedJobs_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _JobPosting_FindSimilarJobs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FindSimilarJobsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(JobPostingServer).FindSimilarJobs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: JobPosting_FindSimilarJobs_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(JobPostingServer).FindSimilarJobs(ctx, req.(*FindSimilarJobsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // JobPosting_ServiceDesc is the grpc.ServiceDesc for JobPosting service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -338,6 +373,10 @@ var JobPosting_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetMyCreatedJobs",
 			Handler:    _JobPosting_GetMyCreatedJobs_Handler,
+		},
+		{
+			MethodName: "FindSimilarJobs",
+			Handler:    _JobPosting_FindSimilarJobs_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

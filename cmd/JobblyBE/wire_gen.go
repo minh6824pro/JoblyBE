@@ -12,17 +12,18 @@ import (
 	"JobblyBE/internal/data"
 	"JobblyBE/internal/server"
 	"JobblyBE/internal/service"
-
 	"github.com/go-kratos/kratos/v2"
 	"github.com/go-kratos/kratos/v2/log"
+)
 
+import (
 	_ "go.uber.org/automaxprocs"
 )
 
 // Injectors from wire.go:
 
 // wireApp init kratos application.
-func wireApp(confServer *conf.Server, confData *conf.Data, kafka *conf.Kafka, logger log.Logger) (*kratos.App, func(), error) {
+func wireApp(confServer *conf.Server, confData *conf.Data, kafka *conf.Kafka, milvus *conf.Milvus, logger log.Logger) (*kratos.App, func(), error) {
 	dataData, cleanup, err := data.NewData(confData, logger)
 	if err != nil {
 		return nil, nil, err
@@ -34,10 +35,18 @@ func wireApp(confServer *conf.Server, confData *conf.Data, kafka *conf.Kafka, lo
 	grpcServer := server.NewGRPCServer(confServer, authService, logger)
 	jobPostingRepo := data.NewJobPostingRepo(dataData, logger)
 	companyRepo := data.NewCompanyRepo(dataData, logger)
-	jobPostingUseCase := biz.NewJobPostingUseCase(jobPostingRepo, companyRepo, logger)
+	client, cleanup2, err := data.NewMilvusClient(milvus, logger)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	jobEmbeddingRepo := data.NewJobEmbeddingRepo(client, logger)
+	embeddingClient := biz.NewEmbeddingClient(confServer)
+	jobEmbeddingUseCase := biz.NewJobEmbeddingUseCase(jobEmbeddingRepo, embeddingClient, jobPostingRepo, logger)
+	jobPostingUseCase := biz.NewJobPostingUseCase(jobPostingRepo, companyRepo, jobEmbeddingUseCase, logger)
 	userTrackingRepo := data.NewUserTrackingRepo(dataData, logger)
 	userTrackingUseCase := biz.NewUserTrackingUseCase(userTrackingRepo, jobPostingRepo, logger)
-	jobPostingService := service.NewJobPostingService(jobPostingUseCase, userTrackingUseCase)
+	jobPostingService := service.NewJobPostingService(jobPostingUseCase, userTrackingUseCase, jobEmbeddingUseCase)
 	companyUseCase := biz.NewCompanyUseCase(companyRepo, logger)
 	companyService := service.NewCompanyService(companyUseCase)
 	resumeRepo := data.NewResumeRepo(dataData, logger)
@@ -56,6 +65,7 @@ func wireApp(confServer *conf.Server, confData *conf.Data, kafka *conf.Kafka, lo
 	httpServer := server.NewHTTPServer(confServer, confData, kafka, authService, jobPostingService, companyService, resumeService, userService, jobApplicationService, notificationService, dataData, resumeUseCase, notificationUseCase, jobApplicationUseCase, logger)
 	app := newApp(logger, grpcServer, httpServer)
 	return app, func() {
+		cleanup2()
 		cleanup()
 	}, nil
 }

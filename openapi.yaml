@@ -505,6 +505,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.job.v1.DeleteJobPostingReply'
+    /api/v1/jobs/{id}/similar:
+        get:
+            tags:
+                - JobPosting
+            description: Find similar jobs by job ID using vector embeddings
+            operationId: JobPosting_FindSimilarJobs
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: topK
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.job.v1.FindSimilarJobsReply'
     /api/v1/jobs/{jobId}/applications:
         get:
             tags:
@@ -1350,6 +1374,19 @@ components:
             properties:
                 message:
                     type: string
+        api.job.v1.FindSimilarJobsReply:
+            type: object
+            properties:
+                sourceJobId:
+                    type: string
+                similarJobs:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.job.v1.SimilarJobResult'
+                count:
+                    type: integer
+                    format: int32
+            description: Find similar jobs response
         api.job.v1.JobPostingReply:
             type: object
             properties:
@@ -1429,6 +1466,27 @@ components:
                 pageSize:
                     type: integer
                     format: int32
+        api.job.v1.SimilarJobResult:
+            type: object
+            properties:
+                job:
+                    $ref: '#/components/schemas/api.job.v1.JobPostingReply'
+                totalScore:
+                    type: number
+                    format: float
+                titleScore:
+                    type: number
+                    format: float
+                requirementsScore:
+                    type: number
+                    format: float
+                skillsScore:
+                    type: number
+                    format: float
+                levelScore:
+                    type: number
+                    format: float
+            description: Similar job with score breakdown
         api.job.v1.UpdateCompanyRequest:
             type: object
             properties:

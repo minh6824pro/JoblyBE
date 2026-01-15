@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.36.10
 // 	protoc        v6.32.1
-// source: conf/conf.proto
+// source: conf.proto
 
 package conf
 
@@ -27,13 +27,14 @@ type Bootstrap struct {
 	Server        *Server                `protobuf:"bytes,1,opt,name=server,proto3" json:"server,omitempty"`
 	Data          *Data                  `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
 	Kafka         *Kafka                 `protobuf:"bytes,3,opt,name=kafka,proto3" json:"kafka,omitempty"`
+	Milvus        *Milvus                `protobuf:"bytes,4,opt,name=milvus,proto3" json:"milvus,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Bootstrap) Reset() {
 	*x = Bootstrap{}
-	mi := &file_conf_conf_proto_msgTypes[0]
+	mi := &file_conf_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -45,7 +46,7 @@ func (x *Bootstrap) String() string {
 func (*Bootstrap) ProtoMessage() {}
 
 func (x *Bootstrap) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_conf_proto_msgTypes[0]
+	mi := &file_conf_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -58,7 +59,7 @@ func (x *Bootstrap) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Bootstrap.ProtoReflect.Descriptor instead.
 func (*Bootstrap) Descriptor() ([]byte, []int) {
-	return file_conf_conf_proto_rawDescGZIP(), []int{0}
+	return file_conf_proto_rawDescGZIP(), []int{0}
 }
 
 func (x *Bootstrap) GetServer() *Server {
@@ -82,6 +83,13 @@ func (x *Bootstrap) GetKafka() *Kafka {
 	return nil
 }
 
+func (x *Bootstrap) GetMilvus() *Milvus {
+	if x != nil {
+		return x.Milvus
+	}
+	return nil
+}
+
 type Server struct {
 	state           protoimpl.MessageState `protogen:"open.v1"`
 	Http            *Server_HTTP           `protobuf:"bytes,1,opt,name=http,proto3" json:"http,omitempty"`
@@ -95,7 +103,7 @@ type Server struct {
 
 func (x *Server) Reset() {
 	*x = Server{}
-	mi := &file_conf_conf_proto_msgTypes[1]
+	mi := &file_conf_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -107,7 +115,7 @@ func (x *Server) String() string {
 func (*Server) ProtoMessage() {}
 
 func (x *Server) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_conf_proto_msgTypes[1]
+	mi := &file_conf_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -120,7 +128,7 @@ func (x *Server) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Server.ProtoReflect.Descriptor instead.
 func (*Server) Descriptor() ([]byte, []int) {
-	return file_conf_conf_proto_rawDescGZIP(), []int{1}
+	return file_conf_proto_rawDescGZIP(), []int{1}
 }
 
 func (x *Server) GetHttp() *Server_HTTP {
@@ -167,7 +175,7 @@ type Data struct {
 
 func (x *Data) Reset() {
 	*x = Data{}
-	mi := &file_conf_conf_proto_msgTypes[2]
+	mi := &file_conf_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -179,7 +187,7 @@ func (x *Data) String() string {
 func (*Data) ProtoMessage() {}
 
 func (x *Data) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_conf_proto_msgTypes[2]
+	mi := &file_conf_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -192,7 +200,7 @@ func (x *Data) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Data.ProtoReflect.Descriptor instead.
 func (*Data) Descriptor() ([]byte, []int) {
-	return file_conf_conf_proto_rawDescGZIP(), []int{2}
+	return file_conf_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *Data) GetDatabase() *Data_Database {
@@ -200,6 +208,74 @@ func (x *Data) GetDatabase() *Data_Database {
 		return x.Database
 	}
 	return nil
+}
+
+type Milvus struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Address       string                 `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	Username      string                 `protobuf:"bytes,2,opt,name=username,proto3" json:"username,omitempty"`
+	Password      string                 `protobuf:"bytes,3,opt,name=password,proto3" json:"password,omitempty"`
+	DbName        string                 `protobuf:"bytes,4,opt,name=db_name,json=dbName,proto3" json:"db_name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Milvus) Reset() {
+	*x = Milvus{}
+	mi := &file_conf_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Milvus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Milvus) ProtoMessage() {}
+
+func (x *Milvus) ProtoReflect() protoreflect.Message {
+	mi := &file_conf_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Milvus.ProtoReflect.Descriptor instead.
+func (*Milvus) Descriptor() ([]byte, []int) {
+	return file_conf_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *Milvus) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
+func (x *Milvus) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+func (x *Milvus) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
+func (x *Milvus) GetDbName() string {
+	if x != nil {
+		return x.DbName
+	}
+	return ""
 }
 
 type Kafka struct {
@@ -219,7 +295,7 @@ type Kafka struct {
 
 func (x *Kafka) Reset() {
 	*x = Kafka{}
-	mi := &file_conf_conf_proto_msgTypes[3]
+	mi := &file_conf_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -231,7 +307,7 @@ func (x *Kafka) String() string {
 func (*Kafka) ProtoMessage() {}
 
 func (x *Kafka) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_conf_proto_msgTypes[3]
+	mi := &file_conf_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -244,7 +320,7 @@ func (x *Kafka) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Kafka.ProtoReflect.Descriptor instead.
 func (*Kafka) Descriptor() ([]byte, []int) {
-	return file_conf_conf_proto_rawDescGZIP(), []int{3}
+	return file_conf_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *Kafka) GetBrokers() []string {
@@ -321,7 +397,7 @@ type Server_HTTP struct {
 
 func (x *Server_HTTP) Reset() {
 	*x = Server_HTTP{}
-	mi := &file_conf_conf_proto_msgTypes[4]
+	mi := &file_conf_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -333,7 +409,7 @@ func (x *Server_HTTP) String() string {
 func (*Server_HTTP) ProtoMessage() {}
 
 func (x *Server_HTTP) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_conf_proto_msgTypes[4]
+	mi := &file_conf_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -346,7 +422,7 @@ func (x *Server_HTTP) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Server_HTTP.ProtoReflect.Descriptor instead.
 func (*Server_HTTP) Descriptor() ([]byte, []int) {
-	return file_conf_conf_proto_rawDescGZIP(), []int{1, 0}
+	return file_conf_proto_rawDescGZIP(), []int{1, 0}
 }
 
 func (x *Server_HTTP) GetNetwork() string {
@@ -381,7 +457,7 @@ type Server_GRPC struct {
 
 func (x *Server_GRPC) Reset() {
 	*x = Server_GRPC{}
-	mi := &file_conf_conf_proto_msgTypes[5]
+	mi := &file_conf_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -393,7 +469,7 @@ func (x *Server_GRPC) String() string {
 func (*Server_GRPC) ProtoMessage() {}
 
 func (x *Server_GRPC) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_conf_proto_msgTypes[5]
+	mi := &file_conf_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -406,7 +482,7 @@ func (x *Server_GRPC) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Server_GRPC.ProtoReflect.Descriptor instead.
 func (*Server_GRPC) Descriptor() ([]byte, []int) {
-	return file_conf_conf_proto_rawDescGZIP(), []int{1, 1}
+	return file_conf_proto_rawDescGZIP(), []int{1, 1}
 }
 
 func (x *Server_GRPC) GetNetwork() string {
@@ -441,7 +517,7 @@ type Data_Database struct {
 
 func (x *Data_Database) Reset() {
 	*x = Data_Database{}
-	mi := &file_conf_conf_proto_msgTypes[6]
+	mi := &file_conf_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -453,7 +529,7 @@ func (x *Data_Database) String() string {
 func (*Data_Database) ProtoMessage() {}
 
 func (x *Data_Database) ProtoReflect() protoreflect.Message {
-	mi := &file_conf_conf_proto_msgTypes[6]
+	mi := &file_conf_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -466,7 +542,7 @@ func (x *Data_Database) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Data_Database.ProtoReflect.Descriptor instead.
 func (*Data_Database) Descriptor() ([]byte, []int) {
-	return file_conf_conf_proto_rawDescGZIP(), []int{2, 0}
+	return file_conf_proto_rawDescGZIP(), []int{2, 0}
 }
 
 func (x *Data_Database) GetDriver() string {
@@ -490,16 +566,18 @@ func (x *Data_Database) GetName() string {
 	return ""
 }
 
-var File_conf_conf_proto protoreflect.FileDescriptor
+var File_conf_proto protoreflect.FileDescriptor
 
-const file_conf_conf_proto_rawDesc = "" +
+const file_conf_proto_rawDesc = "" +
 	"\n" +
-	"\x0fconf/conf.proto\x12\n" +
-	"kratos.api\x1a\x1egoogle/protobuf/duration.proto\"\x86\x01\n" +
+	"\n" +
+	"conf.proto\x12\n" +
+	"kratos.api\x1a\x1egoogle/protobuf/duration.proto\"\xb2\x01\n" +
 	"\tBootstrap\x12*\n" +
 	"\x06server\x18\x01 \x01(\v2\x12.kratos.api.ServerR\x06server\x12$\n" +
 	"\x04data\x18\x02 \x01(\v2\x10.kratos.api.DataR\x04data\x12'\n" +
-	"\x05kafka\x18\x03 \x01(\v2\x11.kratos.api.KafkaR\x05kafka\"\xa9\x03\n" +
+	"\x05kafka\x18\x03 \x01(\v2\x11.kratos.api.KafkaR\x05kafka\x12*\n" +
+	"\x06milvus\x18\x04 \x01(\v2\x12.kratos.api.MilvusR\x06milvus\"\xa9\x03\n" +
 	"\x06Server\x12+\n" +
 	"\x04http\x18\x01 \x01(\v2\x17.kratos.api.Server.HTTPR\x04http\x12+\n" +
 	"\x04grpc\x18\x02 \x01(\v2\x17.kratos.api.Server.GRPCR\x04grpc\x12\x1d\n" +
@@ -520,7 +598,12 @@ const file_conf_conf_proto_rawDesc = "" +
 	"\bDatabase\x12\x16\n" +
 	"\x06driver\x18\x01 \x01(\tR\x06driver\x12\x16\n" +
 	"\x06source\x18\x02 \x01(\tR\x06source\x12\x12\n" +
-	"\x04name\x18\x03 \x01(\tR\x04name\"\xcc\x02\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\"s\n" +
+	"\x06Milvus\x12\x18\n" +
+	"\aaddress\x18\x01 \x01(\tR\aaddress\x12\x1a\n" +
+	"\busername\x18\x02 \x01(\tR\busername\x12\x1a\n" +
+	"\bpassword\x18\x03 \x01(\tR\bpassword\x12\x17\n" +
+	"\adb_name\x18\x04 \x01(\tR\x06dbName\"\xcc\x02\n" +
 	"\x05Kafka\x12\x18\n" +
 	"\abrokers\x18\x01 \x03(\tR\abrokers\x12\x1a\n" +
 	"\busername\x18\x02 \x01(\tR\busername\x12\x1a\n" +
@@ -535,65 +618,67 @@ const file_conf_conf_proto_rawDesc = "" +
 	"numWorkersB\x1dZ\x1bJobblyBE/internal/conf;confb\x06proto3"
 
 var (
-	file_conf_conf_proto_rawDescOnce sync.Once
-	file_conf_conf_proto_rawDescData []byte
+	file_conf_proto_rawDescOnce sync.Once
+	file_conf_proto_rawDescData []byte
 )
 
-func file_conf_conf_proto_rawDescGZIP() []byte {
-	file_conf_conf_proto_rawDescOnce.Do(func() {
-		file_conf_conf_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_conf_conf_proto_rawDesc), len(file_conf_conf_proto_rawDesc)))
+func file_conf_proto_rawDescGZIP() []byte {
+	file_conf_proto_rawDescOnce.Do(func() {
+		file_conf_proto_rawDescData = protoimpl.X.CompressGZIP(unsafe.Slice(unsafe.StringData(file_conf_proto_rawDesc), len(file_conf_proto_rawDesc)))
 	})
-	return file_conf_conf_proto_rawDescData
+	return file_conf_proto_rawDescData
 }
 
-var file_conf_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 7)
-var file_conf_conf_proto_goTypes = []any{
+var file_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_conf_proto_goTypes = []any{
 	(*Bootstrap)(nil),           // 0: kratos.api.Bootstrap
 	(*Server)(nil),              // 1: kratos.api.Server
 	(*Data)(nil),                // 2: kratos.api.Data
-	(*Kafka)(nil),               // 3: kratos.api.Kafka
-	(*Server_HTTP)(nil),         // 4: kratos.api.Server.HTTP
-	(*Server_GRPC)(nil),         // 5: kratos.api.Server.GRPC
-	(*Data_Database)(nil),       // 6: kratos.api.Data.Database
-	(*durationpb.Duration)(nil), // 7: google.protobuf.Duration
+	(*Milvus)(nil),              // 3: kratos.api.Milvus
+	(*Kafka)(nil),               // 4: kratos.api.Kafka
+	(*Server_HTTP)(nil),         // 5: kratos.api.Server.HTTP
+	(*Server_GRPC)(nil),         // 6: kratos.api.Server.GRPC
+	(*Data_Database)(nil),       // 7: kratos.api.Data.Database
+	(*durationpb.Duration)(nil), // 8: google.protobuf.Duration
 }
-var file_conf_conf_proto_depIdxs = []int32{
-	1, // 0: kratos.api.Bootstrap.server:type_name -> kratos.api.Server
-	2, // 1: kratos.api.Bootstrap.data:type_name -> kratos.api.Data
-	3, // 2: kratos.api.Bootstrap.kafka:type_name -> kratos.api.Kafka
-	4, // 3: kratos.api.Server.http:type_name -> kratos.api.Server.HTTP
-	5, // 4: kratos.api.Server.grpc:type_name -> kratos.api.Server.GRPC
-	6, // 5: kratos.api.Data.database:type_name -> kratos.api.Data.Database
-	7, // 6: kratos.api.Kafka.timeout:type_name -> google.protobuf.Duration
-	7, // 7: kratos.api.Server.HTTP.timeout:type_name -> google.protobuf.Duration
-	7, // 8: kratos.api.Server.GRPC.timeout:type_name -> google.protobuf.Duration
-	9, // [9:9] is the sub-list for method output_type
-	9, // [9:9] is the sub-list for method input_type
-	9, // [9:9] is the sub-list for extension type_name
-	9, // [9:9] is the sub-list for extension extendee
-	0, // [0:9] is the sub-list for field type_name
+var file_conf_proto_depIdxs = []int32{
+	1,  // 0: kratos.api.Bootstrap.server:type_name -> kratos.api.Server
+	2,  // 1: kratos.api.Bootstrap.data:type_name -> kratos.api.Data
+	4,  // 2: kratos.api.Bootstrap.kafka:type_name -> kratos.api.Kafka
+	3,  // 3: kratos.api.Bootstrap.milvus:type_name -> kratos.api.Milvus
+	5,  // 4: kratos.api.Server.http:type_name -> kratos.api.Server.HTTP
+	6,  // 5: kratos.api.Server.grpc:type_name -> kratos.api.Server.GRPC
+	7,  // 6: kratos.api.Data.database:type_name -> kratos.api.Data.Database
+	8,  // 7: kratos.api.Kafka.timeout:type_name -> google.protobuf.Duration
+	8,  // 8: kratos.api.Server.HTTP.timeout:type_name -> google.protobuf.Duration
+	8,  // 9: kratos.api.Server.GRPC.timeout:type_name -> google.protobuf.Duration
+	10, // [10:10] is the sub-list for method output_type
+	10, // [10:10] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
-func init() { file_conf_conf_proto_init() }
-func file_conf_conf_proto_init() {
-	if File_conf_conf_proto != nil {
+func init() { file_conf_proto_init() }
+func file_conf_proto_init() {
+	if File_conf_proto != nil {
 		return
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
-			RawDescriptor: unsafe.Slice(unsafe.StringData(file_conf_conf_proto_rawDesc), len(file_conf_conf_proto_rawDesc)),
+			RawDescriptor: unsafe.Slice(unsafe.StringData(file_conf_proto_rawDesc), len(file_conf_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   7,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
-		GoTypes:           file_conf_conf_proto_goTypes,
-		DependencyIndexes: file_conf_conf_proto_depIdxs,
-		MessageInfos:      file_conf_conf_proto_msgTypes,
+		GoTypes:           file_conf_proto_goTypes,
+		DependencyIndexes: file_conf_proto_depIdxs,
+		MessageInfos:      file_conf_proto_msgTypes,
 	}.Build()
-	File_conf_conf_proto = out.File
-	file_conf_conf_proto_goTypes = nil
-	file_conf_conf_proto_depIdxs = nil
+	File_conf_proto = out.File
+	file_conf_proto_goTypes = nil
+	file_conf_proto_depIdxs = nil
 }

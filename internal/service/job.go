@@ -11,11 +11,15 @@ type JobPostingService struct {
 	pb.UnimplementedJobPostingServer
 	jobPostingUseCase   *biz.JobPostingUseCase
 	userTrackingUseCase *biz.UserTrackingUseCase
+	jobEmbeddingUseCase *biz.JobEmbeddingUseCase
 }
 
-func NewJobPostingService(jobPostingUsecase *biz.JobPostingUseCase, userTrackingUseCase *biz.UserTrackingUseCase) *JobPostingService {
-	return &JobPostingService{jobPostingUseCase: jobPostingUsecase,
-		userTrackingUseCase: userTrackingUseCase}
+func NewJobPostingService(jobPostingUsecase *biz.JobPostingUseCase, userTrackingUseCase *biz.UserTrackingUseCase, jobEmbeddingUseCase *biz.JobEmbeddingUseCase) *JobPostingService {
+	return &JobPostingService{
+		jobPostingUseCase:   jobPostingUsecase,
+		userTrackingUseCase: userTrackingUseCase,
+		jobEmbeddingUseCase: jobEmbeddingUseCase,
+	}
 }
 
 func (s *JobPostingService) CreateJobPosting(ctx context.Context, req *pb.CreateJobPostingRequest) (*pb.JobPostingReply, error) {
@@ -256,5 +260,42 @@ func (s *JobPostingService) GetMyCreatedJobs(ctx context.Context, req *pb.GetMyC
 		Total:    int32(total),
 		Page:     req.Page,
 		PageSize: req.PageSize,
+	}, nil
+}
+
+// FindSimilarJobs finds similar jobs based on vector embeddings
+func (s *JobPostingService) FindSimilarJobs(ctx context.Context, req *pb.FindSimilarJobsRequest) (*pb.FindSimilarJobsReply, error) {
+	topK := int(req.TopK)
+	if topK <= 0 {
+		topK = 10 // Default to 10
+	}
+	if topK > 50 {
+		topK = 50 // Max 50
+	}
+
+	// Find similar jobs using embeddings
+	results, err := s.jobEmbeddingUseCase.FindSimilarJobsByJobID(ctx, req.Id, topK)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convert to proto response
+	similarJobs := make([]*pb.SimilarJobResult, 0, len(results))
+	for _, result := range results {
+		similarJob := &pb.SimilarJobResult{
+			Job:               s.jobToPb(result.Job),
+			TotalScore:        result.TotalScore,
+			TitleScore:        result.TitleScore,
+			RequirementsScore: result.RequirementsScore,
+			SkillsScore:       result.SkillsScore,
+			LevelScore:        result.LevelScore,
+		}
+		similarJobs = append(similarJobs, similarJob)
+	}
+
+	return &pb.FindSimilarJobsReply{
+		SourceJobId: req.Id,
+		SimilarJobs: similarJobs,
+		Count:       int32(len(similarJobs)),
 	}, nil
 }

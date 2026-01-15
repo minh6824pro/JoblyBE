@@ -13,6 +13,8 @@ var ProviderSet = wire.NewSet(
 	NewJobApplicationUseCase,
 	NewParserClient,
 	NewNotificationUseCase,
+	NewJobEmbeddingUseCase,
+	NewEmbeddingClient,
 )
 
 type Role string

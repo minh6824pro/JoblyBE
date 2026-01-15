@@ -21,6 +21,7 @@ const _ = http.SupportPackageIsVersion1
 
 const OperationJobPostingCreateJobPosting = "/api.job.v1.JobPosting/CreateJobPosting"
 const OperationJobPostingDeleteJobPosting = "/api.job.v1.JobPosting/DeleteJobPosting"
+const OperationJobPostingFindSimilarJobs = "/api.job.v1.JobPosting/FindSimilarJobs"
 const OperationJobPostingGetJobPosting = "/api.job.v1.JobPosting/GetJobPosting"
 const OperationJobPostingGetMyCreatedJobs = "/api.job.v1.JobPosting/GetMyCreatedJobs"
 const OperationJobPostingListJobPostings = "/api.job.v1.JobPosting/ListJobPostings"
@@ -32,6 +33,8 @@ type JobPostingHTTPServer interface {
 	CreateJobPosting(context.Context, *CreateJobPostingRequest) (*JobPostingReply, error)
 	// DeleteJobPosting Delete a job posting
 	DeleteJobPosting(context.Context, *DeleteJobPostingRequest) (*DeleteJobPostingReply, error)
+	// FindSimilarJobs Find similar jobs by job ID using vector embeddings
+	FindSimilarJobs(context.Context, *FindSimilarJobsRequest) (*FindSimilarJobsReply, error)
 	// GetJobPosting Get a single job posting by ID
 	GetJobPosting(context.Context, *GetJobPostingRequest) (*JobPostingReply, error)
 	// GetMyCreatedJobs List jobs created by current user (from token)
@@ -53,6 +56,7 @@ func RegisterJobPostingHTTPServer(s *http.Server, srv JobPostingHTTPServer) {
 	r.GET("/api/v1/jobs", _JobPosting_ListJobPostings0_HTTP_Handler(srv))
 	r.GET("/api/v1/my-jobs", _JobPosting_ListMyJobs0_HTTP_Handler(srv))
 	r.GET("/api/v1/my-created-jobs", _JobPosting_GetMyCreatedJobs0_HTTP_Handler(srv))
+	r.GET("/api/v1/jobs/{id}/similar", _JobPosting_FindSimilarJobs0_HTTP_Handler(srv))
 }
 
 func _JobPosting_CreateJobPosting0_HTTP_Handler(srv JobPostingHTTPServer) func(ctx http.Context) error {
@@ -203,11 +207,35 @@ func _JobPosting_GetMyCreatedJobs0_HTTP_Handler(srv JobPostingHTTPServer) func(c
 	}
 }
 
+func _JobPosting_FindSimilarJobs0_HTTP_Handler(srv JobPostingHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in FindSimilarJobsRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationJobPostingFindSimilarJobs)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.FindSimilarJobs(ctx, req.(*FindSimilarJobsRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*FindSimilarJobsReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type JobPostingHTTPClient interface {
 	// CreateJobPosting Create a new job posting
 	CreateJobPosting(ctx context.Context, req *CreateJobPostingRequest, opts ...http.CallOption) (rsp *JobPostingReply, err error)
 	// DeleteJobPosting Delete a job posting
 	DeleteJobPosting(ctx context.Context, req *DeleteJobPostingRequest, opts ...http.CallOption) (rsp *DeleteJobPostingReply, err error)
+	// FindSimilarJobs Find similar jobs by job ID using vector embeddings
+	FindSimilarJobs(ctx context.Context, req *FindSimilarJobsRequest, opts ...http.CallOption) (rsp *FindSimilarJobsReply, err error)
 	// GetJobPosting Get a single job posting by ID
 	GetJobPosting(ctx context.Context, req *GetJobPostingRequest, opts ...http.CallOption) (rsp *JobPostingReply, err error)
 	// GetMyCreatedJobs List jobs created by current user (from token)
@@ -250,6 +278,20 @@ func (c *JobPostingHTTPClientImpl) DeleteJobPosting(ctx context.Context, in *Del
 	opts = append(opts, http.Operation(OperationJobPostingDeleteJobPosting))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "DELETE", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// FindSimilarJobs Find similar jobs by job ID using vector embeddings
+func (c *JobPostingHTTPClientImpl) FindSimilarJobs(ctx context.Context, in *FindSimilarJobsRequest, opts ...http.CallOption) (*FindSimilarJobsReply, error) {
+	var out FindSimilarJobsReply
+	pattern := "/api/v1/jobs/{id}/similar"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationJobPostingFindSimilarJobs))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {
 		return nil, err
 	}
