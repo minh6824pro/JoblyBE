@@ -61,6 +61,29 @@ service Resume {
 			body: "*"
 		};
 	}
+	
+	// Get jobs for evaluation selection (viewed jobs and saved jobs)
+	rpc GetJobsForEvaluation (GetJobsForEvaluationRequest) returns (GetJobsForEvaluationReply) {
+		option (google.api.http) = {
+			get: "/api/v1/evaluation/jobs"
+		};
+	}
+	
+	// Evaluate resume with selected JD (synchronous)
+	rpc EvaluateWithJD (EvaluateWithJDRequest) returns (EvaluateWithJDReply) {
+		option (google.api.http) = {
+			post: "/api/v1/evaluation/evaluate-with-jd"
+			body: "*"
+		};
+	}
+
+	// Evaluate resume with selected JD (synchronous)
+	rpc ScoreWithJD (ScoreWithJDRequest) returns (ScoreWithJDReply) {
+		option (google.api.http) = {
+			post: "/api/v1/evaluation/score-with-jd"
+			body: "*"
+		};
+	}
 }
 // Resume messages
 message ResumeReply {
@@ -144,6 +167,9 @@ message ResumeEvaluation {
 	repeated ResumeCVEdit cv_edits = 8;
 	int32 jobs_analyzed = 9;
 	string evaluated_at = 10;
+	string type = 11; // "auto" (default) or "manual" (when user selects JD)
+	string job_id = 12; // Job ID used for manual evaluation
+	string job_title = 13; // Job title for display
 }
 
 // Request/Response messages
@@ -202,3 +228,40 @@ message UpdateCVEditStatusReply {
 	string message = 2;
 }
 
+// Job info for evaluation selection
+message JobForEvaluation {
+	string id = 1;
+	string title = 2;
+	string company_name = 3;
+	string location = 4;
+	int32 time_on_sight = 5; // Only for viewed jobs, 0 for saved jobs
+}
+
+message GetJobsForEvaluationRequest {
+}
+
+message GetJobsForEvaluationReply {
+	repeated JobForEvaluation viewed_jobs = 1; // Jobs from time on sight tracking (limit 10)
+	repeated JobForEvaluation saved_jobs = 2; // Jobs saved by user
+}
+
+message EvaluateWithJDRequest {
+	string resume_id = 1;
+	string job_id = 2;
+}
+
+message EvaluateWithJDReply {
+	ResumeEvaluation evaluation = 1;
+}
+
+message ScoreWithJDRequest{
+	string resume_id = 1;
+	string job_id = 2;
+}
+
+message ScoreWithJDReply{
+	double overall_score = 1;
+	ResumeScoreBreakdown score_breakdown = 2;
+	repeated string missing_skill=3;
+	string job_id=4;
+}

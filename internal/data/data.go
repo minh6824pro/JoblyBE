@@ -4,6 +4,7 @@ import (
 	"JobblyBE/internal/conf"
 	"JobblyBE/pkg/configx"
 	"JobblyBE/pkg/kafkax"
+	"JobblyBE/pkg/milvusx"
 	"context"
 	"time"
 
@@ -18,6 +19,7 @@ import (
 var ProviderSet = wire.NewSet(
 	NewData,
 	NewKafkaProducer,
+	NewMilvusClient,
 	NewUserRepo,
 	NewJobPostingRepo,
 	NewCompanyRepo,
@@ -25,6 +27,7 @@ var ProviderSet = wire.NewSet(
 	NewResumeRepo,
 	NewJobApplicationRepo,
 	NewNotificationRepo,
+	NewJobEmbeddingRepo,
 )
 
 // Data .
@@ -388,4 +391,33 @@ func getKafkaBrokers(cKafka *conf.Kafka) []string {
 		return cKafka.Brokers
 	}
 	return []string{"localhost:9092"}
+}
+
+// NewMilvusClient creates a new Milvus client for vector database operations
+func NewMilvusClient(cMilvus *conf.Milvus, logger log.Logger) (*milvusx.Client, func(), error) {
+	helper := log.NewHelper(logger)
+
+	// Get configuration from environment or config file
+	address := configx.GetEnvOrString("MILVUS_ADDRESS", cMilvus.Address)
+	if address == "" {
+		address = "localhost:19530"
+	}
+
+	username := configx.GetEnvOrString("MILVUS_USERNAME", cMilvus.Username)
+	password := configx.GetEnvOrString("MILVUS_PASSWORD", cMilvus.Password)
+	dbName := configx.GetEnvOrString("MILVUS_DB_NAME", cMilvus.DbName)
+	if dbName == "" {
+		dbName = "default"
+	}
+
+	helper.Infof("Connecting to Milvus at %s, db: %s", address, dbName)
+
+	config := &milvusx.Config{
+		Address:  address,
+		Username: username,
+		Password: password,
+		DBName:   dbName,
+	}
+
+	return milvusx.NewClient(config, logger)
 }

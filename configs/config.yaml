@@ -19,6 +19,11 @@ data:
     addr: 127.0.0.1:6379
     read_timeout: 0.2s
     write_timeout: 0.2s
+milvus:
+  address: ${MILVUS_ADDRESS:localhost:19530}
+  username: ${MILVUS_USERNAME}
+  password: ${MILVUS_PASSWORD}
+  db_name: ${MILVUS_DB_NAME:default}
 kafka:
   brokers:
     - ${KAFKA_BROKERS:localhost:9092}

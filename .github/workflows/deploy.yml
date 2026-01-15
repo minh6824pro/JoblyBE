@@ -1,0 +1,59 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            # Tạo thư mục deploy
+            mkdir -p ~/jobly
+            cd ~/jobly
+
+            # Clone hoặc pull code mới nhất
+            if [ -d ".git" ]; then
+              echo "Pulling latest code..."
+              git pull origin main || git pull origin master
+            else
+              echo "Cloning repository..."
+              git clone https://github.com/${{ github.repository }}.git .
+            fi
+
+            # Dừng containers cũ
+            echo "Stopping old containers..."
+            docker-compose down 2>/dev/null || true
+
+            # Build và chạy Docker
+            echo "Building and starting containers..."
+            docker-compose up -d --build
+
+            # Chờ services khởi động
+            echo "Waiting for services to start..."
+            sleep 20
+
+            # Kiểm tra trạng thái
+            echo "Checking service status..."
+            docker-compose ps
+
+            # Cleanup
+            docker image prune -f
+
+            echo "Deployment completed!"

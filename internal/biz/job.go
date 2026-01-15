@@ -85,17 +85,19 @@ type JobFilter struct {
 
 // JobPostingUseCase handles job posting business logic
 type JobPostingUseCase struct {
-	jobRepo     JobPostingRepo
-	companyRepo CompanyRepo
-	log         *log.Helper
+	jobRepo      JobPostingRepo
+	companyRepo  CompanyRepo
+	jobEmbedding *JobEmbeddingUseCase
+	log          *log.Helper
 }
 
 // NewJobPostingUseCase creates a new job posting use case
-func NewJobPostingUseCase(jobRepo JobPostingRepo, companyRepo CompanyRepo, logger log.Logger) *JobPostingUseCase {
+func NewJobPostingUseCase(jobRepo JobPostingRepo, companyRepo CompanyRepo, jobEmbedding *JobEmbeddingUseCase, logger log.Logger) *JobPostingUseCase {
 	return &JobPostingUseCase{
-		jobRepo:     jobRepo,
-		companyRepo: companyRepo,
-		log:         log.NewHelper(logger),
+		jobRepo:      jobRepo,
+		companyRepo:  companyRepo,
+		jobEmbedding: jobEmbedding,
+		log:          log.NewHelper(logger),
 	}
 }
 
@@ -126,6 +128,22 @@ func (uc *JobPostingUseCase) CreateJobPosting(ctx context.Context, job *JobPosti
 
 	// Attach company info
 	createdJob.Company = company
+
+	// Embed job posting asynchronously with background context
+	// Using background context because the HTTP request context will be canceled
+	// after the response is sent, but embedding takes time to complete
+	go func(job *JobPosting) {
+		// Create a new background context with timeout for embedding
+		embCtx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+		defer cancel()
+
+		result, err := uc.jobEmbedding.EmbedJobPosting(embCtx, job)
+		if err != nil {
+			uc.log.Errorf("failed to embed job posting: %v", err)
+			return
+		}
+		uc.log.Infof("Successfully embedded job %s with %d vectors", job.ID, len(result.Embeddings))
+	}(createdJob)
 
 	return createdJob, nil
 }
@@ -160,6 +178,18 @@ func (uc *JobPostingUseCase) UpdateJobPosting(ctx context.Context, job *JobPosti
 		return nil, err
 	}
 
+	go func(job *JobPosting) {
+		// Create a new background context with timeout for embedding
+		embCtx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+		defer cancel()
+
+		result, err := uc.jobEmbedding.EmbedJobPosting(embCtx, job)
+		if err != nil {
+			uc.log.Errorf("failed to embed job posting: %v", err)
+			return
+		}
+		uc.log.Infof("Successfully embedded job %s with %d vectors", job.ID, len(result.Embeddings))
+	}(updatedJob)
 	return updatedJob, nil
 }
 

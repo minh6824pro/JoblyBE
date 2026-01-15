@@ -679,6 +679,9 @@ type ResumeEvaluation struct {
 	CvEdits         []*ResumeCVEdit        `protobuf:"bytes,8,rep,name=cv_edits,json=cvEdits,proto3" json:"cv_edits,omitempty"`
 	JobsAnalyzed    int32                  `protobuf:"varint,9,opt,name=jobs_analyzed,json=jobsAnalyzed,proto3" json:"jobs_analyzed,omitempty"`
 	EvaluatedAt     string                 `protobuf:"bytes,10,opt,name=evaluated_at,json=evaluatedAt,proto3" json:"evaluated_at,omitempty"`
+	Type            string                 `protobuf:"bytes,11,opt,name=type,proto3" json:"type,omitempty"`                         // "auto" (default) or "manual" (when user selects JD)
+	JobId           string                 `protobuf:"bytes,12,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`          // Job ID used for manual evaluation
+	JobTitle        string                 `protobuf:"bytes,13,opt,name=job_title,json=jobTitle,proto3" json:"job_title,omitempty"` // Job title for display
 	unknownFields   protoimpl.UnknownFields
 	sizeCache       protoimpl.SizeCache
 }
@@ -779,6 +782,27 @@ func (x *ResumeEvaluation) GetJobsAnalyzed() int32 {
 func (x *ResumeEvaluation) GetEvaluatedAt() string {
 	if x != nil {
 		return x.EvaluatedAt
+	}
+	return ""
+}
+
+func (x *ResumeEvaluation) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *ResumeEvaluation) GetJobId() string {
+	if x != nil {
+		return x.JobId
+	}
+	return ""
+}
+
+func (x *ResumeEvaluation) GetJobTitle() string {
+	if x != nil {
+		return x.JobTitle
 	}
 	return ""
 }
@@ -1356,6 +1380,387 @@ func (x *UpdateCVEditStatusReply) GetMessage() string {
 	return ""
 }
 
+// Job info for evaluation selection
+type JobForEvaluation struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	CompanyName   string                 `protobuf:"bytes,3,opt,name=company_name,json=companyName,proto3" json:"company_name,omitempty"`
+	Location      string                 `protobuf:"bytes,4,opt,name=location,proto3" json:"location,omitempty"`
+	TimeOnSight   int32                  `protobuf:"varint,5,opt,name=time_on_sight,json=timeOnSight,proto3" json:"time_on_sight,omitempty"` // Only for viewed jobs, 0 for saved jobs
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *JobForEvaluation) Reset() {
+	*x = JobForEvaluation{}
+	mi := &file_resume_v1_resume_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *JobForEvaluation) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*JobForEvaluation) ProtoMessage() {}
+
+func (x *JobForEvaluation) ProtoReflect() protoreflect.Message {
+	mi := &file_resume_v1_resume_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use JobForEvaluation.ProtoReflect.Descriptor instead.
+func (*JobForEvaluation) Descriptor() ([]byte, []int) {
+	return file_resume_v1_resume_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *JobForEvaluation) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *JobForEvaluation) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *JobForEvaluation) GetCompanyName() string {
+	if x != nil {
+		return x.CompanyName
+	}
+	return ""
+}
+
+func (x *JobForEvaluation) GetLocation() string {
+	if x != nil {
+		return x.Location
+	}
+	return ""
+}
+
+func (x *JobForEvaluation) GetTimeOnSight() int32 {
+	if x != nil {
+		return x.TimeOnSight
+	}
+	return 0
+}
+
+type GetJobsForEvaluationRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetJobsForEvaluationRequest) Reset() {
+	*x = GetJobsForEvaluationRequest{}
+	mi := &file_resume_v1_resume_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetJobsForEvaluationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetJobsForEvaluationRequest) ProtoMessage() {}
+
+func (x *GetJobsForEvaluationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_resume_v1_resume_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetJobsForEvaluationRequest.ProtoReflect.Descriptor instead.
+func (*GetJobsForEvaluationRequest) Descriptor() ([]byte, []int) {
+	return file_resume_v1_resume_proto_rawDescGZIP(), []int{20}
+}
+
+type GetJobsForEvaluationReply struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ViewedJobs    []*JobForEvaluation    `protobuf:"bytes,1,rep,name=viewed_jobs,json=viewedJobs,proto3" json:"viewed_jobs,omitempty"` // Jobs from time on sight tracking (limit 10)
+	SavedJobs     []*JobForEvaluation    `protobuf:"bytes,2,rep,name=saved_jobs,json=savedJobs,proto3" json:"saved_jobs,omitempty"`    // Jobs saved by user
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetJobsForEvaluationReply) Reset() {
+	*x = GetJobsForEvaluationReply{}
+	mi := &file_resume_v1_resume_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetJobsForEvaluationReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetJobsForEvaluationReply) ProtoMessage() {}
+
+func (x *GetJobsForEvaluationReply) ProtoReflect() protoreflect.Message {
+	mi := &file_resume_v1_resume_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetJobsForEvaluationReply.ProtoReflect.Descriptor instead.
+func (*GetJobsForEvaluationReply) Descriptor() ([]byte, []int) {
+	return file_resume_v1_resume_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *GetJobsForEvaluationReply) GetViewedJobs() []*JobForEvaluation {
+	if x != nil {
+		return x.ViewedJobs
+	}
+	return nil
+}
+
+func (x *GetJobsForEvaluationReply) GetSavedJobs() []*JobForEvaluation {
+	if x != nil {
+		return x.SavedJobs
+	}
+	return nil
+}
+
+type EvaluateWithJDRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ResumeId      string                 `protobuf:"bytes,1,opt,name=resume_id,json=resumeId,proto3" json:"resume_id,omitempty"`
+	JobId         string                 `protobuf:"bytes,2,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EvaluateWithJDRequest) Reset() {
+	*x = EvaluateWithJDRequest{}
+	mi := &file_resume_v1_resume_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EvaluateWithJDRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EvaluateWithJDRequest) ProtoMessage() {}
+
+func (x *EvaluateWithJDRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_resume_v1_resume_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EvaluateWithJDRequest.ProtoReflect.Descriptor instead.
+func (*EvaluateWithJDRequest) Descriptor() ([]byte, []int) {
+	return file_resume_v1_resume_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *EvaluateWithJDRequest) GetResumeId() string {
+	if x != nil {
+		return x.ResumeId
+	}
+	return ""
+}
+
+func (x *EvaluateWithJDRequest) GetJobId() string {
+	if x != nil {
+		return x.JobId
+	}
+	return ""
+}
+
+type EvaluateWithJDReply struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Evaluation    *ResumeEvaluation      `protobuf:"bytes,1,opt,name=evaluation,proto3" json:"evaluation,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EvaluateWithJDReply) Reset() {
+	*x = EvaluateWithJDReply{}
+	mi := &file_resume_v1_resume_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EvaluateWithJDReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EvaluateWithJDReply) ProtoMessage() {}
+
+func (x *EvaluateWithJDReply) ProtoReflect() protoreflect.Message {
+	mi := &file_resume_v1_resume_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EvaluateWithJDReply.ProtoReflect.Descriptor instead.
+func (*EvaluateWithJDReply) Descriptor() ([]byte, []int) {
+	return file_resume_v1_resume_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *EvaluateWithJDReply) GetEvaluation() *ResumeEvaluation {
+	if x != nil {
+		return x.Evaluation
+	}
+	return nil
+}
+
+type ScoreWithJDRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ResumeId      string                 `protobuf:"bytes,1,opt,name=resume_id,json=resumeId,proto3" json:"resume_id,omitempty"`
+	JobId         string                 `protobuf:"bytes,2,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ScoreWithJDRequest) Reset() {
+	*x = ScoreWithJDRequest{}
+	mi := &file_resume_v1_resume_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ScoreWithJDRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ScoreWithJDRequest) ProtoMessage() {}
+
+func (x *ScoreWithJDRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_resume_v1_resume_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ScoreWithJDRequest.ProtoReflect.Descriptor instead.
+func (*ScoreWithJDRequest) Descriptor() ([]byte, []int) {
+	return file_resume_v1_resume_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *ScoreWithJDRequest) GetResumeId() string {
+	if x != nil {
+		return x.ResumeId
+	}
+	return ""
+}
+
+func (x *ScoreWithJDRequest) GetJobId() string {
+	if x != nil {
+		return x.JobId
+	}
+	return ""
+}
+
+type ScoreWithJDReply struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	OverallScore   float64                `protobuf:"fixed64,1,opt,name=overall_score,json=overallScore,proto3" json:"overall_score,omitempty"`
+	ScoreBreakdown *ResumeScoreBreakdown  `protobuf:"bytes,2,opt,name=score_breakdown,json=scoreBreakdown,proto3" json:"score_breakdown,omitempty"`
+	MissingSkill   []string               `protobuf:"bytes,3,rep,name=missing_skill,json=missingSkill,proto3" json:"missing_skill,omitempty"`
+	JobId          string                 `protobuf:"bytes,4,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *ScoreWithJDReply) Reset() {
+	*x = ScoreWithJDReply{}
+	mi := &file_resume_v1_resume_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ScoreWithJDReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ScoreWithJDReply) ProtoMessage() {}
+
+func (x *ScoreWithJDReply) ProtoReflect() protoreflect.Message {
+	mi := &file_resume_v1_resume_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ScoreWithJDReply.ProtoReflect.Descriptor instead.
+func (*ScoreWithJDReply) Descriptor() ([]byte, []int) {
+	return file_resume_v1_resume_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *ScoreWithJDReply) GetOverallScore() float64 {
+	if x != nil {
+		return x.OverallScore
+	}
+	return 0
+}
+
+func (x *ScoreWithJDReply) GetScoreBreakdown() *ResumeScoreBreakdown {
+	if x != nil {
+		return x.ScoreBreakdown
+	}
+	return nil
+}
+
+func (x *ScoreWithJDReply) GetMissingSkill() []string {
+	if x != nil {
+		return x.MissingSkill
+	}
+	return nil
+}
+
+func (x *ScoreWithJDReply) GetJobId() string {
+	if x != nil {
+		return x.JobId
+	}
+	return ""
+}
+
 var File_resume_v1_resume_proto protoreflect.FileDescriptor
 
 const file_resume_v1_resume_proto_rawDesc = "" +
@@ -1422,7 +1827,7 @@ const file_resume_v1_resume_proto_rawDesc = "" +
 	"\bpriority\x18\x06 \x01(\tR\bpriority\x12!\n" +
 	"\fimpact_score\x18\a \x01(\x01R\vimpactScore\x12\x16\n" +
 	"\x06status\x18\b \x01(\tR\x06status\x12\x0e\n" +
-	"\x02id\x18\t \x01(\tR\x02id\"\x9c\x03\n" +
+	"\x02id\x18\t \x01(\tR\x02id\"\xe4\x03\n" +
 	"\x10ResumeEvaluation\x12\x17\n" +
 	"\acv_name\x18\x01 \x01(\tR\x06cvName\x12#\n" +
 	"\roverall_score\x18\x02 \x01(\x01R\foverallScore\x12\x14\n" +
@@ -1436,7 +1841,10 @@ const file_resume_v1_resume_proto_rawDesc = "" +
 	"\bcv_edits\x18\b \x03(\v2\x1b.api.resume.v1.ResumeCVEditR\acvEdits\x12#\n" +
 	"\rjobs_analyzed\x18\t \x01(\x05R\fjobsAnalyzed\x12!\n" +
 	"\fevaluated_at\x18\n" +
-	" \x01(\tR\vevaluatedAt\"W\n" +
+	" \x01(\tR\vevaluatedAt\x12\x12\n" +
+	"\x04type\x18\v \x01(\tR\x04type\x12\x15\n" +
+	"\x06job_id\x18\f \x01(\tR\x05jobId\x12\x1b\n" +
+	"\tjob_title\x18\r \x01(\tR\bjobTitle\"W\n" +
 	"\x13CreateResumeRequest\x12@\n" +
 	"\rresume_detail\x18\x01 \x01(\v2\x1b.api.resume.v1.ResumeDetailR\fresumeDetail\"g\n" +
 	"\x13UpdateResumeRequest\x12\x0e\n" +
@@ -1469,7 +1877,35 @@ const file_resume_v1_resume_proto_rawDesc = "" +
 	"\x06status\x18\x03 \x01(\tR\x06status\"M\n" +
 	"\x17UpdateCVEditStatusReply\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessage2\xfb\x06\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"\x9b\x01\n" +
+	"\x10JobForEvaluation\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12!\n" +
+	"\fcompany_name\x18\x03 \x01(\tR\vcompanyName\x12\x1a\n" +
+	"\blocation\x18\x04 \x01(\tR\blocation\x12\"\n" +
+	"\rtime_on_sight\x18\x05 \x01(\x05R\vtimeOnSight\"\x1d\n" +
+	"\x1bGetJobsForEvaluationRequest\"\x9d\x01\n" +
+	"\x19GetJobsForEvaluationReply\x12@\n" +
+	"\vviewed_jobs\x18\x01 \x03(\v2\x1f.api.resume.v1.JobForEvaluationR\n" +
+	"viewedJobs\x12>\n" +
+	"\n" +
+	"saved_jobs\x18\x02 \x03(\v2\x1f.api.resume.v1.JobForEvaluationR\tsavedJobs\"K\n" +
+	"\x15EvaluateWithJDRequest\x12\x1b\n" +
+	"\tresume_id\x18\x01 \x01(\tR\bresumeId\x12\x15\n" +
+	"\x06job_id\x18\x02 \x01(\tR\x05jobId\"V\n" +
+	"\x13EvaluateWithJDReply\x12?\n" +
+	"\n" +
+	"evaluation\x18\x01 \x01(\v2\x1f.api.resume.v1.ResumeEvaluationR\n" +
+	"evaluation\"H\n" +
+	"\x12ScoreWithJDRequest\x12\x1b\n" +
+	"\tresume_id\x18\x01 \x01(\tR\bresumeId\x12\x15\n" +
+	"\x06job_id\x18\x02 \x01(\tR\x05jobId\"\xc1\x01\n" +
+	"\x10ScoreWithJDReply\x12#\n" +
+	"\roverall_score\x18\x01 \x01(\x01R\foverallScore\x12L\n" +
+	"\x0fscore_breakdown\x18\x02 \x01(\v2#.api.resume.v1.ResumeScoreBreakdownR\x0escoreBreakdown\x12#\n" +
+	"\rmissing_skill\x18\x03 \x03(\tR\fmissingSkill\x12\x15\n" +
+	"\x06job_id\x18\x04 \x01(\tR\x05jobId2\x98\n" +
+	"\n" +
 	"\x06Resume\x12j\n" +
 	"\fCreateResume\x12\".api.resume.v1.CreateResumeRequest\x1a\x1a.api.resume.v1.ResumeReply\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/api/v1/resumes\x12o\n" +
 	"\fUpdateResume\x12\".api.resume.v1.UpdateResumeRequest\x1a\x1a.api.resume.v1.ResumeReply\"\x1f\x82\xd3\xe4\x93\x02\x19:\x01*\x1a\x14/api/v1/resumes/{id}\x12f\n" +
@@ -1477,7 +1913,10 @@ const file_resume_v1_resume_proto_rawDesc = "" +
 	"\vListResumes\x12!.api.resume.v1.ListResumesRequest\x1a\x1f.api.resume.v1.ListResumesReply\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/api/v1/resumes\x12r\n" +
 	"\fDeleteResume\x12\".api.resume.v1.DeleteResumeRequest\x1a .api.resume.v1.DeleteResumeReply\"\x1c\x82\xd3\xe4\x93\x02\x16*\x14/api/v1/resumes/{id}\x12\xa0\x01\n" +
 	"\x15GenerateCVDescription\x12+.api.resume.v1.GenerateCVDescriptionRequest\x1a).api.resume.v1.GenerateCVDescriptionReply\"/\x82\xd3\xe4\x93\x02):\x01*\"$/api/v1/resumes/generate-description\x12\xa8\x01\n" +
-	"\x12UpdateCVEditStatus\x12(.api.resume.v1.UpdateCVEditStatusRequest\x1a&.api.resume.v1.UpdateCVEditStatusReply\"@\x82\xd3\xe4\x93\x02::\x01*\x1a5/api/v1/resumes/{resume_id}/cv-edits/{edit_id}/statusB,\n" +
+	"\x12UpdateCVEditStatus\x12(.api.resume.v1.UpdateCVEditStatusRequest\x1a&.api.resume.v1.UpdateCVEditStatusReply\"@\x82\xd3\xe4\x93\x02::\x01*\x1a5/api/v1/resumes/{resume_id}/cv-edits/{edit_id}/status\x12\x8d\x01\n" +
+	"\x14GetJobsForEvaluation\x12*.api.resume.v1.GetJobsForEvaluationRequest\x1a(.api.resume.v1.GetJobsForEvaluationReply\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/api/v1/evaluation/jobs\x12\x8a\x01\n" +
+	"\x0eEvaluateWithJD\x12$.api.resume.v1.EvaluateWithJDRequest\x1a\".api.resume.v1.EvaluateWithJDReply\".\x82\xd3\xe4\x93\x02(:\x01*\"#/api/v1/evaluation/evaluate-with-jd\x12~\n" +
+	"\vScoreWithJD\x12!.api.resume.v1.ScoreWithJDRequest\x1a\x1f.api.resume.v1.ScoreWithJDReply\"+\x82\xd3\xe4\x93\x02%:\x01*\" /api/v1/evaluation/score-with-jdB,\n" +
 	"\rapi.resume.v1P\x01Z\x19JobblyBE/api/resume/v1;v1b\x06proto3"
 
 var (
@@ -1492,7 +1931,7 @@ func file_resume_v1_resume_proto_rawDescGZIP() []byte {
 	return file_resume_v1_resume_proto_rawDescData
 }
 
-var file_resume_v1_resume_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
+var file_resume_v1_resume_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
 var file_resume_v1_resume_proto_goTypes = []any{
 	(*ResumeReply)(nil),                  // 0: api.resume.v1.ResumeReply
 	(*ResumeDetail)(nil),                 // 1: api.resume.v1.ResumeDetail
@@ -1513,6 +1952,13 @@ var file_resume_v1_resume_proto_goTypes = []any{
 	(*GenerateCVDescriptionReply)(nil),   // 16: api.resume.v1.GenerateCVDescriptionReply
 	(*UpdateCVEditStatusRequest)(nil),    // 17: api.resume.v1.UpdateCVEditStatusRequest
 	(*UpdateCVEditStatusReply)(nil),      // 18: api.resume.v1.UpdateCVEditStatusReply
+	(*JobForEvaluation)(nil),             // 19: api.resume.v1.JobForEvaluation
+	(*GetJobsForEvaluationRequest)(nil),  // 20: api.resume.v1.GetJobsForEvaluationRequest
+	(*GetJobsForEvaluationReply)(nil),    // 21: api.resume.v1.GetJobsForEvaluationReply
+	(*EvaluateWithJDRequest)(nil),        // 22: api.resume.v1.EvaluateWithJDRequest
+	(*EvaluateWithJDReply)(nil),          // 23: api.resume.v1.EvaluateWithJDReply
+	(*ScoreWithJDRequest)(nil),           // 24: api.resume.v1.ScoreWithJDRequest
+	(*ScoreWithJDReply)(nil),             // 25: api.resume.v1.ScoreWithJDReply
 }
 var file_resume_v1_resume_proto_depIdxs = []int32{
 	1,  // 0: api.resume.v1.ResumeReply.resume_detail:type_name -> api.resume.v1.ResumeDetail
@@ -1526,25 +1972,35 @@ var file_resume_v1_resume_proto_depIdxs = []int32{
 	1,  // 8: api.resume.v1.UpdateResumeRequest.resume_detail:type_name -> api.resume.v1.ResumeDetail
 	0,  // 9: api.resume.v1.ListResumesReply.resumes:type_name -> api.resume.v1.ResumeReply
 	1,  // 10: api.resume.v1.GenerateCVDescriptionRequest.resume_detail:type_name -> api.resume.v1.ResumeDetail
-	8,  // 11: api.resume.v1.Resume.CreateResume:input_type -> api.resume.v1.CreateResumeRequest
-	9,  // 12: api.resume.v1.Resume.UpdateResume:input_type -> api.resume.v1.UpdateResumeRequest
-	10, // 13: api.resume.v1.Resume.GetResume:input_type -> api.resume.v1.GetResumeRequest
-	11, // 14: api.resume.v1.Resume.ListResumes:input_type -> api.resume.v1.ListResumesRequest
-	13, // 15: api.resume.v1.Resume.DeleteResume:input_type -> api.resume.v1.DeleteResumeRequest
-	15, // 16: api.resume.v1.Resume.GenerateCVDescription:input_type -> api.resume.v1.GenerateCVDescriptionRequest
-	17, // 17: api.resume.v1.Resume.UpdateCVEditStatus:input_type -> api.resume.v1.UpdateCVEditStatusRequest
-	0,  // 18: api.resume.v1.Resume.CreateResume:output_type -> api.resume.v1.ResumeReply
-	0,  // 19: api.resume.v1.Resume.UpdateResume:output_type -> api.resume.v1.ResumeReply
-	0,  // 20: api.resume.v1.Resume.GetResume:output_type -> api.resume.v1.ResumeReply
-	12, // 21: api.resume.v1.Resume.ListResumes:output_type -> api.resume.v1.ListResumesReply
-	14, // 22: api.resume.v1.Resume.DeleteResume:output_type -> api.resume.v1.DeleteResumeReply
-	16, // 23: api.resume.v1.Resume.GenerateCVDescription:output_type -> api.resume.v1.GenerateCVDescriptionReply
-	18, // 24: api.resume.v1.Resume.UpdateCVEditStatus:output_type -> api.resume.v1.UpdateCVEditStatusReply
-	18, // [18:25] is the sub-list for method output_type
-	11, // [11:18] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	19, // 11: api.resume.v1.GetJobsForEvaluationReply.viewed_jobs:type_name -> api.resume.v1.JobForEvaluation
+	19, // 12: api.resume.v1.GetJobsForEvaluationReply.saved_jobs:type_name -> api.resume.v1.JobForEvaluation
+	7,  // 13: api.resume.v1.EvaluateWithJDReply.evaluation:type_name -> api.resume.v1.ResumeEvaluation
+	5,  // 14: api.resume.v1.ScoreWithJDReply.score_breakdown:type_name -> api.resume.v1.ResumeScoreBreakdown
+	8,  // 15: api.resume.v1.Resume.CreateResume:input_type -> api.resume.v1.CreateResumeRequest
+	9,  // 16: api.resume.v1.Resume.UpdateResume:input_type -> api.resume.v1.UpdateResumeRequest
+	10, // 17: api.resume.v1.Resume.GetResume:input_type -> api.resume.v1.GetResumeRequest
+	11, // 18: api.resume.v1.Resume.ListResumes:input_type -> api.resume.v1.ListResumesRequest
+	13, // 19: api.resume.v1.Resume.DeleteResume:input_type -> api.resume.v1.DeleteResumeRequest
+	15, // 20: api.resume.v1.Resume.GenerateCVDescription:input_type -> api.resume.v1.GenerateCVDescriptionRequest
+	17, // 21: api.resume.v1.Resume.UpdateCVEditStatus:input_type -> api.resume.v1.UpdateCVEditStatusRequest
+	20, // 22: api.resume.v1.Resume.GetJobsForEvaluation:input_type -> api.resume.v1.GetJobsForEvaluationRequest
+	22, // 23: api.resume.v1.Resume.EvaluateWithJD:input_type -> api.resume.v1.EvaluateWithJDRequest
+	24, // 24: api.resume.v1.Resume.ScoreWithJD:input_type -> api.resume.v1.ScoreWithJDRequest
+	0,  // 25: api.resume.v1.Resume.CreateResume:output_type -> api.resume.v1.ResumeReply
+	0,  // 26: api.resume.v1.Resume.UpdateResume:output_type -> api.resume.v1.ResumeReply
+	0,  // 27: api.resume.v1.Resume.GetResume:output_type -> api.resume.v1.ResumeReply
+	12, // 28: api.resume.v1.Resume.ListResumes:output_type -> api.resume.v1.ListResumesReply
+	14, // 29: api.resume.v1.Resume.DeleteResume:output_type -> api.resume.v1.DeleteResumeReply
+	16, // 30: api.resume.v1.Resume.GenerateCVDescription:output_type -> api.resume.v1.GenerateCVDescriptionReply
+	18, // 31: api.resume.v1.Resume.UpdateCVEditStatus:output_type -> api.resume.v1.UpdateCVEditStatusReply
+	21, // 32: api.resume.v1.Resume.GetJobsForEvaluation:output_type -> api.resume.v1.GetJobsForEvaluationReply
+	23, // 33: api.resume.v1.Resume.EvaluateWithJD:output_type -> api.resume.v1.EvaluateWithJDReply
+	25, // 34: api.resume.v1.Resume.ScoreWithJD:output_type -> api.resume.v1.ScoreWithJDReply
+	25, // [25:35] is the sub-list for method output_type
+	15, // [15:25] is the sub-list for method input_type
+	15, // [15:15] is the sub-list for extension type_name
+	15, // [15:15] is the sub-list for extension extendee
+	0,  // [0:15] is the sub-list for field type_name
 }
 
 func init() { file_resume_v1_resume_proto_init() }
@@ -1558,7 +2014,7 @@ func file_resume_v1_resume_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_resume_v1_resume_proto_rawDesc), len(file_resume_v1_resume_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   19,
+			NumMessages:   26,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

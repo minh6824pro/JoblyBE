@@ -60,6 +60,13 @@ service JobPosting {
 			get: "/api/v1/my-created-jobs"
 		};
 	}
+
+	// Find similar jobs by job ID using vector embeddings
+	rpc FindSimilarJobs (FindSimilarJobsRequest) returns (FindSimilarJobsReply) {
+		option (google.api.http) = {
+			get: "/api/v1/jobs/{id}/similar"
+		};
+	}
 }
 
 // Company Service
@@ -212,6 +219,29 @@ message GetMyCreatedJobsRequest {
 	int32 page = 1;
 	int32 page_size = 2;
 	bool include_inactive = 3; // Include inactive jobs (default true)
+}
+
+// Find similar jobs request
+message FindSimilarJobsRequest {
+	string id = 1; // Job ID to find similar jobs for
+	int32 top_k = 2; // Number of similar jobs to return (default 10)
+}
+
+// Similar job with score breakdown
+message SimilarJobResult {
+	JobPostingReply job = 1;
+	float total_score = 2;
+	float title_score = 3;
+	float requirements_score = 4;
+	float skills_score = 5;
+	float level_score = 6;
+}
+
+// Find similar jobs response
+message FindSimilarJobsReply {
+	string source_job_id = 1;
+	repeated SimilarJobResult similar_jobs = 2;
+	int32 count = 3;
 }
 
 message ListJobPostingsReply {

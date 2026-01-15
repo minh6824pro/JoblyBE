@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/errors"
 	"github.com/go-kratos/kratos/v2/log"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // Resume represents a user's resume
@@ -94,6 +95,16 @@ type ResumeEvaluation struct {
 	CVEdits         []*ResumeCVEdit       `json:"cv_edits"`
 	JobsAnalyzed    int                   `json:"jobs_analyzed"`
 	EvaluatedAt     time.Time             `json:"evaluated_at"`
+	Type            string                `json:"type"`      // "auto" (default) or "manual"
+	JobID           string                `json:"job_id"`    // Job ID used for manual evaluation
+	JobTitle        string                `json:"job_title"` // Job title for display
+}
+
+type ScoreWithJD struct {
+	JobID          string                `json:"job_id"`
+	OverallScore   float64               `json:"overall_score"`
+	ScoreBreakdown *ResumeScoreBreakdown `json:"score_breakdown"`
+	MissingSkill   []string              `json:"missing_skill"`
 }
 
 // ResumeRepo is the interface for resume repository
@@ -108,6 +119,8 @@ type ResumeRepo interface {
 // ResumeUseCase is the use case for resume operations
 type ResumeUseCase struct {
 	repo         ResumeRepo
+	userRepo     UserRepo
+	jobRepo      JobPostingRepo
 	trackingUC   *UserTrackingUseCase
 	parserClient *ParserClient
 	producer     *kafkax.Producer
@@ -116,9 +129,11 @@ type ResumeUseCase struct {
 }
 
 // NewResumeUseCase creates a new resume use case
-func NewResumeUseCase(repo ResumeRepo, trackingUC *UserTrackingUseCase, parserClient *ParserClient, producer *kafkax.Producer, logger log.Logger) *ResumeUseCase {
+func NewResumeUseCase(repo ResumeRepo, userRepo UserRepo, jobRepo JobPostingRepo, trackingUC *UserTrackingUseCase, parserClient *ParserClient, producer *kafkax.Producer, logger log.Logger) *ResumeUseCase {
 	return &ResumeUseCase{
 		repo:         repo,
+		userRepo:     userRepo,
+		jobRepo:      jobRepo,
 		trackingUC:   trackingUC,
 		parserClient: parserClient,
 		producer:     producer,
@@ -475,7 +490,7 @@ func (uc *ResumeUseCase) buildSummaryPrompt(cvInfo, jobContext, currentInput str
 
 // buildExperienceDescriptionPrompt builds prompt for experience description
 func (uc *ResumeUseCase) buildExperienceDescriptionPrompt(cvInfo, jobContext, currentInput string) string {
-	prompt := "Write professional experience description in FIRST PERSON perspective (using 'I', 'my', 'me').\n\n"
+	prompt := "You are an expert CV/resume writer. Generate a professional experience description paragraph for a CV.\n\n"
 	prompt += cvInfo
 	prompt += jobContext
 
@@ -488,20 +503,19 @@ func (uc *ResumeUseCase) buildExperienceDescriptionPrompt(cvInfo, jobContext, cu
 		prompt += ".\n"
 	}
 
-	prompt += "\nWrite a concise, compelling 2-3 paragraph description that:\n"
-	prompt += "- Highlights key responsibilities and achievements\n"
-	prompt += "- Emphasizes relevant skills and impact\n"
-	prompt += "- Includes specific metrics and results where possible\n"
+	prompt += "\nWrite a SHORT, CONCISE description (2-3 sentences MAX) that:\n"
+	prompt += "- Summarizes the key responsibility and main achievement in this role\n"
+	prompt += "- Uses action verbs without first person (no 'I', 'my', 'me')\n"
+	prompt += "- Includes one key metric or result if available\n"
 	if jobContext != "" {
-		prompt += "- Shows alignment with the target position\n"
+		prompt += "- Emphasizes skills relevant to the target position\n"
 	}
-	prompt += "- Uses first person (I was responsible for, I developed, I led, etc.)\n"
 	prompt += "\nCRITICAL LANGUAGE REQUIREMENT:\n"
 	prompt += "Carefully analyze the language used in the candidate's CV information above.\n"
 	prompt += "If the CV contains Vietnamese text (e.g., 'Đại học', 'Công ty', 'Kinh nghiệm', Vietnamese names/addresses), write your response in Vietnamese.\n"
 	prompt += "If the CV is in English, write your response in English.\n"
 	prompt += "Match the language of the CV exactly - do not translate or mix languages.\n"
-	prompt += "\nProvide only the description text without any additional explanation."
+	prompt += "\nProvide only the paragraph text without any headers, labels, or additional explanation."
 
 	return prompt
 }
@@ -542,7 +556,7 @@ func (uc *ResumeUseCase) buildEducationDescriptionPrompt(cvInfo, jobContext, cur
 
 // buildProjectDescriptionPrompt builds prompt for project description
 func (uc *ResumeUseCase) buildProjectDescriptionPrompt(cvInfo, jobContext, currentInput string) string {
-	prompt := "Write professional project description in FIRST PERSON perspective (using 'I', 'my', 'me').\n\n"
+	prompt := "You are an expert CV/resume writer. Generate a professional project description paragraph for a CV.\n\n"
 	prompt += cvInfo
 	prompt += jobContext
 
@@ -555,21 +569,20 @@ func (uc *ResumeUseCase) buildProjectDescriptionPrompt(cvInfo, jobContext, curre
 		prompt += ".\n"
 	}
 
-	prompt += "\nWrite a concise, compelling 2-3 paragraph description that:\n"
-	prompt += "- Highlights project objectives and outcomes\n"
-	prompt += "- Emphasizes technologies used and technical challenges solved\n"
-	prompt += "- Shows your specific role and contributions\n"
-	prompt += "- Includes measurable results and impact where possible\n"
+	prompt += "\nWrite a SHORT, CONCISE description (2-3 sentences MAX) that:\n"
+	prompt += "- Briefly describes the project purpose and your role\n"
+	prompt += "- Mentions key technologies used\n"
+	prompt += "- Includes one measurable result or impact\n"
+	prompt += "- Uses action verbs without first person (no 'I', 'my', 'me')\n"
 	if jobContext != "" {
-		prompt += "- Demonstrates relevant skills for the target position\n"
+		prompt += "- Emphasizes technologies and skills relevant to the target position\n"
 	}
-	prompt += "- Uses first person (I developed, I implemented, I led, My role was, etc.)\n"
 	prompt += "\nCRITICAL LANGUAGE REQUIREMENT:\n"
 	prompt += "Carefully analyze the language used in the candidate's CV information above.\n"
 	prompt += "If the CV contains Vietnamese text (e.g., 'Đại học', 'Công ty', 'Kinh nghiệm', Vietnamese names/addresses), write your response in Vietnamese.\n"
 	prompt += "If the CV is in English, write your response in English.\n"
 	prompt += "Match the language of the CV exactly - do not translate or mix languages.\n"
-	prompt += "\nProvide only the description text without any additional explanation."
+	prompt += "\nProvide only the paragraph text without any headers, labels, or additional explanation."
 
 	return prompt
 }
@@ -644,6 +657,9 @@ func (uc *ResumeUseCase) EvaluateAndSaveResume(ctx context.Context, resumeID, us
 		Recommendations: evaluateResp.Recommendations,
 		JobsAnalyzed:    evaluateResp.JobsAnalyzed,
 		EvaluatedAt:     time.Now(),
+		Type:            "auto", // Auto evaluation based on interaction history
+		JobID:           "",
+		JobTitle:        "",
 	}
 
 	// Convert ScoreBreakdown
@@ -751,6 +767,291 @@ func (uc *ResumeUseCase) UpdateCVEditStatus(ctx context.Context, resumeID, editI
 
 	uc.log.Infof("Updated CV edit status: resume=%s, edit=%s, status=%s", resumeID, editID, status)
 	return nil
+}
+
+// JobForEvaluation represents a job for evaluation selection
+type JobForEvaluation struct {
+	ID          string
+	Title       string
+	CompanyName string
+	Location    string
+	TimeOnSight int32 // Only for viewed jobs, 0 for saved jobs
+}
+
+// GetJobsForEvaluation returns viewed jobs (from tracking) and saved jobs for evaluation selection
+func (uc *ResumeUseCase) GetJobsForEvaluation(ctx context.Context, userID string) ([]*JobForEvaluation, []*JobForEvaluation, error) {
+	userIDObject, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, nil, errors.BadRequest("INVALID_USER_ID", "Invalid user ID")
+	}
+
+	// Get top 10 viewed jobs from tracking
+	viewedJobs := make([]*JobForEvaluation, 0)
+	topViewedJobs, err := uc.trackingUC.UserTrackingRepo.GetTopViewedJobsInLastWeek(ctx, userIDObject, 10)
+	if err == nil && len(topViewedJobs) > 0 {
+		for _, tracking := range topViewedJobs {
+			job, err := uc.jobRepo.GetJobPosting(ctx, tracking.JobID.Hex())
+			if err != nil || job == nil {
+				continue
+			}
+			companyName := ""
+			if job.Company != nil {
+				companyName = job.Company.Name
+			}
+			viewedJobs = append(viewedJobs, &JobForEvaluation{
+				ID:          job.ID,
+				Title:       job.Title,
+				CompanyName: companyName,
+				Location:    job.Location,
+				TimeOnSight: tracking.TimeOnSight,
+			})
+		}
+	}
+
+	// Get saved jobs from user
+	savedJobs := make([]*JobForEvaluation, 0)
+	savedJobIDs, err := uc.userRepo.GetSavedJobIDs(ctx, userID)
+	if err == nil && len(savedJobIDs) > 0 {
+		for _, jobID := range savedJobIDs {
+			job, err := uc.jobRepo.GetJobPosting(ctx, jobID)
+			if err != nil || job == nil {
+				continue
+			}
+			companyName := ""
+			if job.Company != nil {
+				companyName = job.Company.Name
+			}
+			savedJobs = append(savedJobs, &JobForEvaluation{
+				ID:          job.ID,
+				Title:       job.Title,
+				CompanyName: companyName,
+				Location:    job.Location,
+				TimeOnSight: 0,
+			})
+		}
+	}
+
+	return viewedJobs, savedJobs, nil
+}
+
+// EvaluateWithJD evaluates a resume with a specific JD (synchronous)
+func (uc *ResumeUseCase) EvaluateWithJD(ctx context.Context, resumeID, jobID, userID string) (*Resume, *ResumeEvaluation, error) {
+	// Get the resume
+	resume, err := uc.repo.GetResume(ctx, resumeID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Check if resume exists
+	if resume == nil {
+		return nil, nil, ErrResumeNotFound
+	}
+
+	// Verify user owns this resume
+	if resume.UserID != userID {
+		return nil, nil, ErrUnauthorized
+	}
+
+	// Get the job posting
+	job, err := uc.jobRepo.GetJobPosting(ctx, jobID)
+	if err != nil {
+		return nil, nil, errors.InternalServer("JOB_FETCH_ERROR", "Failed to get job posting")
+	}
+	if job == nil {
+		return nil, nil, errors.NotFound("JOB_NOT_FOUND", "Job posting not found")
+	}
+
+	// Check if parser client is available
+	if uc.parserClient == nil {
+		return nil, nil, errors.InternalServer("PARSER_CLIENT_NOT_AVAILABLE", "Parser client is not initialized")
+	}
+
+	// Call evaluate service with specific JD
+	evaluateResp, err := uc.parserClient.EvaluateResumeWithJD(ctx, resume.ResumeDetail, job)
+	if err != nil {
+		uc.log.Errorf("Failed to evaluate resume with JD: %v", err)
+		return nil, nil, errors.InternalServer("EVALUATE_FAILED", "Failed to evaluate resume")
+	}
+
+	// Check if evaluation was successful
+	if !evaluateResp.Success {
+		errMsg := "Evaluation failed"
+		if evaluateResp.Error != "" {
+			errMsg = evaluateResp.Error
+		}
+		return nil, nil, errors.InternalServer("EVALUATE_FAILED", errMsg)
+	}
+
+	// Get company name
+	companyName := ""
+	if job.Company != nil {
+		companyName = job.Company.Name
+	}
+
+	// Convert EvaluateResponse to ResumeEvaluation
+	evaluation := &ResumeEvaluation{
+		CVName:          evaluateResp.CVName,
+		OverallScore:    evaluateResp.OverallScore,
+		Grade:           evaluateResp.Grade,
+		Strengths:       evaluateResp.Strengths,
+		Weaknesses:      evaluateResp.Weaknesses,
+		Recommendations: evaluateResp.Recommendations,
+		JobsAnalyzed:    1,
+		EvaluatedAt:     time.Now(),
+		Type:            "manual",
+		JobID:           jobID,
+		JobTitle:        job.Title + " - " + companyName,
+	}
+
+	// Convert ScoreBreakdown
+	if evaluateResp.ScoreBreakdown != nil {
+		evaluation.ScoreBreakdown = &ResumeScoreBreakdown{
+			SkillsScore:       evaluateResp.ScoreBreakdown.SkillsScore,
+			ExperienceScore:   evaluateResp.ScoreBreakdown.ExperienceScore,
+			EducationScore:    evaluateResp.ScoreBreakdown.EducationScore,
+			CompletenessScore: evaluateResp.ScoreBreakdown.CompletenessScore,
+			JobAlignmentScore: evaluateResp.ScoreBreakdown.JobAlignmentScore,
+			PresentationScore: evaluateResp.ScoreBreakdown.PresentationScore,
+		}
+	}
+
+	// Convert CVEdits
+	if len(evaluateResp.CVEdits) > 0 {
+		evaluation.CVEdits = make([]*ResumeCVEdit, 0, len(evaluateResp.CVEdits))
+		for i, edit := range evaluateResp.CVEdits {
+			// Generate unique ID for each edit
+			editID := fmt.Sprintf("%s-manual-%d-%d", resumeID, time.Now().Unix(), i)
+			evaluation.CVEdits = append(evaluation.CVEdits, &ResumeCVEdit{
+				ID:             editID,
+				FieldPath:      edit.FieldPath,
+				Action:         edit.Action,
+				CurrentValue:   edit.CurrentValue,
+				SuggestedValue: edit.SuggestedValue,
+				Reason:         edit.Reason,
+				Priority:       edit.Priority,
+				ImpactScore:    edit.ImpactScore,
+				Status:         "", // Empty means new/pending
+			})
+		}
+	}
+
+	// Initialize Evaluations array if nil
+	if resume.ResumeDetail.Evaluations == nil {
+		resume.ResumeDetail.Evaluations = make([]*ResumeEvaluation, 0)
+	}
+
+	// Append new evaluation to the array
+	resume.ResumeDetail.Evaluations = append(resume.ResumeDetail.Evaluations, evaluation)
+
+	// Update resume in database
+	updatedResume, err := uc.repo.UpdateResume(ctx, resume)
+	if err != nil {
+		uc.log.Errorf("Failed to update resume with evaluation: %v", err)
+		return nil, nil, errors.InternalServer("UPDATE_FAILED", "Failed to save evaluation result")
+	}
+
+	uc.log.Infof("Successfully evaluated resume %s with JD %s, score: %.2f", resumeID, jobID, evaluation.OverallScore)
+	return updatedResume, evaluation, nil
+}
+
+func (uc *ResumeUseCase) ScoreWithJD(ctx context.Context, resumeID, jobID, userID string) (*ScoreWithJD, error) {
+	// Get the resume
+	resume, err := uc.repo.GetResume(ctx, resumeID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if resume exists
+	if resume == nil {
+		return nil, ErrResumeNotFound
+	}
+
+	// Verify user owns this resume
+	if resume.UserID != userID {
+		return nil, ErrUnauthorized
+	}
+
+	// Get the job posting
+	job, err := uc.jobRepo.GetJobPosting(ctx, jobID)
+	if err != nil {
+		return nil, errors.InternalServer("JOB_FETCH_ERROR", "Failed to get job posting")
+	}
+	if job == nil {
+		return nil, errors.NotFound("JOB_NOT_FOUND", "Job posting not found")
+	}
+
+	// Check if parser client is available
+	if uc.parserClient == nil {
+		return nil, errors.InternalServer("PARSER_CLIENT_NOT_AVAILABLE", "Parser client is not initialized")
+	}
+
+	// Call evaluate service with specific JD
+	evaluateResp, err := uc.parserClient.EvaluateResumeWithJD(ctx, resume.ResumeDetail, job)
+	if err != nil {
+		uc.log.Errorf("Failed to evaluate resume with JD: %v", err)
+		return nil, errors.InternalServer("EVALUATE_FAILED", "Failed to evaluate resume")
+	}
+
+	// Check if evaluation was successful
+	if !evaluateResp.Success {
+		errMsg := "Evaluation failed"
+		if evaluateResp.Error != "" {
+			errMsg = evaluateResp.Error
+		}
+		return nil, errors.InternalServer("EVALUATE_FAILED", errMsg)
+	}
+
+	// Get company name
+	companyName := ""
+	if job.Company != nil {
+		companyName = job.Company.Name
+	}
+
+	// Convert EvaluateResponse to ResumeEvaluation
+	evaluation := &ResumeEvaluation{
+		CVName:          evaluateResp.CVName,
+		OverallScore:    evaluateResp.OverallScore,
+		Grade:           evaluateResp.Grade,
+		Strengths:       evaluateResp.Strengths,
+		Weaknesses:      evaluateResp.Weaknesses,
+		Recommendations: evaluateResp.Recommendations,
+		JobsAnalyzed:    1,
+		EvaluatedAt:     time.Now(),
+		Type:            "manual",
+		JobID:           jobID,
+		JobTitle:        job.Title + " - " + companyName,
+	}
+
+	// Convert ScoreBreakdown
+	if evaluateResp.ScoreBreakdown != nil {
+		evaluation.ScoreBreakdown = &ResumeScoreBreakdown{
+			SkillsScore:       evaluateResp.ScoreBreakdown.SkillsScore,
+			ExperienceScore:   evaluateResp.ScoreBreakdown.ExperienceScore,
+			EducationScore:    evaluateResp.ScoreBreakdown.EducationScore,
+			CompletenessScore: evaluateResp.ScoreBreakdown.CompletenessScore,
+			JobAlignmentScore: evaluateResp.ScoreBreakdown.JobAlignmentScore,
+			PresentationScore: evaluateResp.ScoreBreakdown.PresentationScore,
+		}
+	}
+	skillMissing := make([]string, 0)
+	// Convert CVEdits
+	if len(evaluateResp.CVEdits) > 0 {
+		for _, edit := range evaluateResp.CVEdits {
+			if edit.FieldPath == "skills" {
+				skillMissing = append(skillMissing, edit.SuggestedValue)
+			}
+		}
+	}
+
+	score := &ScoreWithJD{
+		JobID:          jobID,
+		OverallScore:   evaluation.OverallScore,
+		ScoreBreakdown: evaluation.ScoreBreakdown,
+		MissingSkill:   skillMissing,
+	}
+
+	uc.log.Infof("Successfully score resume %s with JD %s, score: %.2f", resumeID, jobID, evaluation.OverallScore)
+	return score, nil
 }
 
 // Error definitions

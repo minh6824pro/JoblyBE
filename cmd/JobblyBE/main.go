@@ -78,7 +78,7 @@ func main() {
 		panic(err)
 	}
 
-	app, cleanup, err := wireApp(bc.Server, bc.Data, bc.Kafka, logger)
+	app, cleanup, err := wireApp(bc.Server, bc.Data, bc.Kafka, bc.Milvus, logger)
 	if err != nil {
 		panic(err)
 	}

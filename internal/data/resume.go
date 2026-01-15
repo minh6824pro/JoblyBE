@@ -91,6 +91,9 @@ type ResumeEvaluation struct {
 	CVEdits         []ResumeCVEdit       `bson:"cv_edits"`
 	JobsAnalyzed    int                  `bson:"jobs_analyzed"`
 	EvaluatedAt     time.Time            `bson:"evaluated_at"`
+	Type            string               `bson:"type,omitempty"`      // "auto" (default) or "manual"
+	JobID           string               `bson:"job_id,omitempty"`    // Job ID used for manual evaluation
+	JobTitle        string               `bson:"job_title,omitempty"` // Job title for display
 }
 
 type resumeRepo struct {
@@ -468,6 +471,12 @@ func (r *resumeRepo) toEvaluationsArray(evals []*biz.ResumeEvaluation) []ResumeE
 	result := make([]ResumeEvaluation, 0, len(evals))
 	for _, eval := range evals {
 		if eval != nil {
+			// Set default type to "auto" if empty
+			evalType := eval.Type
+			if evalType == "" {
+				evalType = "auto"
+			}
+
 			dataEval := ResumeEvaluation{
 				CVName:          eval.CVName,
 				OverallScore:    eval.OverallScore,
@@ -477,6 +486,9 @@ func (r *resumeRepo) toEvaluationsArray(evals []*biz.ResumeEvaluation) []ResumeE
 				Recommendations: eval.Recommendations,
 				JobsAnalyzed:    eval.JobsAnalyzed,
 				EvaluatedAt:     eval.EvaluatedAt,
+				Type:            evalType,
+				JobID:           eval.JobID,
+				JobTitle:        eval.JobTitle,
 			}
 
 			// Convert ScoreBreakdown
@@ -523,6 +535,12 @@ func (r *resumeRepo) toEvaluationsBizArray(docs []ResumeEvaluation) []*biz.Resum
 	}
 	result := make([]*biz.ResumeEvaluation, 0, len(docs))
 	for i := range docs {
+		// Set default type to "auto" if empty
+		evalType := docs[i].Type
+		if evalType == "" {
+			evalType = "auto"
+		}
+
 		bizEval := &biz.ResumeEvaluation{
 			CVName:          docs[i].CVName,
 			OverallScore:    docs[i].OverallScore,
@@ -532,6 +550,9 @@ func (r *resumeRepo) toEvaluationsBizArray(docs []ResumeEvaluation) []*biz.Resum
 			Recommendations: docs[i].Recommendations,
 			JobsAnalyzed:    docs[i].JobsAnalyzed,
 			EvaluatedAt:     docs[i].EvaluatedAt,
+			Type:            evalType,
+			JobID:           docs[i].JobID,
+			JobTitle:        docs[i].JobTitle,
 		}
 
 		// Convert ScoreBreakdown
