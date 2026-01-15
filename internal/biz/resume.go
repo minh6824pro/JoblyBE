@@ -100,6 +100,13 @@ type ResumeEvaluation struct {
 	JobTitle        string                `json:"job_title"` // Job title for display
 }
 
+type ScoreWithJD struct {
+	JobID          string                `json:"job_id"`
+	OverallScore   float64               `json:"overall_score"`
+	ScoreBreakdown *ResumeScoreBreakdown `json:"score_breakdown"`
+	MissingSkill   []string              `json:"missing_skill"`
+}
+
 // ResumeRepo is the interface for resume repository
 type ResumeRepo interface {
 	CreateResume(ctx context.Context, resume *Resume) (*Resume, error)
@@ -945,6 +952,106 @@ func (uc *ResumeUseCase) EvaluateWithJD(ctx context.Context, resumeID, jobID, us
 
 	uc.log.Infof("Successfully evaluated resume %s with JD %s, score: %.2f", resumeID, jobID, evaluation.OverallScore)
 	return updatedResume, evaluation, nil
+}
+
+func (uc *ResumeUseCase) ScoreWithJD(ctx context.Context, resumeID, jobID, userID string) (*ScoreWithJD, error) {
+	// Get the resume
+	resume, err := uc.repo.GetResume(ctx, resumeID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if resume exists
+	if resume == nil {
+		return nil, ErrResumeNotFound
+	}
+
+	// Verify user owns this resume
+	if resume.UserID != userID {
+		return nil, ErrUnauthorized
+	}
+
+	// Get the job posting
+	job, err := uc.jobRepo.GetJobPosting(ctx, jobID)
+	if err != nil {
+		return nil, errors.InternalServer("JOB_FETCH_ERROR", "Failed to get job posting")
+	}
+	if job == nil {
+		return nil, errors.NotFound("JOB_NOT_FOUND", "Job posting not found")
+	}
+
+	// Check if parser client is available
+	if uc.parserClient == nil {
+		return nil, errors.InternalServer("PARSER_CLIENT_NOT_AVAILABLE", "Parser client is not initialized")
+	}
+
+	// Call evaluate service with specific JD
+	evaluateResp, err := uc.parserClient.EvaluateResumeWithJD(ctx, resume.ResumeDetail, job)
+	if err != nil {
+		uc.log.Errorf("Failed to evaluate resume with JD: %v", err)
+		return nil, errors.InternalServer("EVALUATE_FAILED", "Failed to evaluate resume")
+	}
+
+	// Check if evaluation was successful
+	if !evaluateResp.Success {
+		errMsg := "Evaluation failed"
+		if evaluateResp.Error != "" {
+			errMsg = evaluateResp.Error
+		}
+		return nil, errors.InternalServer("EVALUATE_FAILED", errMsg)
+	}
+
+	// Get company name
+	companyName := ""
+	if job.Company != nil {
+		companyName = job.Company.Name
+	}
+
+	// Convert EvaluateResponse to ResumeEvaluation
+	evaluation := &ResumeEvaluation{
+		CVName:          evaluateResp.CVName,
+		OverallScore:    evaluateResp.OverallScore,
+		Grade:           evaluateResp.Grade,
+		Strengths:       evaluateResp.Strengths,
+		Weaknesses:      evaluateResp.Weaknesses,
+		Recommendations: evaluateResp.Recommendations,
+		JobsAnalyzed:    1,
+		EvaluatedAt:     time.Now(),
+		Type:            "manual",
+		JobID:           jobID,
+		JobTitle:        job.Title + " - " + companyName,
+	}
+
+	// Convert ScoreBreakdown
+	if evaluateResp.ScoreBreakdown != nil {
+		evaluation.ScoreBreakdown = &ResumeScoreBreakdown{
+			SkillsScore:       evaluateResp.ScoreBreakdown.SkillsScore,
+			ExperienceScore:   evaluateResp.ScoreBreakdown.ExperienceScore,
+			EducationScore:    evaluateResp.ScoreBreakdown.EducationScore,
+			CompletenessScore: evaluateResp.ScoreBreakdown.CompletenessScore,
+			JobAlignmentScore: evaluateResp.ScoreBreakdown.JobAlignmentScore,
+			PresentationScore: evaluateResp.ScoreBreakdown.PresentationScore,
+		}
+	}
+	skillMissing := make([]string, 0)
+	// Convert CVEdits
+	if len(evaluateResp.CVEdits) > 0 {
+		for _, edit := range evaluateResp.CVEdits {
+			if edit.FieldPath == "skills" {
+				skillMissing = append(skillMissing, edit.SuggestedValue)
+			}
+		}
+	}
+
+	score := &ScoreWithJD{
+		JobID:          jobID,
+		OverallScore:   evaluation.OverallScore,
+		ScoreBreakdown: evaluation.ScoreBreakdown,
+		MissingSkill:   skillMissing,
+	}
+
+	uc.log.Infof("Successfully score resume %s with JD %s, score: %.2f", resumeID, jobID, evaluation.OverallScore)
+	return score, nil
 }
 
 // Error definitions

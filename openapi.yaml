@@ -353,6 +353,25 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.resume.v1.GetJobsForEvaluationReply'
+    /api/v1/evaluation/score-with-jd:
+        post:
+            tags:
+                - Resume
+            description: Evaluate resume with selected JD (synchronous)
+            operationId: Resume_ScoreWithJD
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.resume.v1.ScoreWithJDRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.resume.v1.ScoreWithJDReply'
     /api/v1/jobs:
         get:
             tags:
@@ -1794,6 +1813,27 @@ components:
                 presentationScore:
                     type: number
                     format: double
+        api.resume.v1.ScoreWithJDReply:
+            type: object
+            properties:
+                overallScore:
+                    type: number
+                    format: double
+                scoreBreakdown:
+                    $ref: '#/components/schemas/api.resume.v1.ResumeScoreBreakdown'
+                missingSkill:
+                    type: array
+                    items:
+                        type: string
+                jobId:
+                    type: string
+        api.resume.v1.ScoreWithJDRequest:
+            type: object
+            properties:
+                resumeId:
+                    type: string
+                jobId:
+                    type: string
         api.resume.v1.UpdateCVEditStatusReply:
             type: object
             properties:

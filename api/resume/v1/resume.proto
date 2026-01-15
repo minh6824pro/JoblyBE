@@ -76,6 +76,14 @@ service Resume {
 			body: "*"
 		};
 	}
+
+	// Evaluate resume with selected JD (synchronous)
+	rpc ScoreWithJD (ScoreWithJDRequest) returns (ScoreWithJDReply) {
+		option (google.api.http) = {
+			post: "/api/v1/evaluation/score-with-jd"
+			body: "*"
+		};
+	}
 }
 // Resume messages
 message ResumeReply {
@@ -246,3 +254,14 @@ message EvaluateWithJDReply {
 	ResumeEvaluation evaluation = 1;
 }
 
+message ScoreWithJDRequest{
+	string resume_id = 1;
+	string job_id = 2;
+}
+
+message ScoreWithJDReply{
+	double overall_score = 1;
+	ResumeScoreBreakdown score_breakdown = 2;
+	repeated string missing_skill=3;
+	string job_id=4;
+}

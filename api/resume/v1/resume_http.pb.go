@@ -26,6 +26,7 @@ const OperationResumeGenerateCVDescription = "/api.resume.v1.Resume/GenerateCVDe
 const OperationResumeGetJobsForEvaluation = "/api.resume.v1.Resume/GetJobsForEvaluation"
 const OperationResumeGetResume = "/api.resume.v1.Resume/GetResume"
 const OperationResumeListResumes = "/api.resume.v1.Resume/ListResumes"
+const OperationResumeScoreWithJD = "/api.resume.v1.Resume/ScoreWithJD"
 const OperationResumeUpdateCVEditStatus = "/api.resume.v1.Resume/UpdateCVEditStatus"
 const OperationResumeUpdateResume = "/api.resume.v1.Resume/UpdateResume"
 
@@ -44,6 +45,8 @@ type ResumeHTTPServer interface {
 	GetResume(context.Context, *GetResumeRequest) (*ResumeReply, error)
 	// ListResumes List all resumes for the authenticated user
 	ListResumes(context.Context, *ListResumesRequest) (*ListResumesReply, error)
+	// ScoreWithJD Evaluate resume with selected JD (synchronous)
+	ScoreWithJD(context.Context, *ScoreWithJDRequest) (*ScoreWithJDReply, error)
 	// UpdateCVEditStatus Update CV edit status
 	UpdateCVEditStatus(context.Context, *UpdateCVEditStatusRequest) (*UpdateCVEditStatusReply, error)
 	// UpdateResume Update an existing resume
@@ -61,6 +64,7 @@ func RegisterResumeHTTPServer(s *http.Server, srv ResumeHTTPServer) {
 	r.PUT("/api/v1/resumes/{resume_id}/cv-edits/{edit_id}/status", _Resume_UpdateCVEditStatus0_HTTP_Handler(srv))
 	r.GET("/api/v1/evaluation/jobs", _Resume_GetJobsForEvaluation0_HTTP_Handler(srv))
 	r.POST("/api/v1/evaluation/evaluate-with-jd", _Resume_EvaluateWithJD0_HTTP_Handler(srv))
+	r.POST("/api/v1/evaluation/score-with-jd", _Resume_ScoreWithJD0_HTTP_Handler(srv))
 }
 
 func _Resume_CreateResume0_HTTP_Handler(srv ResumeHTTPServer) func(ctx http.Context) error {
@@ -261,6 +265,28 @@ func _Resume_EvaluateWithJD0_HTTP_Handler(srv ResumeHTTPServer) func(ctx http.Co
 	}
 }
 
+func _Resume_ScoreWithJD0_HTTP_Handler(srv ResumeHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in ScoreWithJDRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationResumeScoreWithJD)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.ScoreWithJD(ctx, req.(*ScoreWithJDRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*ScoreWithJDReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type ResumeHTTPClient interface {
 	// CreateResume Create a new resume
 	CreateResume(ctx context.Context, req *CreateResumeRequest, opts ...http.CallOption) (rsp *ResumeReply, err error)
@@ -276,6 +302,8 @@ type ResumeHTTPClient interface {
 	GetResume(ctx context.Context, req *GetResumeRequest, opts ...http.CallOption) (rsp *ResumeReply, err error)
 	// ListResumes List all resumes for the authenticated user
 	ListResumes(ctx context.Context, req *ListResumesRequest, opts ...http.CallOption) (rsp *ListResumesReply, err error)
+	// ScoreWithJD Evaluate resume with selected JD (synchronous)
+	ScoreWithJD(ctx context.Context, req *ScoreWithJDRequest, opts ...http.CallOption) (rsp *ScoreWithJDReply, err error)
 	// UpdateCVEditStatus Update CV edit status
 	UpdateCVEditStatus(ctx context.Context, req *UpdateCVEditStatusRequest, opts ...http.CallOption) (rsp *UpdateCVEditStatusReply, err error)
 	// UpdateResume Update an existing resume
@@ -382,6 +410,20 @@ func (c *ResumeHTTPClientImpl) ListResumes(ctx context.Context, in *ListResumesR
 	opts = append(opts, http.Operation(OperationResumeListResumes))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// ScoreWithJD Evaluate resume with selected JD (synchronous)
+func (c *ResumeHTTPClientImpl) ScoreWithJD(ctx context.Context, in *ScoreWithJDRequest, opts ...http.CallOption) (*ScoreWithJDReply, error) {
+	var out ScoreWithJDReply
+	pattern := "/api/v1/evaluation/score-with-jd"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationResumeScoreWithJD))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

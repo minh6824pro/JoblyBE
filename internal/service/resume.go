@@ -456,6 +456,30 @@ func (s *ResumeService) EvaluateWithJD(ctx context.Context, req *pb.EvaluateWith
 		Evaluation: pbEval,
 	}, nil
 }
+func (s *ResumeService) ScoreWithJD(ctx context.Context, req *pb.ScoreWithJDRequest) (*pb.ScoreWithJDReply, error) {
+	claims, err := auth.GetClaimsFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	evaluation, err := s.uc.ScoreWithJD(ctx, req.ResumeId, req.JobId, claims.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.ScoreWithJDReply{
+		OverallScore: evaluation.OverallScore,
+		ScoreBreakdown: &pb.ResumeScoreBreakdown{
+			SkillsScore:       evaluation.ScoreBreakdown.SkillsScore,
+			ExperienceScore:   evaluation.ScoreBreakdown.ExperienceScore,
+			EducationScore:    evaluation.ScoreBreakdown.EducationScore,
+			CompletenessScore: evaluation.ScoreBreakdown.CompletenessScore,
+			JobAlignmentScore: evaluation.ScoreBreakdown.JobAlignmentScore,
+			PresentationScore: evaluation.ScoreBreakdown.PresentationScore,
+		},
+		MissingSkill: evaluation.MissingSkill,
+		JobId:        evaluation.JobID,
+	}, nil
+}
 
 // Helper function to convert single evaluation to proto
 func (s *ResumeService) evaluationToPb(eval *biz.ResumeEvaluation) *pb.ResumeEvaluation {

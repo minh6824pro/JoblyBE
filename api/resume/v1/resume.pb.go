@@ -1641,6 +1641,126 @@ func (x *EvaluateWithJDReply) GetEvaluation() *ResumeEvaluation {
 	return nil
 }
 
+type ScoreWithJDRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ResumeId      string                 `protobuf:"bytes,1,opt,name=resume_id,json=resumeId,proto3" json:"resume_id,omitempty"`
+	JobId         string                 `protobuf:"bytes,2,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ScoreWithJDRequest) Reset() {
+	*x = ScoreWithJDRequest{}
+	mi := &file_resume_v1_resume_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ScoreWithJDRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ScoreWithJDRequest) ProtoMessage() {}
+
+func (x *ScoreWithJDRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_resume_v1_resume_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ScoreWithJDRequest.ProtoReflect.Descriptor instead.
+func (*ScoreWithJDRequest) Descriptor() ([]byte, []int) {
+	return file_resume_v1_resume_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *ScoreWithJDRequest) GetResumeId() string {
+	if x != nil {
+		return x.ResumeId
+	}
+	return ""
+}
+
+func (x *ScoreWithJDRequest) GetJobId() string {
+	if x != nil {
+		return x.JobId
+	}
+	return ""
+}
+
+type ScoreWithJDReply struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	OverallScore   float64                `protobuf:"fixed64,1,opt,name=overall_score,json=overallScore,proto3" json:"overall_score,omitempty"`
+	ScoreBreakdown *ResumeScoreBreakdown  `protobuf:"bytes,2,opt,name=score_breakdown,json=scoreBreakdown,proto3" json:"score_breakdown,omitempty"`
+	MissingSkill   []string               `protobuf:"bytes,3,rep,name=missing_skill,json=missingSkill,proto3" json:"missing_skill,omitempty"`
+	JobId          string                 `protobuf:"bytes,4,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *ScoreWithJDReply) Reset() {
+	*x = ScoreWithJDReply{}
+	mi := &file_resume_v1_resume_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ScoreWithJDReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ScoreWithJDReply) ProtoMessage() {}
+
+func (x *ScoreWithJDReply) ProtoReflect() protoreflect.Message {
+	mi := &file_resume_v1_resume_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ScoreWithJDReply.ProtoReflect.Descriptor instead.
+func (*ScoreWithJDReply) Descriptor() ([]byte, []int) {
+	return file_resume_v1_resume_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *ScoreWithJDReply) GetOverallScore() float64 {
+	if x != nil {
+		return x.OverallScore
+	}
+	return 0
+}
+
+func (x *ScoreWithJDReply) GetScoreBreakdown() *ResumeScoreBreakdown {
+	if x != nil {
+		return x.ScoreBreakdown
+	}
+	return nil
+}
+
+func (x *ScoreWithJDReply) GetMissingSkill() []string {
+	if x != nil {
+		return x.MissingSkill
+	}
+	return nil
+}
+
+func (x *ScoreWithJDReply) GetJobId() string {
+	if x != nil {
+		return x.JobId
+	}
+	return ""
+}
+
 var File_resume_v1_resume_proto protoreflect.FileDescriptor
 
 const file_resume_v1_resume_proto_rawDesc = "" +
@@ -1776,7 +1896,16 @@ const file_resume_v1_resume_proto_rawDesc = "" +
 	"\x13EvaluateWithJDReply\x12?\n" +
 	"\n" +
 	"evaluation\x18\x01 \x01(\v2\x1f.api.resume.v1.ResumeEvaluationR\n" +
-	"evaluation2\x98\t\n" +
+	"evaluation\"H\n" +
+	"\x12ScoreWithJDRequest\x12\x1b\n" +
+	"\tresume_id\x18\x01 \x01(\tR\bresumeId\x12\x15\n" +
+	"\x06job_id\x18\x02 \x01(\tR\x05jobId\"\xc1\x01\n" +
+	"\x10ScoreWithJDReply\x12#\n" +
+	"\roverall_score\x18\x01 \x01(\x01R\foverallScore\x12L\n" +
+	"\x0fscore_breakdown\x18\x02 \x01(\v2#.api.resume.v1.ResumeScoreBreakdownR\x0escoreBreakdown\x12#\n" +
+	"\rmissing_skill\x18\x03 \x03(\tR\fmissingSkill\x12\x15\n" +
+	"\x06job_id\x18\x04 \x01(\tR\x05jobId2\x98\n" +
+	"\n" +
 	"\x06Resume\x12j\n" +
 	"\fCreateResume\x12\".api.resume.v1.CreateResumeRequest\x1a\x1a.api.resume.v1.ResumeReply\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/api/v1/resumes\x12o\n" +
 	"\fUpdateResume\x12\".api.resume.v1.UpdateResumeRequest\x1a\x1a.api.resume.v1.ResumeReply\"\x1f\x82\xd3\xe4\x93\x02\x19:\x01*\x1a\x14/api/v1/resumes/{id}\x12f\n" +
@@ -1786,7 +1915,8 @@ const file_resume_v1_resume_proto_rawDesc = "" +
 	"\x15GenerateCVDescription\x12+.api.resume.v1.GenerateCVDescriptionRequest\x1a).api.resume.v1.GenerateCVDescriptionReply\"/\x82\xd3\xe4\x93\x02):\x01*\"$/api/v1/resumes/generate-description\x12\xa8\x01\n" +
 	"\x12UpdateCVEditStatus\x12(.api.resume.v1.UpdateCVEditStatusRequest\x1a&.api.resume.v1.UpdateCVEditStatusReply\"@\x82\xd3\xe4\x93\x02::\x01*\x1a5/api/v1/resumes/{resume_id}/cv-edits/{edit_id}/status\x12\x8d\x01\n" +
 	"\x14GetJobsForEvaluation\x12*.api.resume.v1.GetJobsForEvaluationRequest\x1a(.api.resume.v1.GetJobsForEvaluationReply\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/api/v1/evaluation/jobs\x12\x8a\x01\n" +
-	"\x0eEvaluateWithJD\x12$.api.resume.v1.EvaluateWithJDRequest\x1a\".api.resume.v1.EvaluateWithJDReply\".\x82\xd3\xe4\x93\x02(:\x01*\"#/api/v1/evaluation/evaluate-with-jdB,\n" +
+	"\x0eEvaluateWithJD\x12$.api.resume.v1.EvaluateWithJDRequest\x1a\".api.resume.v1.EvaluateWithJDReply\".\x82\xd3\xe4\x93\x02(:\x01*\"#/api/v1/evaluation/evaluate-with-jd\x12~\n" +
+	"\vScoreWithJD\x12!.api.resume.v1.ScoreWithJDRequest\x1a\x1f.api.resume.v1.ScoreWithJDReply\"+\x82\xd3\xe4\x93\x02%:\x01*\" /api/v1/evaluation/score-with-jdB,\n" +
 	"\rapi.resume.v1P\x01Z\x19JobblyBE/api/resume/v1;v1b\x06proto3"
 
 var (
@@ -1801,7 +1931,7 @@ func file_resume_v1_resume_proto_rawDescGZIP() []byte {
 	return file_resume_v1_resume_proto_rawDescData
 }
 
-var file_resume_v1_resume_proto_msgTypes = make([]protoimpl.MessageInfo, 24)
+var file_resume_v1_resume_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
 var file_resume_v1_resume_proto_goTypes = []any{
 	(*ResumeReply)(nil),                  // 0: api.resume.v1.ResumeReply
 	(*ResumeDetail)(nil),                 // 1: api.resume.v1.ResumeDetail
@@ -1827,6 +1957,8 @@ var file_resume_v1_resume_proto_goTypes = []any{
 	(*GetJobsForEvaluationReply)(nil),    // 21: api.resume.v1.GetJobsForEvaluationReply
 	(*EvaluateWithJDRequest)(nil),        // 22: api.resume.v1.EvaluateWithJDRequest
 	(*EvaluateWithJDReply)(nil),          // 23: api.resume.v1.EvaluateWithJDReply
+	(*ScoreWithJDRequest)(nil),           // 24: api.resume.v1.ScoreWithJDRequest
+	(*ScoreWithJDReply)(nil),             // 25: api.resume.v1.ScoreWithJDReply
 }
 var file_resume_v1_resume_proto_depIdxs = []int32{
 	1,  // 0: api.resume.v1.ResumeReply.resume_detail:type_name -> api.resume.v1.ResumeDetail
@@ -1843,29 +1975,32 @@ var file_resume_v1_resume_proto_depIdxs = []int32{
 	19, // 11: api.resume.v1.GetJobsForEvaluationReply.viewed_jobs:type_name -> api.resume.v1.JobForEvaluation
 	19, // 12: api.resume.v1.GetJobsForEvaluationReply.saved_jobs:type_name -> api.resume.v1.JobForEvaluation
 	7,  // 13: api.resume.v1.EvaluateWithJDReply.evaluation:type_name -> api.resume.v1.ResumeEvaluation
-	8,  // 14: api.resume.v1.Resume.CreateResume:input_type -> api.resume.v1.CreateResumeRequest
-	9,  // 15: api.resume.v1.Resume.UpdateResume:input_type -> api.resume.v1.UpdateResumeRequest
-	10, // 16: api.resume.v1.Resume.GetResume:input_type -> api.resume.v1.GetResumeRequest
-	11, // 17: api.resume.v1.Resume.ListResumes:input_type -> api.resume.v1.ListResumesRequest
-	13, // 18: api.resume.v1.Resume.DeleteResume:input_type -> api.resume.v1.DeleteResumeRequest
-	15, // 19: api.resume.v1.Resume.GenerateCVDescription:input_type -> api.resume.v1.GenerateCVDescriptionRequest
-	17, // 20: api.resume.v1.Resume.UpdateCVEditStatus:input_type -> api.resume.v1.UpdateCVEditStatusRequest
-	20, // 21: api.resume.v1.Resume.GetJobsForEvaluation:input_type -> api.resume.v1.GetJobsForEvaluationRequest
-	22, // 22: api.resume.v1.Resume.EvaluateWithJD:input_type -> api.resume.v1.EvaluateWithJDRequest
-	0,  // 23: api.resume.v1.Resume.CreateResume:output_type -> api.resume.v1.ResumeReply
-	0,  // 24: api.resume.v1.Resume.UpdateResume:output_type -> api.resume.v1.ResumeReply
-	0,  // 25: api.resume.v1.Resume.GetResume:output_type -> api.resume.v1.ResumeReply
-	12, // 26: api.resume.v1.Resume.ListResumes:output_type -> api.resume.v1.ListResumesReply
-	14, // 27: api.resume.v1.Resume.DeleteResume:output_type -> api.resume.v1.DeleteResumeReply
-	16, // 28: api.resume.v1.Resume.GenerateCVDescription:output_type -> api.resume.v1.GenerateCVDescriptionReply
-	18, // 29: api.resume.v1.Resume.UpdateCVEditStatus:output_type -> api.resume.v1.UpdateCVEditStatusReply
-	21, // 30: api.resume.v1.Resume.GetJobsForEvaluation:output_type -> api.resume.v1.GetJobsForEvaluationReply
-	23, // 31: api.resume.v1.Resume.EvaluateWithJD:output_type -> api.resume.v1.EvaluateWithJDReply
-	23, // [23:32] is the sub-list for method output_type
-	14, // [14:23] is the sub-list for method input_type
-	14, // [14:14] is the sub-list for extension type_name
-	14, // [14:14] is the sub-list for extension extendee
-	0,  // [0:14] is the sub-list for field type_name
+	5,  // 14: api.resume.v1.ScoreWithJDReply.score_breakdown:type_name -> api.resume.v1.ResumeScoreBreakdown
+	8,  // 15: api.resume.v1.Resume.CreateResume:input_type -> api.resume.v1.CreateResumeRequest
+	9,  // 16: api.resume.v1.Resume.UpdateResume:input_type -> api.resume.v1.UpdateResumeRequest
+	10, // 17: api.resume.v1.Resume.GetResume:input_type -> api.resume.v1.GetResumeRequest
+	11, // 18: api.resume.v1.Resume.ListResumes:input_type -> api.resume.v1.ListResumesRequest
+	13, // 19: api.resume.v1.Resume.DeleteResume:input_type -> api.resume.v1.DeleteResumeRequest
+	15, // 20: api.resume.v1.Resume.GenerateCVDescription:input_type -> api.resume.v1.GenerateCVDescriptionRequest
+	17, // 21: api.resume.v1.Resume.UpdateCVEditStatus:input_type -> api.resume.v1.UpdateCVEditStatusRequest
+	20, // 22: api.resume.v1.Resume.GetJobsForEvaluation:input_type -> api.resume.v1.GetJobsForEvaluationRequest
+	22, // 23: api.resume.v1.Resume.EvaluateWithJD:input_type -> api.resume.v1.EvaluateWithJDRequest
+	24, // 24: api.resume.v1.Resume.ScoreWithJD:input_type -> api.resume.v1.ScoreWithJDRequest
+	0,  // 25: api.resume.v1.Resume.CreateResume:output_type -> api.resume.v1.ResumeReply
+	0,  // 26: api.resume.v1.Resume.UpdateResume:output_type -> api.resume.v1.ResumeReply
+	0,  // 27: api.resume.v1.Resume.GetResume:output_type -> api.resume.v1.ResumeReply
+	12, // 28: api.resume.v1.Resume.ListResumes:output_type -> api.resume.v1.ListResumesReply
+	14, // 29: api.resume.v1.Resume.DeleteResume:output_type -> api.resume.v1.DeleteResumeReply
+	16, // 30: api.resume.v1.Resume.GenerateCVDescription:output_type -> api.resume.v1.GenerateCVDescriptionReply
+	18, // 31: api.resume.v1.Resume.UpdateCVEditStatus:output_type -> api.resume.v1.UpdateCVEditStatusReply
+	21, // 32: api.resume.v1.Resume.GetJobsForEvaluation:output_type -> api.resume.v1.GetJobsForEvaluationReply
+	23, // 33: api.resume.v1.Resume.EvaluateWithJD:output_type -> api.resume.v1.EvaluateWithJDReply
+	25, // 34: api.resume.v1.Resume.ScoreWithJD:output_type -> api.resume.v1.ScoreWithJDReply
+	25, // [25:35] is the sub-list for method output_type
+	15, // [15:25] is the sub-list for method input_type
+	15, // [15:15] is the sub-list for extension type_name
+	15, // [15:15] is the sub-list for extension extendee
+	0,  // [0:15] is the sub-list for field type_name
 }
 
 func init() { file_resume_v1_resume_proto_init() }
@@ -1879,7 +2014,7 @@ func file_resume_v1_resume_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_resume_v1_resume_proto_rawDesc), len(file_resume_v1_resume_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   24,
+			NumMessages:   26,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
