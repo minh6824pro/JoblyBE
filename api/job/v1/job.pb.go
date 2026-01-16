@@ -1289,6 +1289,358 @@ func (x *ListJobPostingsReply) GetPageSize() int32 {
 	return 0
 }
 
+// Request to normalize a job posting
+type NormalizeJobPostingRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"` // Job ID to normalize
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *NormalizeJobPostingRequest) Reset() {
+	*x = NormalizeJobPostingRequest{}
+	mi := &file_job_v1_job_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NormalizeJobPostingRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NormalizeJobPostingRequest) ProtoMessage() {}
+
+func (x *NormalizeJobPostingRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_job_v1_job_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NormalizeJobPostingRequest.ProtoReflect.Descriptor instead.
+func (*NormalizeJobPostingRequest) Descriptor() ([]byte, []int) {
+	return file_job_v1_job_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *NormalizeJobPostingRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+// Skill category with skills
+type SkillCategory struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Category      string                 `protobuf:"bytes,1,opt,name=category,proto3" json:"category,omitempty"`
+	Skills        []string               `protobuf:"bytes,2,rep,name=skills,proto3" json:"skills,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SkillCategory) Reset() {
+	*x = SkillCategory{}
+	mi := &file_job_v1_job_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SkillCategory) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SkillCategory) ProtoMessage() {}
+
+func (x *SkillCategory) ProtoReflect() protoreflect.Message {
+	mi := &file_job_v1_job_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SkillCategory.ProtoReflect.Descriptor instead.
+func (*SkillCategory) Descriptor() ([]byte, []int) {
+	return file_job_v1_job_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *SkillCategory) GetCategory() string {
+	if x != nil {
+		return x.Category
+	}
+	return ""
+}
+
+func (x *SkillCategory) GetSkills() []string {
+	if x != nil {
+		return x.Skills
+	}
+	return nil
+}
+
+// Requirement category with requirements
+type RequirementCategory struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Category      string                 `protobuf:"bytes,1,opt,name=category,proto3" json:"category,omitempty"`
+	Requirements  []string               `protobuf:"bytes,2,rep,name=requirements,proto3" json:"requirements,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RequirementCategory) Reset() {
+	*x = RequirementCategory{}
+	mi := &file_job_v1_job_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RequirementCategory) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RequirementCategory) ProtoMessage() {}
+
+func (x *RequirementCategory) ProtoReflect() protoreflect.Message {
+	mi := &file_job_v1_job_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RequirementCategory.ProtoReflect.Descriptor instead.
+func (*RequirementCategory) Descriptor() ([]byte, []int) {
+	return file_job_v1_job_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *RequirementCategory) GetCategory() string {
+	if x != nil {
+		return x.Category
+	}
+	return ""
+}
+
+func (x *RequirementCategory) GetRequirements() []string {
+	if x != nil {
+		return x.Requirements
+	}
+	return nil
+}
+
+// Normalized job data response
+type NormalizeJobPostingReply struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Original values
+	OriginalTitle        string   `protobuf:"bytes,1,opt,name=original_title,json=originalTitle,proto3" json:"original_title,omitempty"`
+	OriginalSkills       []string `protobuf:"bytes,2,rep,name=original_skills,json=originalSkills,proto3" json:"original_skills,omitempty"`
+	OriginalRequirements string   `protobuf:"bytes,3,opt,name=original_requirements,json=originalRequirements,proto3" json:"original_requirements,omitempty"`
+	OriginalLevel        string   `protobuf:"bytes,4,opt,name=original_level,json=originalLevel,proto3" json:"original_level,omitempty"`
+	// Normalized values
+	NormalizedTitle        string   `protobuf:"bytes,5,opt,name=normalized_title,json=normalizedTitle,proto3" json:"normalized_title,omitempty"`
+	NormalizedSkills       []string `protobuf:"bytes,6,rep,name=normalized_skills,json=normalizedSkills,proto3" json:"normalized_skills,omitempty"`
+	NormalizedRequirements string   `protobuf:"bytes,7,opt,name=normalized_requirements,json=normalizedRequirements,proto3" json:"normalized_requirements,omitempty"`
+	NormalizedLevel        string   `protobuf:"bytes,8,opt,name=normalized_level,json=normalizedLevel,proto3" json:"normalized_level,omitempty"`
+	// Enriched data from ontology
+	SkillCategories     []*SkillCategory       `protobuf:"bytes,9,rep,name=skill_categories,json=skillCategories,proto3" json:"skill_categories,omitempty"`
+	RelatedSkills       []string               `protobuf:"bytes,10,rep,name=related_skills,json=relatedSkills,proto3" json:"related_skills,omitempty"`
+	TitleCategory       string                 `protobuf:"bytes,11,opt,name=title_category,json=titleCategory,proto3" json:"title_category,omitempty"`
+	TitleSeniority      string                 `protobuf:"bytes,12,opt,name=title_seniority,json=titleSeniority,proto3" json:"title_seniority,omitempty"`
+	RequirementTypes    []*RequirementCategory `protobuf:"bytes,13,rep,name=requirement_types,json=requirementTypes,proto3" json:"requirement_types,omitempty"`
+	LevelYearsRange     string                 `protobuf:"bytes,14,opt,name=level_years_range,json=levelYearsRange,proto3" json:"level_years_range,omitempty"`
+	LevelResponsibility string                 `protobuf:"bytes,15,opt,name=level_responsibility,json=levelResponsibility,proto3" json:"level_responsibility,omitempty"`
+	// Prepared texts for embedding
+	EmbeddingTextTitle        string `protobuf:"bytes,16,opt,name=embedding_text_title,json=embeddingTextTitle,proto3" json:"embedding_text_title,omitempty"`
+	EmbeddingTextSkills       string `protobuf:"bytes,17,opt,name=embedding_text_skills,json=embeddingTextSkills,proto3" json:"embedding_text_skills,omitempty"`
+	EmbeddingTextRequirements string `protobuf:"bytes,18,opt,name=embedding_text_requirements,json=embeddingTextRequirements,proto3" json:"embedding_text_requirements,omitempty"`
+	EmbeddingTextLevel        string `protobuf:"bytes,19,opt,name=embedding_text_level,json=embeddingTextLevel,proto3" json:"embedding_text_level,omitempty"`
+	EmbeddingTextFull         string `protobuf:"bytes,20,opt,name=embedding_text_full,json=embeddingTextFull,proto3" json:"embedding_text_full,omitempty"`
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
+}
+
+func (x *NormalizeJobPostingReply) Reset() {
+	*x = NormalizeJobPostingReply{}
+	mi := &file_job_v1_job_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NormalizeJobPostingReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NormalizeJobPostingReply) ProtoMessage() {}
+
+func (x *NormalizeJobPostingReply) ProtoReflect() protoreflect.Message {
+	mi := &file_job_v1_job_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NormalizeJobPostingReply.ProtoReflect.Descriptor instead.
+func (*NormalizeJobPostingReply) Descriptor() ([]byte, []int) {
+	return file_job_v1_job_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *NormalizeJobPostingReply) GetOriginalTitle() string {
+	if x != nil {
+		return x.OriginalTitle
+	}
+	return ""
+}
+
+func (x *NormalizeJobPostingReply) GetOriginalSkills() []string {
+	if x != nil {
+		return x.OriginalSkills
+	}
+	return nil
+}
+
+func (x *NormalizeJobPostingReply) GetOriginalRequirements() string {
+	if x != nil {
+		return x.OriginalRequirements
+	}
+	return ""
+}
+
+func (x *NormalizeJobPostingReply) GetOriginalLevel() string {
+	if x != nil {
+		return x.OriginalLevel
+	}
+	return ""
+}
+
+func (x *NormalizeJobPostingReply) GetNormalizedTitle() string {
+	if x != nil {
+		return x.NormalizedTitle
+	}
+	return ""
+}
+
+func (x *NormalizeJobPostingReply) GetNormalizedSkills() []string {
+	if x != nil {
+		return x.NormalizedSkills
+	}
+	return nil
+}
+
+func (x *NormalizeJobPostingReply) GetNormalizedRequirements() string {
+	if x != nil {
+		return x.NormalizedRequirements
+	}
+	return ""
+}
+
+func (x *NormalizeJobPostingReply) GetNormalizedLevel() string {
+	if x != nil {
+		return x.NormalizedLevel
+	}
+	return ""
+}
+
+func (x *NormalizeJobPostingReply) GetSkillCategories() []*SkillCategory {
+	if x != nil {
+		return x.SkillCategories
+	}
+	return nil
+}
+
+func (x *NormalizeJobPostingReply) GetRelatedSkills() []string {
+	if x != nil {
+		return x.RelatedSkills
+	}
+	return nil
+}
+
+func (x *NormalizeJobPostingReply) GetTitleCategory() string {
+	if x != nil {
+		return x.TitleCategory
+	}
+	return ""
+}
+
+func (x *NormalizeJobPostingReply) GetTitleSeniority() string {
+	if x != nil {
+		return x.TitleSeniority
+	}
+	return ""
+}
+
+func (x *NormalizeJobPostingReply) GetRequirementTypes() []*RequirementCategory {
+	if x != nil {
+		return x.RequirementTypes
+	}
+	return nil
+}
+
+func (x *NormalizeJobPostingReply) GetLevelYearsRange() string {
+	if x != nil {
+		return x.LevelYearsRange
+	}
+	return ""
+}
+
+func (x *NormalizeJobPostingReply) GetLevelResponsibility() string {
+	if x != nil {
+		return x.LevelResponsibility
+	}
+	return ""
+}
+
+func (x *NormalizeJobPostingReply) GetEmbeddingTextTitle() string {
+	if x != nil {
+		return x.EmbeddingTextTitle
+	}
+	return ""
+}
+
+func (x *NormalizeJobPostingReply) GetEmbeddingTextSkills() string {
+	if x != nil {
+		return x.EmbeddingTextSkills
+	}
+	return ""
+}
+
+func (x *NormalizeJobPostingReply) GetEmbeddingTextRequirements() string {
+	if x != nil {
+		return x.EmbeddingTextRequirements
+	}
+	return ""
+}
+
+func (x *NormalizeJobPostingReply) GetEmbeddingTextLevel() string {
+	if x != nil {
+		return x.EmbeddingTextLevel
+	}
+	return ""
+}
+
+func (x *NormalizeJobPostingReply) GetEmbeddingTextFull() string {
+	if x != nil {
+		return x.EmbeddingTextFull
+	}
+	return ""
+}
+
 type CompanyReply struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -1306,7 +1658,7 @@ type CompanyReply struct {
 
 func (x *CompanyReply) Reset() {
 	*x = CompanyReply{}
-	mi := &file_job_v1_job_proto_msgTypes[14]
+	mi := &file_job_v1_job_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1318,7 +1670,7 @@ func (x *CompanyReply) String() string {
 func (*CompanyReply) ProtoMessage() {}
 
 func (x *CompanyReply) ProtoReflect() protoreflect.Message {
-	mi := &file_job_v1_job_proto_msgTypes[14]
+	mi := &file_job_v1_job_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1331,7 +1683,7 @@ func (x *CompanyReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CompanyReply.ProtoReflect.Descriptor instead.
 func (*CompanyReply) Descriptor() ([]byte, []int) {
-	return file_job_v1_job_proto_rawDescGZIP(), []int{14}
+	return file_job_v1_job_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *CompanyReply) GetId() string {
@@ -1413,7 +1765,7 @@ type CreateCompanyRequest struct {
 
 func (x *CreateCompanyRequest) Reset() {
 	*x = CreateCompanyRequest{}
-	mi := &file_job_v1_job_proto_msgTypes[15]
+	mi := &file_job_v1_job_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1425,7 +1777,7 @@ func (x *CreateCompanyRequest) String() string {
 func (*CreateCompanyRequest) ProtoMessage() {}
 
 func (x *CreateCompanyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_job_v1_job_proto_msgTypes[15]
+	mi := &file_job_v1_job_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1438,7 +1790,7 @@ func (x *CreateCompanyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateCompanyRequest.ProtoReflect.Descriptor instead.
 func (*CreateCompanyRequest) Descriptor() ([]byte, []int) {
-	return file_job_v1_job_proto_rawDescGZIP(), []int{15}
+	return file_job_v1_job_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *CreateCompanyRequest) GetName() string {
@@ -1514,7 +1866,7 @@ type UpdateCompanyRequest struct {
 
 func (x *UpdateCompanyRequest) Reset() {
 	*x = UpdateCompanyRequest{}
-	mi := &file_job_v1_job_proto_msgTypes[16]
+	mi := &file_job_v1_job_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1526,7 +1878,7 @@ func (x *UpdateCompanyRequest) String() string {
 func (*UpdateCompanyRequest) ProtoMessage() {}
 
 func (x *UpdateCompanyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_job_v1_job_proto_msgTypes[16]
+	mi := &file_job_v1_job_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1539,7 +1891,7 @@ func (x *UpdateCompanyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UpdateCompanyRequest.ProtoReflect.Descriptor instead.
 func (*UpdateCompanyRequest) Descriptor() ([]byte, []int) {
-	return file_job_v1_job_proto_rawDescGZIP(), []int{16}
+	return file_job_v1_job_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *UpdateCompanyRequest) GetId() string {
@@ -1614,7 +1966,7 @@ type DeleteCompanyRequest struct {
 
 func (x *DeleteCompanyRequest) Reset() {
 	*x = DeleteCompanyRequest{}
-	mi := &file_job_v1_job_proto_msgTypes[17]
+	mi := &file_job_v1_job_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1626,7 +1978,7 @@ func (x *DeleteCompanyRequest) String() string {
 func (*DeleteCompanyRequest) ProtoMessage() {}
 
 func (x *DeleteCompanyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_job_v1_job_proto_msgTypes[17]
+	mi := &file_job_v1_job_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1639,7 +1991,7 @@ func (x *DeleteCompanyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteCompanyRequest.ProtoReflect.Descriptor instead.
 func (*DeleteCompanyRequest) Descriptor() ([]byte, []int) {
-	return file_job_v1_job_proto_rawDescGZIP(), []int{17}
+	return file_job_v1_job_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *DeleteCompanyRequest) GetId() string {
@@ -1658,7 +2010,7 @@ type DeleteCompanyReply struct {
 
 func (x *DeleteCompanyReply) Reset() {
 	*x = DeleteCompanyReply{}
-	mi := &file_job_v1_job_proto_msgTypes[18]
+	mi := &file_job_v1_job_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1670,7 +2022,7 @@ func (x *DeleteCompanyReply) String() string {
 func (*DeleteCompanyReply) ProtoMessage() {}
 
 func (x *DeleteCompanyReply) ProtoReflect() protoreflect.Message {
-	mi := &file_job_v1_job_proto_msgTypes[18]
+	mi := &file_job_v1_job_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1683,7 +2035,7 @@ func (x *DeleteCompanyReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DeleteCompanyReply.ProtoReflect.Descriptor instead.
 func (*DeleteCompanyReply) Descriptor() ([]byte, []int) {
-	return file_job_v1_job_proto_rawDescGZIP(), []int{18}
+	return file_job_v1_job_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *DeleteCompanyReply) GetSuccess() bool {
@@ -1702,7 +2054,7 @@ type GetCompanyRequest struct {
 
 func (x *GetCompanyRequest) Reset() {
 	*x = GetCompanyRequest{}
-	mi := &file_job_v1_job_proto_msgTypes[19]
+	mi := &file_job_v1_job_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1714,7 +2066,7 @@ func (x *GetCompanyRequest) String() string {
 func (*GetCompanyRequest) ProtoMessage() {}
 
 func (x *GetCompanyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_job_v1_job_proto_msgTypes[19]
+	mi := &file_job_v1_job_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1727,7 +2079,7 @@ func (x *GetCompanyRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetCompanyRequest.ProtoReflect.Descriptor instead.
 func (*GetCompanyRequest) Descriptor() ([]byte, []int) {
-	return file_job_v1_job_proto_rawDescGZIP(), []int{19}
+	return file_job_v1_job_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *GetCompanyRequest) GetId() string {
@@ -1750,7 +2102,7 @@ type ListCompaniesRequest struct {
 
 func (x *ListCompaniesRequest) Reset() {
 	*x = ListCompaniesRequest{}
-	mi := &file_job_v1_job_proto_msgTypes[20]
+	mi := &file_job_v1_job_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1762,7 +2114,7 @@ func (x *ListCompaniesRequest) String() string {
 func (*ListCompaniesRequest) ProtoMessage() {}
 
 func (x *ListCompaniesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_job_v1_job_proto_msgTypes[20]
+	mi := &file_job_v1_job_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1775,7 +2127,7 @@ func (x *ListCompaniesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCompaniesRequest.ProtoReflect.Descriptor instead.
 func (*ListCompaniesRequest) Descriptor() ([]byte, []int) {
-	return file_job_v1_job_proto_rawDescGZIP(), []int{20}
+	return file_job_v1_job_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *ListCompaniesRequest) GetPage() int32 {
@@ -1825,7 +2177,7 @@ type ListCompaniesReply struct {
 
 func (x *ListCompaniesReply) Reset() {
 	*x = ListCompaniesReply{}
-	mi := &file_job_v1_job_proto_msgTypes[21]
+	mi := &file_job_v1_job_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1837,7 +2189,7 @@ func (x *ListCompaniesReply) String() string {
 func (*ListCompaniesReply) ProtoMessage() {}
 
 func (x *ListCompaniesReply) ProtoReflect() protoreflect.Message {
-	mi := &file_job_v1_job_proto_msgTypes[21]
+	mi := &file_job_v1_job_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1850,7 +2202,7 @@ func (x *ListCompaniesReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListCompaniesReply.ProtoReflect.Descriptor instead.
 func (*ListCompaniesReply) Descriptor() ([]byte, []int) {
-	return file_job_v1_job_proto_rawDescGZIP(), []int{21}
+	return file_job_v1_job_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *ListCompaniesReply) GetCompanies() []*CompanyReply {
@@ -2013,7 +2365,37 @@ const file_job_v1_job_proto_rawDesc = "" +
 	"\x04jobs\x18\x01 \x03(\v2\x1b.api.job.v1.JobPostingReplyR\x04jobs\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x05R\x05total\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x04 \x01(\x05R\bpageSize\"\x87\x02\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\bpageSize\",\n" +
+	"\x1aNormalizeJobPostingRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"C\n" +
+	"\rSkillCategory\x12\x1a\n" +
+	"\bcategory\x18\x01 \x01(\tR\bcategory\x12\x16\n" +
+	"\x06skills\x18\x02 \x03(\tR\x06skills\"U\n" +
+	"\x13RequirementCategory\x12\x1a\n" +
+	"\bcategory\x18\x01 \x01(\tR\bcategory\x12\"\n" +
+	"\frequirements\x18\x02 \x03(\tR\frequirements\"\xf4\a\n" +
+	"\x18NormalizeJobPostingReply\x12%\n" +
+	"\x0eoriginal_title\x18\x01 \x01(\tR\roriginalTitle\x12'\n" +
+	"\x0foriginal_skills\x18\x02 \x03(\tR\x0eoriginalSkills\x123\n" +
+	"\x15original_requirements\x18\x03 \x01(\tR\x14originalRequirements\x12%\n" +
+	"\x0eoriginal_level\x18\x04 \x01(\tR\roriginalLevel\x12)\n" +
+	"\x10normalized_title\x18\x05 \x01(\tR\x0fnormalizedTitle\x12+\n" +
+	"\x11normalized_skills\x18\x06 \x03(\tR\x10normalizedSkills\x127\n" +
+	"\x17normalized_requirements\x18\a \x01(\tR\x16normalizedRequirements\x12)\n" +
+	"\x10normalized_level\x18\b \x01(\tR\x0fnormalizedLevel\x12D\n" +
+	"\x10skill_categories\x18\t \x03(\v2\x19.api.job.v1.SkillCategoryR\x0fskillCategories\x12%\n" +
+	"\x0erelated_skills\x18\n" +
+	" \x03(\tR\rrelatedSkills\x12%\n" +
+	"\x0etitle_category\x18\v \x01(\tR\rtitleCategory\x12'\n" +
+	"\x0ftitle_seniority\x18\f \x01(\tR\x0etitleSeniority\x12L\n" +
+	"\x11requirement_types\x18\r \x03(\v2\x1f.api.job.v1.RequirementCategoryR\x10requirementTypes\x12*\n" +
+	"\x11level_years_range\x18\x0e \x01(\tR\x0flevelYearsRange\x121\n" +
+	"\x14level_responsibility\x18\x0f \x01(\tR\x13levelResponsibility\x120\n" +
+	"\x14embedding_text_title\x18\x10 \x01(\tR\x12embeddingTextTitle\x122\n" +
+	"\x15embedding_text_skills\x18\x11 \x01(\tR\x13embeddingTextSkills\x12>\n" +
+	"\x1bembedding_text_requirements\x18\x12 \x01(\tR\x19embeddingTextRequirements\x120\n" +
+	"\x14embedding_text_level\x18\x13 \x01(\tR\x12embeddingTextLevel\x12.\n" +
+	"\x13embedding_text_full\x18\x14 \x01(\tR\x11embeddingTextFull\"\x87\x02\n" +
 	"\fCompanyReply\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\x12 \n" +
@@ -2059,7 +2441,7 @@ const file_job_v1_job_proto_rawDesc = "" +
 	"\tcompanies\x18\x01 \x03(\v2\x18.api.job.v1.CompanyReplyR\tcompanies\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x05R\x05total\x12\x12\n" +
 	"\x04page\x18\x03 \x01(\x05R\x04page\x12\x1b\n" +
-	"\tpage_size\x18\x04 \x01(\x05R\bpageSize2\xa0\a\n" +
+	"\tpage_size\x18\x04 \x01(\x05R\bpageSize2\xab\b\n" +
 	"\n" +
 	"JobPosting\x12m\n" +
 	"\x10CreateJobPosting\x12#.api.job.v1.CreateJobPostingRequest\x1a\x1b.api.job.v1.JobPostingReply\"\x17\x82\xd3\xe4\x93\x02\x11:\x01*\"\f/api/v1/jobs\x12r\n" +
@@ -2070,7 +2452,8 @@ const file_job_v1_job_proto_rawDesc = "" +
 	"\n" +
 	"ListMyJobs\x12\x1d.api.job.v1.ListMyJobsRequest\x1a .api.job.v1.ListJobPostingsReply\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/api/v1/my-jobs\x12z\n" +
 	"\x10GetMyCreatedJobs\x12#.api.job.v1.GetMyCreatedJobsRequest\x1a .api.job.v1.ListJobPostingsReply\"\x1f\x82\xd3\xe4\x93\x02\x19\x12\x17/api/v1/my-created-jobs\x12z\n" +
-	"\x0fFindSimilarJobs\x12\".api.job.v1.FindSimilarJobsRequest\x1a .api.job.v1.FindSimilarJobsReply\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/api/v1/jobs/{id}/similar2\xac\x04\n" +
+	"\x0fFindSimilarJobs\x12\".api.job.v1.FindSimilarJobsRequest\x1a .api.job.v1.FindSimilarJobsReply\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/api/v1/jobs/{id}/similar\x12\x88\x01\n" +
+	"\x13NormalizeJobPosting\x12&.api.job.v1.NormalizeJobPostingRequest\x1a$.api.job.v1.NormalizeJobPostingReply\"#\x82\xd3\xe4\x93\x02\x1d\x12\x1b/api/v1/jobs/{id}/normalize2\xac\x04\n" +
 	"\aCompany\x12i\n" +
 	"\rCreateCompany\x12 .api.job.v1.CreateCompanyRequest\x1a\x18.api.job.v1.CompanyReply\"\x1c\x82\xd3\xe4\x93\x02\x16:\x01*\"\x11/api/v1/companies\x12n\n" +
 	"\rUpdateCompany\x12 .api.job.v1.UpdateCompanyRequest\x1a\x18.api.job.v1.CompanyReply\"!\x82\xd3\xe4\x93\x02\x1b:\x01*\x1a\x16/api/v1/companies/{id}\x12q\n" +
@@ -2093,68 +2476,76 @@ func file_job_v1_job_proto_rawDescGZIP() []byte {
 	return file_job_v1_job_proto_rawDescData
 }
 
-var file_job_v1_job_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
+var file_job_v1_job_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
 var file_job_v1_job_proto_goTypes = []any{
-	(*CompanyInfo)(nil),             // 0: api.job.v1.CompanyInfo
-	(*JobPostingReply)(nil),         // 1: api.job.v1.JobPostingReply
-	(*CreateJobPostingRequest)(nil), // 2: api.job.v1.CreateJobPostingRequest
-	(*UpdateJobPostingRequest)(nil), // 3: api.job.v1.UpdateJobPostingRequest
-	(*DeleteJobPostingRequest)(nil), // 4: api.job.v1.DeleteJobPostingRequest
-	(*DeleteJobPostingReply)(nil),   // 5: api.job.v1.DeleteJobPostingReply
-	(*GetJobPostingRequest)(nil),    // 6: api.job.v1.GetJobPostingRequest
-	(*ListJobPostingsRequest)(nil),  // 7: api.job.v1.ListJobPostingsRequest
-	(*ListMyJobsRequest)(nil),       // 8: api.job.v1.ListMyJobsRequest
-	(*GetMyCreatedJobsRequest)(nil), // 9: api.job.v1.GetMyCreatedJobsRequest
-	(*FindSimilarJobsRequest)(nil),  // 10: api.job.v1.FindSimilarJobsRequest
-	(*SimilarJobResult)(nil),        // 11: api.job.v1.SimilarJobResult
-	(*FindSimilarJobsReply)(nil),    // 12: api.job.v1.FindSimilarJobsReply
-	(*ListJobPostingsReply)(nil),    // 13: api.job.v1.ListJobPostingsReply
-	(*CompanyReply)(nil),            // 14: api.job.v1.CompanyReply
-	(*CreateCompanyRequest)(nil),    // 15: api.job.v1.CreateCompanyRequest
-	(*UpdateCompanyRequest)(nil),    // 16: api.job.v1.UpdateCompanyRequest
-	(*DeleteCompanyRequest)(nil),    // 17: api.job.v1.DeleteCompanyRequest
-	(*DeleteCompanyReply)(nil),      // 18: api.job.v1.DeleteCompanyReply
-	(*GetCompanyRequest)(nil),       // 19: api.job.v1.GetCompanyRequest
-	(*ListCompaniesRequest)(nil),    // 20: api.job.v1.ListCompaniesRequest
-	(*ListCompaniesReply)(nil),      // 21: api.job.v1.ListCompaniesReply
+	(*CompanyInfo)(nil),                // 0: api.job.v1.CompanyInfo
+	(*JobPostingReply)(nil),            // 1: api.job.v1.JobPostingReply
+	(*CreateJobPostingRequest)(nil),    // 2: api.job.v1.CreateJobPostingRequest
+	(*UpdateJobPostingRequest)(nil),    // 3: api.job.v1.UpdateJobPostingRequest
+	(*DeleteJobPostingRequest)(nil),    // 4: api.job.v1.DeleteJobPostingRequest
+	(*DeleteJobPostingReply)(nil),      // 5: api.job.v1.DeleteJobPostingReply
+	(*GetJobPostingRequest)(nil),       // 6: api.job.v1.GetJobPostingRequest
+	(*ListJobPostingsRequest)(nil),     // 7: api.job.v1.ListJobPostingsRequest
+	(*ListMyJobsRequest)(nil),          // 8: api.job.v1.ListMyJobsRequest
+	(*GetMyCreatedJobsRequest)(nil),    // 9: api.job.v1.GetMyCreatedJobsRequest
+	(*FindSimilarJobsRequest)(nil),     // 10: api.job.v1.FindSimilarJobsRequest
+	(*SimilarJobResult)(nil),           // 11: api.job.v1.SimilarJobResult
+	(*FindSimilarJobsReply)(nil),       // 12: api.job.v1.FindSimilarJobsReply
+	(*ListJobPostingsReply)(nil),       // 13: api.job.v1.ListJobPostingsReply
+	(*NormalizeJobPostingRequest)(nil), // 14: api.job.v1.NormalizeJobPostingRequest
+	(*SkillCategory)(nil),              // 15: api.job.v1.SkillCategory
+	(*RequirementCategory)(nil),        // 16: api.job.v1.RequirementCategory
+	(*NormalizeJobPostingReply)(nil),   // 17: api.job.v1.NormalizeJobPostingReply
+	(*CompanyReply)(nil),               // 18: api.job.v1.CompanyReply
+	(*CreateCompanyRequest)(nil),       // 19: api.job.v1.CreateCompanyRequest
+	(*UpdateCompanyRequest)(nil),       // 20: api.job.v1.UpdateCompanyRequest
+	(*DeleteCompanyRequest)(nil),       // 21: api.job.v1.DeleteCompanyRequest
+	(*DeleteCompanyReply)(nil),         // 22: api.job.v1.DeleteCompanyReply
+	(*GetCompanyRequest)(nil),          // 23: api.job.v1.GetCompanyRequest
+	(*ListCompaniesRequest)(nil),       // 24: api.job.v1.ListCompaniesRequest
+	(*ListCompaniesReply)(nil),         // 25: api.job.v1.ListCompaniesReply
 }
 var file_job_v1_job_proto_depIdxs = []int32{
 	0,  // 0: api.job.v1.JobPostingReply.company:type_name -> api.job.v1.CompanyInfo
 	1,  // 1: api.job.v1.SimilarJobResult.job:type_name -> api.job.v1.JobPostingReply
 	11, // 2: api.job.v1.FindSimilarJobsReply.similar_jobs:type_name -> api.job.v1.SimilarJobResult
 	1,  // 3: api.job.v1.ListJobPostingsReply.jobs:type_name -> api.job.v1.JobPostingReply
-	14, // 4: api.job.v1.ListCompaniesReply.companies:type_name -> api.job.v1.CompanyReply
-	2,  // 5: api.job.v1.JobPosting.CreateJobPosting:input_type -> api.job.v1.CreateJobPostingRequest
-	3,  // 6: api.job.v1.JobPosting.UpdateJobPosting:input_type -> api.job.v1.UpdateJobPostingRequest
-	4,  // 7: api.job.v1.JobPosting.DeleteJobPosting:input_type -> api.job.v1.DeleteJobPostingRequest
-	6,  // 8: api.job.v1.JobPosting.GetJobPosting:input_type -> api.job.v1.GetJobPostingRequest
-	7,  // 9: api.job.v1.JobPosting.ListJobPostings:input_type -> api.job.v1.ListJobPostingsRequest
-	8,  // 10: api.job.v1.JobPosting.ListMyJobs:input_type -> api.job.v1.ListMyJobsRequest
-	9,  // 11: api.job.v1.JobPosting.GetMyCreatedJobs:input_type -> api.job.v1.GetMyCreatedJobsRequest
-	10, // 12: api.job.v1.JobPosting.FindSimilarJobs:input_type -> api.job.v1.FindSimilarJobsRequest
-	15, // 13: api.job.v1.Company.CreateCompany:input_type -> api.job.v1.CreateCompanyRequest
-	16, // 14: api.job.v1.Company.UpdateCompany:input_type -> api.job.v1.UpdateCompanyRequest
-	17, // 15: api.job.v1.Company.DeleteCompany:input_type -> api.job.v1.DeleteCompanyRequest
-	19, // 16: api.job.v1.Company.GetCompany:input_type -> api.job.v1.GetCompanyRequest
-	20, // 17: api.job.v1.Company.ListCompanies:input_type -> api.job.v1.ListCompaniesRequest
-	1,  // 18: api.job.v1.JobPosting.CreateJobPosting:output_type -> api.job.v1.JobPostingReply
-	1,  // 19: api.job.v1.JobPosting.UpdateJobPosting:output_type -> api.job.v1.JobPostingReply
-	5,  // 20: api.job.v1.JobPosting.DeleteJobPosting:output_type -> api.job.v1.DeleteJobPostingReply
-	1,  // 21: api.job.v1.JobPosting.GetJobPosting:output_type -> api.job.v1.JobPostingReply
-	13, // 22: api.job.v1.JobPosting.ListJobPostings:output_type -> api.job.v1.ListJobPostingsReply
-	13, // 23: api.job.v1.JobPosting.ListMyJobs:output_type -> api.job.v1.ListJobPostingsReply
-	13, // 24: api.job.v1.JobPosting.GetMyCreatedJobs:output_type -> api.job.v1.ListJobPostingsReply
-	12, // 25: api.job.v1.JobPosting.FindSimilarJobs:output_type -> api.job.v1.FindSimilarJobsReply
-	14, // 26: api.job.v1.Company.CreateCompany:output_type -> api.job.v1.CompanyReply
-	14, // 27: api.job.v1.Company.UpdateCompany:output_type -> api.job.v1.CompanyReply
-	18, // 28: api.job.v1.Company.DeleteCompany:output_type -> api.job.v1.DeleteCompanyReply
-	14, // 29: api.job.v1.Company.GetCompany:output_type -> api.job.v1.CompanyReply
-	21, // 30: api.job.v1.Company.ListCompanies:output_type -> api.job.v1.ListCompaniesReply
-	18, // [18:31] is the sub-list for method output_type
-	5,  // [5:18] is the sub-list for method input_type
-	5,  // [5:5] is the sub-list for extension type_name
-	5,  // [5:5] is the sub-list for extension extendee
-	0,  // [0:5] is the sub-list for field type_name
+	15, // 4: api.job.v1.NormalizeJobPostingReply.skill_categories:type_name -> api.job.v1.SkillCategory
+	16, // 5: api.job.v1.NormalizeJobPostingReply.requirement_types:type_name -> api.job.v1.RequirementCategory
+	18, // 6: api.job.v1.ListCompaniesReply.companies:type_name -> api.job.v1.CompanyReply
+	2,  // 7: api.job.v1.JobPosting.CreateJobPosting:input_type -> api.job.v1.CreateJobPostingRequest
+	3,  // 8: api.job.v1.JobPosting.UpdateJobPosting:input_type -> api.job.v1.UpdateJobPostingRequest
+	4,  // 9: api.job.v1.JobPosting.DeleteJobPosting:input_type -> api.job.v1.DeleteJobPostingRequest
+	6,  // 10: api.job.v1.JobPosting.GetJobPosting:input_type -> api.job.v1.GetJobPostingRequest
+	7,  // 11: api.job.v1.JobPosting.ListJobPostings:input_type -> api.job.v1.ListJobPostingsRequest
+	8,  // 12: api.job.v1.JobPosting.ListMyJobs:input_type -> api.job.v1.ListMyJobsRequest
+	9,  // 13: api.job.v1.JobPosting.GetMyCreatedJobs:input_type -> api.job.v1.GetMyCreatedJobsRequest
+	10, // 14: api.job.v1.JobPosting.FindSimilarJobs:input_type -> api.job.v1.FindSimilarJobsRequest
+	14, // 15: api.job.v1.JobPosting.NormalizeJobPosting:input_type -> api.job.v1.NormalizeJobPostingRequest
+	19, // 16: api.job.v1.Company.CreateCompany:input_type -> api.job.v1.CreateCompanyRequest
+	20, // 17: api.job.v1.Company.UpdateCompany:input_type -> api.job.v1.UpdateCompanyRequest
+	21, // 18: api.job.v1.Company.DeleteCompany:input_type -> api.job.v1.DeleteCompanyRequest
+	23, // 19: api.job.v1.Company.GetCompany:input_type -> api.job.v1.GetCompanyRequest
+	24, // 20: api.job.v1.Company.ListCompanies:input_type -> api.job.v1.ListCompaniesRequest
+	1,  // 21: api.job.v1.JobPosting.CreateJobPosting:output_type -> api.job.v1.JobPostingReply
+	1,  // 22: api.job.v1.JobPosting.UpdateJobPosting:output_type -> api.job.v1.JobPostingReply
+	5,  // 23: api.job.v1.JobPosting.DeleteJobPosting:output_type -> api.job.v1.DeleteJobPostingReply
+	1,  // 24: api.job.v1.JobPosting.GetJobPosting:output_type -> api.job.v1.JobPostingReply
+	13, // 25: api.job.v1.JobPosting.ListJobPostings:output_type -> api.job.v1.ListJobPostingsReply
+	13, // 26: api.job.v1.JobPosting.ListMyJobs:output_type -> api.job.v1.ListJobPostingsReply
+	13, // 27: api.job.v1.JobPosting.GetMyCreatedJobs:output_type -> api.job.v1.ListJobPostingsReply
+	12, // 28: api.job.v1.JobPosting.FindSimilarJobs:output_type -> api.job.v1.FindSimilarJobsReply
+	17, // 29: api.job.v1.JobPosting.NormalizeJobPosting:output_type -> api.job.v1.NormalizeJobPostingReply
+	18, // 30: api.job.v1.Company.CreateCompany:output_type -> api.job.v1.CompanyReply
+	18, // 31: api.job.v1.Company.UpdateCompany:output_type -> api.job.v1.CompanyReply
+	22, // 32: api.job.v1.Company.DeleteCompany:output_type -> api.job.v1.DeleteCompanyReply
+	18, // 33: api.job.v1.Company.GetCompany:output_type -> api.job.v1.CompanyReply
+	25, // 34: api.job.v1.Company.ListCompanies:output_type -> api.job.v1.ListCompaniesReply
+	21, // [21:35] is the sub-list for method output_type
+	7,  // [7:21] is the sub-list for method input_type
+	7,  // [7:7] is the sub-list for extension type_name
+	7,  // [7:7] is the sub-list for extension extendee
+	0,  // [0:7] is the sub-list for field type_name
 }
 
 func init() { file_job_v1_job_proto_init() }
@@ -2168,7 +2559,7 @@ func file_job_v1_job_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_job_v1_job_proto_rawDesc), len(file_job_v1_job_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   22,
+			NumMessages:   26,
 			NumExtensions: 0,
 			NumServices:   2,
 		},

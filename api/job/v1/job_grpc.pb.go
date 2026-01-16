@@ -19,14 +19,15 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	JobPosting_CreateJobPosting_FullMethodName = "/api.job.v1.JobPosting/CreateJobPosting"
-	JobPosting_UpdateJobPosting_FullMethodName = "/api.job.v1.JobPosting/UpdateJobPosting"
-	JobPosting_DeleteJobPosting_FullMethodName = "/api.job.v1.JobPosting/DeleteJobPosting"
-	JobPosting_GetJobPosting_FullMethodName    = "/api.job.v1.JobPosting/GetJobPosting"
-	JobPosting_ListJobPostings_FullMethodName  = "/api.job.v1.JobPosting/ListJobPostings"
-	JobPosting_ListMyJobs_FullMethodName       = "/api.job.v1.JobPosting/ListMyJobs"
-	JobPosting_GetMyCreatedJobs_FullMethodName = "/api.job.v1.JobPosting/GetMyCreatedJobs"
-	JobPosting_FindSimilarJobs_FullMethodName  = "/api.job.v1.JobPosting/FindSimilarJobs"
+	JobPosting_CreateJobPosting_FullMethodName    = "/api.job.v1.JobPosting/CreateJobPosting"
+	JobPosting_UpdateJobPosting_FullMethodName    = "/api.job.v1.JobPosting/UpdateJobPosting"
+	JobPosting_DeleteJobPosting_FullMethodName    = "/api.job.v1.JobPosting/DeleteJobPosting"
+	JobPosting_GetJobPosting_FullMethodName       = "/api.job.v1.JobPosting/GetJobPosting"
+	JobPosting_ListJobPostings_FullMethodName     = "/api.job.v1.JobPosting/ListJobPostings"
+	JobPosting_ListMyJobs_FullMethodName          = "/api.job.v1.JobPosting/ListMyJobs"
+	JobPosting_GetMyCreatedJobs_FullMethodName    = "/api.job.v1.JobPosting/GetMyCreatedJobs"
+	JobPosting_FindSimilarJobs_FullMethodName     = "/api.job.v1.JobPosting/FindSimilarJobs"
+	JobPosting_NormalizeJobPosting_FullMethodName = "/api.job.v1.JobPosting/NormalizeJobPosting"
 )
 
 // JobPostingClient is the client API for JobPosting service.
@@ -49,6 +50,8 @@ type JobPostingClient interface {
 	GetMyCreatedJobs(ctx context.Context, in *GetMyCreatedJobsRequest, opts ...grpc.CallOption) (*ListJobPostingsReply, error)
 	// Find similar jobs by job ID using vector embeddings
 	FindSimilarJobs(ctx context.Context, in *FindSimilarJobsRequest, opts ...grpc.CallOption) (*FindSimilarJobsReply, error)
+	// Normalize a job posting using ontology-based text normalization
+	NormalizeJobPosting(ctx context.Context, in *NormalizeJobPostingRequest, opts ...grpc.CallOption) (*NormalizeJobPostingReply, error)
 }
 
 type jobPostingClient struct {
@@ -131,6 +134,15 @@ func (c *jobPostingClient) FindSimilarJobs(ctx context.Context, in *FindSimilarJ
 	return out, nil
 }
 
+func (c *jobPostingClient) NormalizeJobPosting(ctx context.Context, in *NormalizeJobPostingRequest, opts ...grpc.CallOption) (*NormalizeJobPostingReply, error) {
+	out := new(NormalizeJobPostingReply)
+	err := c.cc.Invoke(ctx, JobPosting_NormalizeJobPosting_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // JobPostingServer is the server API for JobPosting service.
 // All implementations must embed UnimplementedJobPostingServer
 // for forward compatibility
@@ -151,6 +163,8 @@ type JobPostingServer interface {
 	GetMyCreatedJobs(context.Context, *GetMyCreatedJobsRequest) (*ListJobPostingsReply, error)
 	// Find similar jobs by job ID using vector embeddings
 	FindSimilarJobs(context.Context, *FindSimilarJobsRequest) (*FindSimilarJobsReply, error)
+	// Normalize a job posting using ontology-based text normalization
+	NormalizeJobPosting(context.Context, *NormalizeJobPostingRequest) (*NormalizeJobPostingReply, error)
 	mustEmbedUnimplementedJobPostingServer()
 }
 
@@ -181,6 +195,9 @@ func (UnimplementedJobPostingServer) GetMyCreatedJobs(context.Context, *GetMyCre
 }
 func (UnimplementedJobPostingServer) FindSimilarJobs(context.Context, *FindSimilarJobsRequest) (*FindSimilarJobsReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method FindSimilarJobs not implemented")
+}
+func (UnimplementedJobPostingServer) NormalizeJobPosting(context.Context, *NormalizeJobPostingRequest) (*NormalizeJobPostingReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method NormalizeJobPosting not implemented")
 }
 func (UnimplementedJobPostingServer) mustEmbedUnimplementedJobPostingServer() {}
 
@@ -339,6 +356,24 @@ func _JobPosting_FindSimilarJobs_Handler(srv interface{}, ctx context.Context, d
 	return interceptor(ctx, in, info, handler)
 }
 
+func _JobPosting_NormalizeJobPosting_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NormalizeJobPostingRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(JobPostingServer).NormalizeJobPosting(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: JobPosting_NormalizeJobPosting_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(JobPostingServer).NormalizeJobPosting(ctx, req.(*NormalizeJobPostingRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // JobPosting_ServiceDesc is the grpc.ServiceDesc for JobPosting service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -377,6 +412,10 @@ var JobPosting_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "FindSimilarJobs",
 			Handler:    _JobPosting_FindSimilarJobs_Handler,
+		},
+		{
+			MethodName: "NormalizeJobPosting",
+			Handler:    _JobPosting_NormalizeJobPosting_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

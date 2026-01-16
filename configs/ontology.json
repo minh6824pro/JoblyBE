@@ -1,0 +1,994 @@
+{
+  "skills": {
+    "Programming Languages": {
+      "JavaScript": {
+        "aliases": [
+          "JS",
+          "Javascript",
+          "java script",
+          "ECMAScript",
+          "ES6",
+          "ES2015",
+          "ES2020",
+          "ES2021",
+          "ES2022",
+          "ES2023"
+        ],
+        "related": ["TypeScript", "Node.js", "React", "Vue.js", "Angular"]
+      },
+      "TypeScript": {
+        "aliases": ["TS", "Typescript", "type script"],
+        "related": ["JavaScript", "Node.js", "Angular", "React"]
+      },
+      "Python": {
+        "aliases": ["python3", "python2", "py", "Python 3", "Python 2"],
+        "related": ["Django", "Flask", "FastAPI", "NumPy", "Pandas"]
+      },
+      "Java": {
+        "aliases": [
+          "java8",
+          "java11",
+          "java17",
+          "java21",
+          "jdk",
+          "J2EE",
+          "JavaEE",
+          "Jakarta EE"
+        ],
+        "related": ["Spring", "Spring Boot", "Maven", "Gradle", "Hibernate"]
+      },
+      "Go": {
+        "aliases": ["Golang", "golang", "go lang", "Go Language"],
+        "related": ["Gin", "Echo", "Fiber", "gRPC"]
+      },
+      "C#": {
+        "aliases": [
+          "CSharp",
+          "C Sharp",
+          "csharp",
+          "c-sharp",
+          "dotnet",
+          ".NET",
+          ".NET Core",
+          "ASP.NET"
+        ],
+        "related": [
+          ".NET Framework",
+          "ASP.NET Core",
+          "Entity Framework",
+          "Azure"
+        ]
+      },
+      "C++": {
+        "aliases": ["CPP", "Cpp", "c plus plus", "cplusplus"],
+        "related": ["C", "Embedded Systems", "Game Development"]
+      },
+      "C": {
+        "aliases": ["c language", "c programming"],
+        "related": ["C++", "Embedded Systems"]
+      },
+      "Ruby": {
+        "aliases": ["ruby lang"],
+        "related": ["Ruby on Rails", "Sinatra"]
+      },
+      "PHP": {
+        "aliases": ["php7", "php8", "PHP 7", "PHP 8"],
+        "related": ["Laravel", "Symfony", "WordPress"]
+      },
+      "Rust": {
+        "aliases": ["rust lang", "rustlang"],
+        "related": ["WebAssembly", "Systems Programming"]
+      },
+      "Kotlin": {
+        "aliases": ["kotlin lang"],
+        "related": ["Android", "Spring Boot", "Java"]
+      },
+      "Swift": {
+        "aliases": ["swift lang", "swiftui"],
+        "related": ["iOS", "macOS", "Xcode"]
+      },
+      "Scala": {
+        "aliases": ["scala lang"],
+        "related": ["Apache Spark", "Akka", "Java"]
+      },
+      "R": {
+        "aliases": ["R language", "R programming", "r-lang"],
+        "related": ["Data Science", "Statistics", "Machine Learning"]
+      },
+      "Dart": {
+        "aliases": ["dart lang"],
+        "related": ["Flutter", "Mobile Development"]
+      },
+      "Elixir": {
+        "aliases": ["elixir lang"],
+        "related": ["Phoenix", "Erlang"]
+      }
+    },
+    "Frontend": {
+      "React": {
+        "aliases": ["ReactJS", "React.js", "React JS", "react.js", "reactjs"],
+        "related": ["Redux", "Next.js", "TypeScript", "JavaScript"]
+      },
+      "Vue.js": {
+        "aliases": [
+          "Vue",
+          "VueJS",
+          "vue",
+          "Vue 2",
+          "Vue 3",
+          "Vue.js 3",
+          "vuejs"
+        ],
+        "related": ["Vuex", "Nuxt.js", "Pinia", "JavaScript"]
+      },
+      "Angular": {
+        "aliases": [
+          "AngularJS",
+          "Angular.js",
+          "Angular 2+",
+          "Angular 14",
+          "Angular 15",
+          "Angular 16",
+          "Angular 17"
+        ],
+        "related": ["TypeScript", "RxJS", "NgRx"]
+      },
+      "Svelte": {
+        "aliases": ["SvelteJS", "Svelte.js", "SvelteKit"],
+        "related": ["JavaScript", "TypeScript"]
+      },
+      "Next.js": {
+        "aliases": ["NextJS", "Next", "nextjs", "next.js"],
+        "related": ["React", "TypeScript", "Vercel"]
+      },
+      "Nuxt.js": {
+        "aliases": ["NuxtJS", "Nuxt", "nuxtjs", "nuxt.js"],
+        "related": ["Vue.js", "TypeScript"]
+      },
+      "jQuery": {
+        "aliases": ["jquery", "JQuery"],
+        "related": ["JavaScript"]
+      },
+      "Redux": {
+        "aliases": ["Redux Toolkit", "RTK", "redux-toolkit"],
+        "related": ["React"]
+      },
+      "Tailwind CSS": {
+        "aliases": ["TailwindCSS", "Tailwind", "tailwindcss"],
+        "related": ["CSS", "PostCSS"]
+      },
+      "Bootstrap": {
+        "aliases": ["bootstrap 5", "Bootstrap 5", "twitter bootstrap"],
+        "related": ["CSS", "JavaScript"]
+      },
+      "Material UI": {
+        "aliases": ["MUI", "Material-UI", "MaterialUI"],
+        "related": ["React"]
+      },
+      "Ant Design": {
+        "aliases": ["AntD", "antd", "Ant-Design"],
+        "related": ["React"]
+      }
+    },
+    "Backend": {
+      "Node.js": {
+        "aliases": ["NodeJS", "Node", "node.js", "nodejs"],
+        "related": ["Express.js", "NestJS", "JavaScript", "TypeScript"]
+      },
+      "Express.js": {
+        "aliases": ["Express", "ExpressJS", "express", "expressjs"],
+        "related": ["Node.js"]
+      },
+      "NestJS": {
+        "aliases": ["Nest.js", "Nest", "nestjs"],
+        "related": ["Node.js", "TypeScript"]
+      },
+      "Spring Boot": {
+        "aliases": ["SpringBoot", "Spring-Boot", "springboot"],
+        "related": ["Java", "Spring", "Maven", "Gradle"]
+      },
+      "Spring": {
+        "aliases": ["Spring Framework", "spring framework"],
+        "related": ["Java", "Spring Boot"]
+      },
+      "Django": {
+        "aliases": ["django framework"],
+        "related": ["Python", "Django REST Framework"]
+      },
+      "Flask": {
+        "aliases": ["flask framework"],
+        "related": ["Python"]
+      },
+      "FastAPI": {
+        "aliases": ["fast api", "fastapi"],
+        "related": ["Python", "Async"]
+      },
+      "Laravel": {
+        "aliases": ["laravel framework"],
+        "related": ["PHP"]
+      },
+      "Ruby on Rails": {
+        "aliases": ["Rails", "RoR", "ruby rails"],
+        "related": ["Ruby"]
+      },
+      "ASP.NET Core": {
+        "aliases": ["ASP.NET", "ASPNET Core", "aspnet", ".NET Core Web API"],
+        "related": ["C#", ".NET"]
+      },
+      "Gin": {
+        "aliases": ["Gin Framework", "gin-gonic"],
+        "related": ["Go"]
+      },
+      "Echo": {
+        "aliases": ["Echo Framework", "labstack echo"],
+        "related": ["Go"]
+      },
+      "Fiber": {
+        "aliases": ["Fiber Framework", "gofiber"],
+        "related": ["Go"]
+      }
+    },
+    "Databases": {
+      "PostgreSQL": {
+        "aliases": ["Postgres", "postgres", "postgresql", "psql", "PG"],
+        "related": ["SQL", "Database Design"]
+      },
+      "MySQL": {
+        "aliases": ["mysql", "MariaDB", "mariadb"],
+        "related": ["SQL", "Database Design"]
+      },
+      "MongoDB": {
+        "aliases": ["Mongo", "mongo", "mongodb", "Mongo DB"],
+        "related": ["NoSQL", "Document Database"]
+      },
+      "Redis": {
+        "aliases": ["redis", "Redis Cache", "redis cache"],
+        "related": ["Caching", "In-Memory Database"]
+      },
+      "Elasticsearch": {
+        "aliases": ["ES", "Elastic Search", "elastic search", "ELK"],
+        "related": ["Search Engine", "Kibana", "Logstash"]
+      },
+      "Cassandra": {
+        "aliases": ["Apache Cassandra", "cassandra"],
+        "related": ["NoSQL", "Distributed Database"]
+      },
+      "DynamoDB": {
+        "aliases": ["AWS DynamoDB", "Dynamo DB", "dynamodb"],
+        "related": ["AWS", "NoSQL"]
+      },
+      "Oracle": {
+        "aliases": ["Oracle DB", "Oracle Database", "oracle", "OracleDB"],
+        "related": ["SQL", "PL/SQL"]
+      },
+      "SQL Server": {
+        "aliases": [
+          "MSSQL",
+          "Microsoft SQL Server",
+          "MS SQL",
+          "mssql",
+          "sql server"
+        ],
+        "related": ["SQL", "T-SQL", "Azure"]
+      },
+      "SQLite": {
+        "aliases": ["sqlite", "sqlite3"],
+        "related": ["SQL", "Embedded Database"]
+      },
+      "Neo4j": {
+        "aliases": ["neo4j", "Graph Database"],
+        "related": ["Graph Database", "Cypher"]
+      },
+      "InfluxDB": {
+        "aliases": ["influxdb", "Influx DB"],
+        "related": ["Time Series Database"]
+      }
+    },
+    "Cloud Platforms": {
+      "AWS": {
+        "aliases": ["Amazon Web Services", "amazon web services", "aws"],
+        "related": ["EC2", "S3", "Lambda", "RDS", "ECS", "EKS"]
+      },
+      "Azure": {
+        "aliases": ["Microsoft Azure", "azure", "Azure Cloud"],
+        "related": ["Azure Functions", "Azure DevOps", "AKS"]
+      },
+      "GCP": {
+        "aliases": [
+          "Google Cloud Platform",
+          "Google Cloud",
+          "google cloud",
+          "gcp"
+        ],
+        "related": ["BigQuery", "GKE", "Cloud Functions"]
+      },
+      "DigitalOcean": {
+        "aliases": ["Digital Ocean", "digitalocean", "DO"],
+        "related": ["Droplets", "Kubernetes"]
+      },
+      "Heroku": {
+        "aliases": ["heroku"],
+        "related": ["PaaS"]
+      },
+      "Vercel": {
+        "aliases": ["vercel", "Zeit"],
+        "related": ["Next.js", "Serverless"]
+      },
+      "Netlify": {
+        "aliases": ["netlify"],
+        "related": ["JAMstack", "Serverless"]
+      }
+    },
+    "DevOps": {
+      "Docker": {
+        "aliases": ["docker", "Docker Container", "Containerization"],
+        "related": ["Kubernetes", "Docker Compose", "Container"]
+      },
+      "Kubernetes": {
+        "aliases": ["K8s", "k8s", "kubernetes", "K8S"],
+        "related": ["Docker", "Helm", "Container Orchestration"]
+      },
+      "Terraform": {
+        "aliases": ["terraform", "TF", "Infrastructure as Code", "IaC"],
+        "related": ["AWS", "Azure", "GCP", "Infrastructure"]
+      },
+      "Ansible": {
+        "aliases": ["ansible", "Configuration Management"],
+        "related": ["Infrastructure", "Automation"]
+      },
+      "Jenkins": {
+        "aliases": ["jenkins", "Jenkins CI"],
+        "related": ["CI/CD", "Automation"]
+      },
+      "GitLab CI/CD": {
+        "aliases": ["GitLab CI", "gitlab ci", "GitLab Pipeline"],
+        "related": ["CI/CD", "GitLab"]
+      },
+      "GitHub Actions": {
+        "aliases": ["github actions", "GH Actions"],
+        "related": ["CI/CD", "GitHub"]
+      },
+      "CircleCI": {
+        "aliases": ["circleci", "Circle CI"],
+        "related": ["CI/CD"]
+      },
+      "ArgoCD": {
+        "aliases": ["Argo CD", "argocd", "Argo"],
+        "related": ["Kubernetes", "GitOps"]
+      },
+      "Prometheus": {
+        "aliases": ["prometheus"],
+        "related": ["Monitoring", "Grafana"]
+      },
+      "Grafana": {
+        "aliases": ["grafana"],
+        "related": ["Monitoring", "Prometheus"]
+      },
+      "Nginx": {
+        "aliases": ["nginx", "NGINX"],
+        "related": ["Web Server", "Reverse Proxy", "Load Balancer"]
+      },
+      "Apache": {
+        "aliases": ["Apache HTTP", "httpd", "Apache Server"],
+        "related": ["Web Server"]
+      },
+      "Linux": {
+        "aliases": ["linux", "Ubuntu", "CentOS", "Debian", "RHEL", "Red Hat"],
+        "related": ["Shell", "Bash", "System Administration"]
+      },
+      "Helm": {
+        "aliases": ["helm", "Helm Charts"],
+        "related": ["Kubernetes"]
+      }
+    },
+    "Message Queue": {
+      "Kafka": {
+        "aliases": ["Apache Kafka", "kafka", "Kafka Streams"],
+        "related": ["Event Streaming", "Message Queue"]
+      },
+      "RabbitMQ": {
+        "aliases": ["rabbitmq", "Rabbit MQ", "RMQ"],
+        "related": ["Message Queue", "AMQP"]
+      },
+      "Redis Pub/Sub": {
+        "aliases": ["Redis PubSub", "redis pub sub"],
+        "related": ["Redis", "Message Queue"]
+      },
+      "AWS SQS": {
+        "aliases": ["SQS", "Simple Queue Service", "Amazon SQS"],
+        "related": ["AWS", "Message Queue"]
+      },
+      "AWS SNS": {
+        "aliases": ["SNS", "Simple Notification Service", "Amazon SNS"],
+        "related": ["AWS", "Notification"]
+      }
+    },
+    "AI/ML": {
+      "TensorFlow": {
+        "aliases": ["tensorflow", "TF", "TensorFlow 2"],
+        "related": ["Deep Learning", "Machine Learning", "Python"]
+      },
+      "PyTorch": {
+        "aliases": ["pytorch", "Torch"],
+        "related": ["Deep Learning", "Machine Learning", "Python"]
+      },
+      "Scikit-learn": {
+        "aliases": ["sklearn", "scikit learn", "sk-learn"],
+        "related": ["Machine Learning", "Python"]
+      },
+      "Pandas": {
+        "aliases": ["pandas"],
+        "related": ["Data Analysis", "Python"]
+      },
+      "NumPy": {
+        "aliases": ["numpy"],
+        "related": ["Data Analysis", "Python"]
+      },
+      "OpenAI": {
+        "aliases": ["GPT", "ChatGPT", "GPT-4", "GPT-3", "openai"],
+        "related": ["LLM", "AI"]
+      },
+      "LangChain": {
+        "aliases": ["langchain", "Lang Chain"],
+        "related": ["LLM", "AI", "RAG"]
+      },
+      "Hugging Face": {
+        "aliases": ["HuggingFace", "huggingface", "Transformers"],
+        "related": ["NLP", "Deep Learning"]
+      }
+    },
+    "Mobile": {
+      "React Native": {
+        "aliases": ["ReactNative", "react native", "RN"],
+        "related": ["React", "Mobile Development", "JavaScript"]
+      },
+      "Flutter": {
+        "aliases": ["flutter"],
+        "related": ["Dart", "Mobile Development"]
+      },
+      "iOS Development": {
+        "aliases": ["iOS", "ios", "iPhone Development", "iPad Development"],
+        "related": ["Swift", "Objective-C", "Xcode"]
+      },
+      "Android Development": {
+        "aliases": ["Android", "android"],
+        "related": ["Kotlin", "Java", "Android Studio"]
+      }
+    },
+    "Testing": {
+      "Jest": {
+        "aliases": ["jest", "Jest Testing"],
+        "related": ["JavaScript", "React"]
+      },
+      "Cypress": {
+        "aliases": ["cypress", "Cypress.io"],
+        "related": ["E2E Testing", "JavaScript"]
+      },
+      "Selenium": {
+        "aliases": ["selenium", "Selenium WebDriver"],
+        "related": ["E2E Testing", "Automation Testing"]
+      },
+      "JUnit": {
+        "aliases": ["junit", "JUnit 5"],
+        "related": ["Java", "Unit Testing"]
+      },
+      "PyTest": {
+        "aliases": ["pytest", "py.test"],
+        "related": ["Python", "Unit Testing"]
+      },
+      "Mocha": {
+        "aliases": ["mocha", "MochaJS"],
+        "related": ["JavaScript", "Node.js"]
+      },
+      "Playwright": {
+        "aliases": ["playwright"],
+        "related": ["E2E Testing", "JavaScript"]
+      }
+    },
+    "API": {
+      "REST API": {
+        "aliases": ["REST", "RESTful", "restful", "REST APIs", "RESTful API"],
+        "related": ["API Design", "HTTP"]
+      },
+      "GraphQL": {
+        "aliases": ["graphql", "Graph QL"],
+        "related": ["API", "Apollo"]
+      },
+      "gRPC": {
+        "aliases": ["grpc", "GRPC", "Protocol Buffers", "Protobuf"],
+        "related": ["API", "Microservices"]
+      },
+      "WebSocket": {
+        "aliases": ["websocket", "WS", "Web Socket", "Socket.io"],
+        "related": ["Real-time", "Communication"]
+      },
+      "OpenAPI": {
+        "aliases": ["Swagger", "swagger", "OpenAPI Specification", "OAS"],
+        "related": ["API Documentation"]
+      }
+    },
+    "Version Control": {
+      "Git": {
+        "aliases": ["git", "Version Control", "Source Control"],
+        "related": ["GitHub", "GitLab", "Bitbucket"]
+      },
+      "GitHub": {
+        "aliases": ["github", "Git Hub"],
+        "related": ["Git", "GitHub Actions"]
+      },
+      "GitLab": {
+        "aliases": ["gitlab", "Git Lab"],
+        "related": ["Git", "GitLab CI/CD"]
+      },
+      "Bitbucket": {
+        "aliases": ["bitbucket"],
+        "related": ["Git", "Jira"]
+      }
+    },
+    "Architecture": {
+      "Microservices": {
+        "aliases": ["microservice", "Microservice Architecture", "MSA"],
+        "related": ["Docker", "Kubernetes", "API Gateway"]
+      },
+      "Serverless": {
+        "aliases": ["serverless", "FaaS", "Function as a Service"],
+        "related": ["AWS Lambda", "Azure Functions", "Cloud Functions"]
+      },
+      "Event-Driven Architecture": {
+        "aliases": ["EDA", "Event Driven", "event-driven"],
+        "related": ["Kafka", "Message Queue"]
+      },
+      "Domain-Driven Design": {
+        "aliases": ["DDD", "domain driven design"],
+        "related": ["Clean Architecture", "Microservices"]
+      },
+      "Clean Architecture": {
+        "aliases": [
+          "clean architecture",
+          "Hexagonal Architecture",
+          "Ports and Adapters"
+        ],
+        "related": ["DDD", "SOLID"]
+      }
+    },
+    "Security": {
+      "OAuth 2.0": {
+        "aliases": ["OAuth", "oauth", "OAuth2", "OAuth 2"],
+        "related": ["Authentication", "Authorization"]
+      },
+      "JWT": {
+        "aliases": ["JSON Web Token", "jwt", "JSON Web Tokens"],
+        "related": ["Authentication", "Security"]
+      },
+      "SSL/TLS": {
+        "aliases": ["SSL", "TLS", "HTTPS", "Certificate"],
+        "related": ["Security", "Encryption"]
+      }
+    }
+  },
+  "jobTitles": {
+    "Backend": {
+      "Backend Developer": [
+        "Backend Engineer",
+        "Back-end Developer",
+        "Back End Developer",
+        "Server-side Developer",
+        "API Developer",
+        "BE Developer"
+      ],
+      "Backend Software Engineer": ["Backend SWE", "BE Software Engineer"],
+      "Java Developer": [
+        "Java Engineer",
+        "Java Programmer",
+        "Java Backend Developer",
+        "J2EE Developer",
+        "Spring Developer",
+        "Spring Boot Developer"
+      ],
+      "Python Developer": [
+        "Python Engineer",
+        "Python Programmer",
+        "Python Backend Developer",
+        "Django Developer",
+        "Flask Developer"
+      ],
+      "Go Developer": [
+        "Golang Developer",
+        "Go Engineer",
+        "Golang Engineer",
+        "Go Backend Developer"
+      ],
+      "Node.js Developer": [
+        "NodeJS Developer",
+        "Node Developer",
+        "Node.js Engineer",
+        "Express Developer",
+        "NestJS Developer"
+      ],
+      ".NET Developer": [
+        "C# Developer",
+        "DotNet Developer",
+        "ASP.NET Developer",
+        ".NET Core Developer",
+        "C Sharp Developer"
+      ],
+      "PHP Developer": [
+        "PHP Engineer",
+        "Laravel Developer",
+        "Symfony Developer"
+      ],
+      "Ruby Developer": [
+        "Ruby on Rails Developer",
+        "Rails Developer",
+        "RoR Developer"
+      ]
+    },
+    "Frontend": {
+      "Frontend Developer": [
+        "Frontend Engineer",
+        "Front-end Developer",
+        "Front End Developer",
+        "UI Developer",
+        "FE Developer",
+        "Client-side Developer"
+      ],
+      "React Developer": [
+        "ReactJS Developer",
+        "React.js Developer",
+        "React Engineer",
+        "React Frontend Developer"
+      ],
+      "Vue.js Developer": [
+        "Vue Developer",
+        "VueJS Developer",
+        "Vue.js Engineer"
+      ],
+      "Angular Developer": ["AngularJS Developer", "Angular Engineer"],
+      "UI/UX Developer": ["UI Developer", "UX Developer", "UI/UX Engineer"]
+    },
+    "Full Stack": {
+      "Full Stack Developer": [
+        "Fullstack Developer",
+        "Full-Stack Developer",
+        "Full Stack Engineer",
+        "Fullstack Engineer",
+        "Full-Stack Engineer",
+        "FS Developer"
+      ],
+      "Software Engineer": [
+        "Software Developer",
+        "SWE",
+        "Programmer",
+        "Application Developer",
+        "Software Programmer"
+      ],
+      "Web Developer": [
+        "Web Engineer",
+        "Web Programmer",
+        "Web Application Developer"
+      ]
+    },
+    "Mobile": {
+      "Mobile Developer": [
+        "Mobile Engineer",
+        "Mobile Application Developer",
+        "App Developer"
+      ],
+      "iOS Developer": [
+        "iOS Engineer",
+        "iPhone Developer",
+        "Swift Developer",
+        "iOS Mobile Developer"
+      ],
+      "Android Developer": [
+        "Android Engineer",
+        "Android Mobile Developer",
+        "Kotlin Developer",
+        "Android App Developer"
+      ],
+      "React Native Developer": ["React Native Engineer", "RN Developer"],
+      "Flutter Developer": ["Flutter Engineer", "Dart Developer"]
+    },
+    "DevOps": {
+      "DevOps Engineer": [
+        "DevOps Developer",
+        "DevOps Specialist",
+        "Dev Ops Engineer",
+        "Platform Engineer"
+      ],
+      "Site Reliability Engineer": [
+        "SRE",
+        "SRE Engineer",
+        "Reliability Engineer"
+      ],
+      "Cloud Engineer": [
+        "Cloud Developer",
+        "Cloud Architect",
+        "Cloud Infrastructure Engineer"
+      ],
+      "Infrastructure Engineer": ["Infrastructure Developer", "Infra Engineer"],
+      "System Administrator": [
+        "SysAdmin",
+        "Systems Administrator",
+        "Linux Admin",
+        "System Engineer"
+      ]
+    },
+    "Data": {
+      "Data Engineer": [
+        "Data Developer",
+        "Data Platform Engineer",
+        "Big Data Engineer"
+      ],
+      "Data Scientist": ["Data Science Engineer", "ML Scientist"],
+      "Data Analyst": ["Business Analyst", "Data Analytics", "BI Analyst"],
+      "Machine Learning Engineer": [
+        "ML Engineer",
+        "AI Engineer",
+        "AI/ML Engineer",
+        "Deep Learning Engineer"
+      ],
+      "Database Administrator": ["DBA", "Database Engineer", "DB Admin"]
+    },
+    "QA": {
+      "QA Engineer": [
+        "Quality Assurance Engineer",
+        "QA Developer",
+        "Test Engineer",
+        "Quality Engineer"
+      ],
+      "Automation Engineer": [
+        "Test Automation Engineer",
+        "QA Automation Engineer",
+        "Automation Test Engineer",
+        "SDET"
+      ],
+      "Software Tester": ["Tester", "Manual Tester", "QA Tester"]
+    },
+    "Security": {
+      "Security Engineer": [
+        "Cybersecurity Engineer",
+        "Information Security Engineer",
+        "AppSec Engineer",
+        "SecOps Engineer"
+      ],
+      "Penetration Tester": ["Pen Tester", "Ethical Hacker", "Security Analyst"]
+    },
+    "Leadership": {
+      "Tech Lead": [
+        "Technical Lead",
+        "Team Lead",
+        "Engineering Lead",
+        "Development Lead",
+        "Lead Developer"
+      ],
+      "Engineering Manager": [
+        "Software Engineering Manager",
+        "Development Manager",
+        "IT Manager"
+      ],
+      "Software Architect": [
+        "Solution Architect",
+        "Technical Architect",
+        "System Architect",
+        "Application Architect"
+      ],
+      "CTO": [
+        "Chief Technology Officer",
+        "VP of Engineering",
+        "VP Engineering",
+        "Head of Engineering"
+      ]
+    }
+  },
+  "levels": {
+    "Entry Level": {
+      "aliases": [
+        "ENTRY",
+        "Entry",
+        "entry",
+        "Fresher",
+        "fresher",
+        "Fresh Graduate",
+        "fresh graduate",
+        "New Grad",
+        "new grad",
+        "Graduate",
+        "Trainee",
+        "Intern",
+        "0-1 years",
+        "No experience"
+      ],
+      "yearsRange": "0-1 years",
+      "responsibility": "Learning and contributing under guidance"
+    },
+    "Junior": {
+      "aliases": [
+        "JUNIOR",
+        "Junior",
+        "junior",
+        "Jr",
+        "Jr.",
+        "jr",
+        "Associate",
+        "associate",
+        "1-2 years",
+        "1-3 years"
+      ],
+      "yearsRange": "1-2 years",
+      "responsibility": "Individual contributor with growing independence"
+    },
+    "Mid Level": {
+      "aliases": [
+        "MID",
+        "Mid",
+        "mid",
+        "Middle",
+        "middle",
+        "Intermediate",
+        "intermediate",
+        "Regular",
+        "regular",
+        "2-4 years",
+        "3-5 years"
+      ],
+      "yearsRange": "3-5 years",
+      "responsibility": "Independent contributor, may mentor juniors"
+    },
+    "Senior": {
+      "aliases": [
+        "SENIOR",
+        "Senior",
+        "senior",
+        "Sr",
+        "Sr.",
+        "sr",
+        "Experienced",
+        "experienced",
+        "5+ years",
+        "5-7 years",
+        "5-10 years"
+      ],
+      "yearsRange": "5+ years",
+      "responsibility": "Technical leadership, mentoring, complex problem solving"
+    },
+    "Lead": {
+      "aliases": [
+        "LEAD",
+        "Lead",
+        "lead",
+        "Principal",
+        "principal",
+        "Staff",
+        "staff",
+        "Tech Lead",
+        "Team Lead",
+        "Architect",
+        "7+ years",
+        "8+ years",
+        "10+ years"
+      ],
+      "yearsRange": "7+ years",
+      "responsibility": "Team leadership, architecture decisions, cross-team collaboration"
+    }
+  },
+  "seniorityKeywords": {
+    "Entry": [
+      "entry level",
+      "entry-level",
+      "fresher",
+      "fresh graduate",
+      "graduate",
+      "trainee",
+      "intern"
+    ],
+    "Junior": ["junior", "jr", "jr.", "associate", "beginner"],
+    "Mid": ["mid-level", "mid level", "intermediate", "regular"],
+    "Senior": ["senior", "sr", "sr.", "experienced", "seasoned"],
+    "Lead": [
+      "lead",
+      "principal",
+      "staff",
+      "architect",
+      "manager",
+      "head",
+      "chief",
+      "director"
+    ]
+  },
+  "requirementKeywords": {
+    "Technical Skills": [
+      "proficient in",
+      "experience with",
+      "knowledge of",
+      "familiar with",
+      "expertise in",
+      "skilled in",
+      "hands-on experience",
+      "working knowledge",
+      "strong background in",
+      "solid understanding of",
+      "programming",
+      "coding",
+      "development",
+      "software"
+    ],
+    "Experience": [
+      "years of experience",
+      "year of experience",
+      "years experience",
+      "year experience",
+      "experience in",
+      "background in",
+      "track record",
+      "proven experience",
+      "demonstrated experience",
+      "relevant experience"
+    ],
+    "Education": [
+      "bachelor",
+      "master",
+      "phd",
+      "degree",
+      "computer science",
+      "software engineering",
+      "information technology",
+      "IT background",
+      "relevant degree",
+      "technical degree",
+      "university",
+      "college",
+      "graduated"
+    ],
+    "Soft Skills": [
+      "communication",
+      "teamwork",
+      "collaboration",
+      "problem solving",
+      "problem-solving",
+      "analytical",
+      "critical thinking",
+      "leadership",
+      "self-motivated",
+      "proactive",
+      "attention to detail",
+      "time management",
+      "ability to work",
+      "interpersonal"
+    ],
+    "Language": [
+      "english",
+      "vietnamese",
+      "japanese",
+      "korean",
+      "fluent in",
+      "proficiency in",
+      "language skills",
+      "communication in",
+      "written and verbal"
+    ],
+    "Certifications": [
+      "certification",
+      "certified",
+      "certificate",
+      "aws certified",
+      "azure certified",
+      "gcp certified",
+      "pmp",
+      "scrum",
+      "agile certified"
+    ],
+    "Nice to Have": [
+      "nice to have",
+      "preferred",
+      "plus",
+      "bonus",
+      "advantage",
+      "a plus",
+      "would be a plus",
+      "is a plus",
+      "beneficial",
+      "desirable"
+    ]
+  }
+}

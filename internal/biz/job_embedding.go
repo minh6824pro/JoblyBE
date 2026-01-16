@@ -217,86 +217,53 @@ func (uc *JobEmbeddingUseCase) SearchSimilarJobsBySkills(ctx context.Context, sk
 }
 
 // prepareEmbeddingTexts prepares text content for different embedding types
+// This method now uses ontology-based normalization for better consistency
 func (uc *JobEmbeddingUseCase) prepareEmbeddingTexts(job *JobPosting) map[string]string {
 	texts := make(map[string]string)
 
-	// Full content embedding
-	fullContent := uc.buildFullJobContent(job)
-	texts[string(milvusx.EmbeddingTypeFull)] = fullContent
+	// Get the normalizer instance
+	normalizer := GetDefaultNormalizer()
 
-	// Title embedding
-	texts[string(milvusx.EmbeddingTypeTitle)] = job.Title
+	// Normalize job data using ontology
+	normalizedData := normalizer.NormalizeJobPosting(job)
 
-	// Level embedding (with context for better semantic understanding)
+	// Get normalized texts optimized for embedding
+	normalizedTexts := normalizer.PrepareTextForEmbedding(normalizedData)
+
+	// Full content embedding (normalized)
+	texts[string(milvusx.EmbeddingTypeFull)] = normalizedTexts["full"]
+
+	// Title embedding (normalized with category and seniority context)
+	texts[string(milvusx.EmbeddingTypeTitle)] = normalizedTexts["title"]
+
+	// Level embedding (normalized with years range and responsibility context)
 	if job.Level != "" {
-		levelText := fmt.Sprintf("Job Level: %s. Experience level for this position.", string(job.Level))
-		texts[string(milvusx.EmbeddingTypeLevel)] = levelText
+		texts[string(milvusx.EmbeddingTypeLevel)] = normalizedTexts["level"]
 	}
 
-	// Requirements embedding
+	// Requirements embedding (normalized and categorized)
 	if job.Requirements != "" {
-		texts[string(milvusx.EmbeddingTypeRequirements)] = job.Requirements
+		texts[string(milvusx.EmbeddingTypeRequirements)] = normalizedTexts["requirements"]
 	}
 
-	// Skills embedding (combine tech stack)
+	// Skills embedding (normalized with categories and related skills)
 	if len(job.JobTech) > 0 {
-		skillsText := fmt.Sprintf("Technical Skills: %s", strings.Join(job.JobTech, ", "))
-		texts[string(milvusx.EmbeddingTypeSkills)] = skillsText
+		texts[string(milvusx.EmbeddingTypeSkills)] = normalizedTexts["skills"]
 	}
 
-	// Description embedding
+	// Description embedding (keep original as it's usually free-form)
 	if job.Description != "" {
 		texts[string(milvusx.EmbeddingTypeDescription)] = job.Description
 	}
 
+	// Log normalization results for debugging
+	uc.log.Debugf("Normalized job %s: Title[%s->%s] Level[%s->%s] Skills[%v->%v]",
+		job.ID,
+		normalizedData.OriginalTitle, normalizedData.NormalizedTitle,
+		normalizedData.OriginalLevel, normalizedData.NormalizedLevel,
+		normalizedData.OriginalSkills, normalizedData.NormalizedSkills)
+
 	return texts
-}
-
-// buildFullJobContent builds a comprehensive text representation of the job
-func (uc *JobEmbeddingUseCase) buildFullJobContent(job *JobPosting) string {
-	var parts []string
-
-	// Title and Level
-	parts = append(parts, fmt.Sprintf("Job Title: %s", job.Title))
-	parts = append(parts, fmt.Sprintf("Level: %s", job.Level))
-	parts = append(parts, fmt.Sprintf("Job Type: %s", job.JobType))
-
-	// Location
-	if job.Location != "" {
-		parts = append(parts, fmt.Sprintf("Location: %s", job.Location))
-	}
-
-	// Experience
-	if job.ExperienceRequirement != "" {
-		parts = append(parts, fmt.Sprintf("Experience Required: %s", job.ExperienceRequirement))
-	}
-
-	// Description
-	if job.Description != "" {
-		parts = append(parts, fmt.Sprintf("Description: %s", job.Description))
-	}
-
-	// Responsibilities
-	if job.Responsibilities != "" {
-		parts = append(parts, fmt.Sprintf("Responsibilities: %s", job.Responsibilities))
-	}
-
-	// Requirements
-	if job.Requirements != "" {
-		parts = append(parts, fmt.Sprintf("Requirements: %s", job.Requirements))
-	}
-
-	// Tech Stack
-	if len(job.JobTech) > 0 {
-		parts = append(parts, fmt.Sprintf("Technical Skills: %s", strings.Join(job.JobTech, ", ")))
-	}
-
-	// Benefits
-	if job.Benefits != "" {
-		parts = append(parts, fmt.Sprintf("Benefits: %s", job.Benefits))
-	}
-
-	return strings.Join(parts, "\n\n")
 }
 
 // generateEmbeddingID generates a unique ID for an embedding

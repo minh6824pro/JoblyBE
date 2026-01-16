@@ -26,6 +26,7 @@ const OperationJobPostingGetJobPosting = "/api.job.v1.JobPosting/GetJobPosting"
 const OperationJobPostingGetMyCreatedJobs = "/api.job.v1.JobPosting/GetMyCreatedJobs"
 const OperationJobPostingListJobPostings = "/api.job.v1.JobPosting/ListJobPostings"
 const OperationJobPostingListMyJobs = "/api.job.v1.JobPosting/ListMyJobs"
+const OperationJobPostingNormalizeJobPosting = "/api.job.v1.JobPosting/NormalizeJobPosting"
 const OperationJobPostingUpdateJobPosting = "/api.job.v1.JobPosting/UpdateJobPosting"
 
 type JobPostingHTTPServer interface {
@@ -43,6 +44,8 @@ type JobPostingHTTPServer interface {
 	ListJobPostings(context.Context, *ListJobPostingsRequest) (*ListJobPostingsReply, error)
 	// ListMyJobs List jobs created by current user/company (for HR)
 	ListMyJobs(context.Context, *ListMyJobsRequest) (*ListJobPostingsReply, error)
+	// NormalizeJobPosting Normalize a job posting using ontology-based text normalization
+	NormalizeJobPosting(context.Context, *NormalizeJobPostingRequest) (*NormalizeJobPostingReply, error)
 	// UpdateJobPosting Update an existing job posting
 	UpdateJobPosting(context.Context, *UpdateJobPostingRequest) (*JobPostingReply, error)
 }
@@ -57,6 +60,7 @@ func RegisterJobPostingHTTPServer(s *http.Server, srv JobPostingHTTPServer) {
 	r.GET("/api/v1/my-jobs", _JobPosting_ListMyJobs0_HTTP_Handler(srv))
 	r.GET("/api/v1/my-created-jobs", _JobPosting_GetMyCreatedJobs0_HTTP_Handler(srv))
 	r.GET("/api/v1/jobs/{id}/similar", _JobPosting_FindSimilarJobs0_HTTP_Handler(srv))
+	r.GET("/api/v1/jobs/{id}/normalize", _JobPosting_NormalizeJobPosting0_HTTP_Handler(srv))
 }
 
 func _JobPosting_CreateJobPosting0_HTTP_Handler(srv JobPostingHTTPServer) func(ctx http.Context) error {
@@ -229,6 +233,28 @@ func _JobPosting_FindSimilarJobs0_HTTP_Handler(srv JobPostingHTTPServer) func(ct
 	}
 }
 
+func _JobPosting_NormalizeJobPosting0_HTTP_Handler(srv JobPostingHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in NormalizeJobPostingRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationJobPostingNormalizeJobPosting)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.NormalizeJobPosting(ctx, req.(*NormalizeJobPostingRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*NormalizeJobPostingReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type JobPostingHTTPClient interface {
 	// CreateJobPosting Create a new job posting
 	CreateJobPosting(ctx context.Context, req *CreateJobPostingRequest, opts ...http.CallOption) (rsp *JobPostingReply, err error)
@@ -244,6 +270,8 @@ type JobPostingHTTPClient interface {
 	ListJobPostings(ctx context.Context, req *ListJobPostingsRequest, opts ...http.CallOption) (rsp *ListJobPostingsReply, err error)
 	// ListMyJobs List jobs created by current user/company (for HR)
 	ListMyJobs(ctx context.Context, req *ListMyJobsRequest, opts ...http.CallOption) (rsp *ListJobPostingsReply, err error)
+	// NormalizeJobPosting Normalize a job posting using ontology-based text normalization
+	NormalizeJobPosting(ctx context.Context, req *NormalizeJobPostingRequest, opts ...http.CallOption) (rsp *NormalizeJobPostingReply, err error)
 	// UpdateJobPosting Update an existing job posting
 	UpdateJobPosting(ctx context.Context, req *UpdateJobPostingRequest, opts ...http.CallOption) (rsp *JobPostingReply, err error)
 }
@@ -346,6 +374,20 @@ func (c *JobPostingHTTPClientImpl) ListMyJobs(ctx context.Context, in *ListMyJob
 	pattern := "/api/v1/my-jobs"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationJobPostingListMyJobs))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// NormalizeJobPosting Normalize a job posting using ontology-based text normalization
+func (c *JobPostingHTTPClientImpl) NormalizeJobPosting(ctx context.Context, in *NormalizeJobPostingRequest, opts ...http.CallOption) (*NormalizeJobPostingReply, error) {
+	var out NormalizeJobPostingReply
+	pattern := "/api/v1/jobs/{id}/normalize"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationJobPostingNormalizeJobPosting))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

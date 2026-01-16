@@ -505,6 +505,25 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/api.job.v1.DeleteJobPostingReply'
+    /api/v1/jobs/{id}/normalize:
+        get:
+            tags:
+                - JobPosting
+            description: Normalize a job posting using ontology-based text normalization
+            operationId: JobPosting_NormalizeJobPosting
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/api.job.v1.NormalizeJobPostingReply'
     /api/v1/jobs/{id}/similar:
         get:
             tags:
@@ -1466,6 +1485,74 @@ components:
                 pageSize:
                     type: integer
                     format: int32
+        api.job.v1.NormalizeJobPostingReply:
+            type: object
+            properties:
+                originalTitle:
+                    type: string
+                    description: Original values
+                originalSkills:
+                    type: array
+                    items:
+                        type: string
+                originalRequirements:
+                    type: string
+                originalLevel:
+                    type: string
+                normalizedTitle:
+                    type: string
+                    description: Normalized values
+                normalizedSkills:
+                    type: array
+                    items:
+                        type: string
+                normalizedRequirements:
+                    type: string
+                normalizedLevel:
+                    type: string
+                skillCategories:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.job.v1.SkillCategory'
+                    description: Enriched data from ontology
+                relatedSkills:
+                    type: array
+                    items:
+                        type: string
+                titleCategory:
+                    type: string
+                titleSeniority:
+                    type: string
+                requirementTypes:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/api.job.v1.RequirementCategory'
+                levelYearsRange:
+                    type: string
+                levelResponsibility:
+                    type: string
+                embeddingTextTitle:
+                    type: string
+                    description: Prepared texts for embedding
+                embeddingTextSkills:
+                    type: string
+                embeddingTextRequirements:
+                    type: string
+                embeddingTextLevel:
+                    type: string
+                embeddingTextFull:
+                    type: string
+            description: Normalized job data response
+        api.job.v1.RequirementCategory:
+            type: object
+            properties:
+                category:
+                    type: string
+                requirements:
+                    type: array
+                    items:
+                        type: string
+            description: Requirement category with requirements
         api.job.v1.SimilarJobResult:
             type: object
             properties:
@@ -1487,6 +1574,16 @@ components:
                     type: number
                     format: float
             description: Similar job with score breakdown
+        api.job.v1.SkillCategory:
+            type: object
+            properties:
+                category:
+                    type: string
+                skills:
+                    type: array
+                    items:
+                        type: string
+            description: Skill category with skills
         api.job.v1.UpdateCompanyRequest:
             type: object
             properties:

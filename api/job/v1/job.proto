@@ -67,6 +67,13 @@ service JobPosting {
 			get: "/api/v1/jobs/{id}/similar"
 		};
 	}
+
+	// Normalize a job posting using ontology-based text normalization
+	rpc NormalizeJobPosting (NormalizeJobPostingRequest) returns (NormalizeJobPostingReply) {
+		option (google.api.http) = {
+			get: "/api/v1/jobs/{id}/normalize"
+		};
+	}
 }
 
 // Company Service
@@ -249,6 +256,56 @@ message ListJobPostingsReply {
 	int32 total = 2;
 	int32 page = 3;
 	int32 page_size = 4;
+}
+
+// ==================== Normalize Job Messages ====================
+
+// Request to normalize a job posting
+message NormalizeJobPostingRequest {
+	string id = 1; // Job ID to normalize
+}
+
+// Skill category with skills
+message SkillCategory {
+	string category = 1;
+	repeated string skills = 2;
+}
+
+// Requirement category with requirements
+message RequirementCategory {
+	string category = 1;
+	repeated string requirements = 2;
+}
+
+// Normalized job data response
+message NormalizeJobPostingReply {
+	// Original values
+	string original_title = 1;
+	repeated string original_skills = 2;
+	string original_requirements = 3;
+	string original_level = 4;
+	
+	// Normalized values
+	string normalized_title = 5;
+	repeated string normalized_skills = 6;
+	string normalized_requirements = 7;
+	string normalized_level = 8;
+	
+	// Enriched data from ontology
+	repeated SkillCategory skill_categories = 9;
+	repeated string related_skills = 10;
+	string title_category = 11;
+	string title_seniority = 12;
+	repeated RequirementCategory requirement_types = 13;
+	string level_years_range = 14;
+	string level_responsibility = 15;
+	
+	// Prepared texts for embedding
+	string embedding_text_title = 16;
+	string embedding_text_skills = 17;
+	string embedding_text_requirements = 18;
+	string embedding_text_level = 19;
+	string embedding_text_full = 20;
 }
 
 // ==================== Company Messages ====================

@@ -299,3 +299,65 @@ func (s *JobPostingService) FindSimilarJobs(ctx context.Context, req *pb.FindSim
 		Count:       int32(len(similarJobs)),
 	}, nil
 }
+
+// NormalizeJobPosting normalizes a job posting using ontology-based text normalization
+func (s *JobPostingService) NormalizeJobPosting(ctx context.Context, req *pb.NormalizeJobPostingRequest) (*pb.NormalizeJobPostingReply, error) {
+	// Get the job posting
+	job, err := s.jobPostingUseCase.GetJobPosting(ctx, req.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Normalize using JDNormalizer
+	normalizer := biz.GetDefaultNormalizer()
+	normalizedData := normalizer.NormalizeJobPosting(job)
+	embeddingTexts := normalizer.PrepareTextForEmbedding(normalizedData)
+
+	// Convert skill categories to proto
+	skillCategories := make([]*pb.SkillCategory, 0)
+	for category, skills := range normalizedData.SkillCategories {
+		skillCategories = append(skillCategories, &pb.SkillCategory{
+			Category: category,
+			Skills:   skills,
+		})
+	}
+
+	// Convert requirement types to proto
+	requirementTypes := make([]*pb.RequirementCategory, 0)
+	for category, reqs := range normalizedData.RequirementTypes {
+		requirementTypes = append(requirementTypes, &pb.RequirementCategory{
+			Category:     category,
+			Requirements: reqs,
+		})
+	}
+
+	return &pb.NormalizeJobPostingReply{
+		// Original values
+		OriginalTitle:        normalizedData.OriginalTitle,
+		OriginalSkills:       normalizedData.OriginalSkills,
+		OriginalRequirements: normalizedData.OriginalRequirements,
+		OriginalLevel:        normalizedData.OriginalLevel,
+
+		// Normalized values
+		NormalizedTitle:        normalizedData.NormalizedTitle,
+		NormalizedSkills:       normalizedData.NormalizedSkills,
+		NormalizedRequirements: normalizedData.NormalizedRequirements,
+		NormalizedLevel:        normalizedData.NormalizedLevel,
+
+		// Enriched data from ontology
+		SkillCategories:     skillCategories,
+		RelatedSkills:       normalizedData.RelatedSkills,
+		TitleCategory:       normalizedData.TitleCategory,
+		TitleSeniority:      normalizedData.TitleSeniority,
+		RequirementTypes:    requirementTypes,
+		LevelYearsRange:     normalizedData.LevelYearsRange,
+		LevelResponsibility: normalizedData.LevelResponsibility,
+
+		// Prepared texts for embedding
+		EmbeddingTextTitle:        embeddingTexts["title"],
+		EmbeddingTextSkills:       embeddingTexts["skills"],
+		EmbeddingTextRequirements: embeddingTexts["requirements"],
+		EmbeddingTextLevel:        embeddingTexts["level"],
+		EmbeddingTextFull:         embeddingTexts["full"],
+	}, nil
+}
