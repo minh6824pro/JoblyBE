@@ -118,27 +118,29 @@ type ResumeRepo interface {
 
 // ResumeUseCase is the use case for resume operations
 type ResumeUseCase struct {
-	repo         ResumeRepo
-	userRepo     UserRepo
-	jobRepo      JobPostingRepo
-	trackingUC   *UserTrackingUseCase
-	parserClient *ParserClient
-	producer     *kafkax.Producer
-	openAIKey    string
-	log          *log.Helper
+	repo           ResumeRepo
+	userRepo       UserRepo
+	jobRepo        JobPostingRepo
+	trackingUC     *UserTrackingUseCase
+	parserClient   *ParserClient
+	jobEmbeddingUC *JobEmbeddingUseCase
+	producer       *kafkax.Producer
+	openAIKey      string
+	log            *log.Helper
 }
 
 // NewResumeUseCase creates a new resume use case
-func NewResumeUseCase(repo ResumeRepo, userRepo UserRepo, jobRepo JobPostingRepo, trackingUC *UserTrackingUseCase, parserClient *ParserClient, producer *kafkax.Producer, logger log.Logger) *ResumeUseCase {
+func NewResumeUseCase(repo ResumeRepo, userRepo UserRepo, jobRepo JobPostingRepo, trackingUC *UserTrackingUseCase, parserClient *ParserClient, jobEmbeddingUC *JobEmbeddingUseCase, producer *kafkax.Producer, logger log.Logger) *ResumeUseCase {
 	return &ResumeUseCase{
-		repo:         repo,
-		userRepo:     userRepo,
-		jobRepo:      jobRepo,
-		trackingUC:   trackingUC,
-		parserClient: parserClient,
-		producer:     producer,
-		openAIKey:    configx.GetEnvOrString("OPENAI_API_KEY", ""),
-		log:          log.NewHelper(logger),
+		repo:           repo,
+		userRepo:       userRepo,
+		jobRepo:        jobRepo,
+		trackingUC:     trackingUC,
+		parserClient:   parserClient,
+		jobEmbeddingUC: jobEmbeddingUC,
+		producer:       producer,
+		openAIKey:      configx.GetEnvOrString("OPENAI_API_KEY", ""),
+		log:            log.NewHelper(logger),
 	}
 }
 
@@ -835,6 +837,7 @@ func (uc *ResumeUseCase) GetJobsForEvaluation(ctx context.Context, userID string
 }
 
 // EvaluateWithJD evaluates a resume with a specific JD (synchronous)
+// It also finds similar JDs using RAG (job embedding) for better evaluation context
 func (uc *ResumeUseCase) EvaluateWithJD(ctx context.Context, resumeID, jobID, userID string) (*Resume, *ResumeEvaluation, error) {
 	// Get the resume
 	resume, err := uc.repo.GetResume(ctx, resumeID)
@@ -866,8 +869,30 @@ func (uc *ResumeUseCase) EvaluateWithJD(ctx context.Context, resumeID, jobID, us
 		return nil, nil, errors.InternalServer("PARSER_CLIENT_NOT_AVAILABLE", "Parser client is not initialized")
 	}
 
-	// Call evaluate service with specific JD
-	evaluateResp, err := uc.parserClient.EvaluateResumeWithJD(ctx, resume.ResumeDetail, job)
+	// Find similar JDs using RAG (job embedding)
+	var similarJobs []*JobPosting
+	if uc.jobEmbeddingUC != nil {
+		uc.log.Infof("Finding similar JDs for job %s using RAG", jobID)
+		similarResults, err := uc.jobEmbeddingUC.FindSimilarJobsByJobID(ctx, jobID, 3)
+		if err != nil {
+			uc.log.Warnf("Failed to find similar JDs: %v, continuing without similar JDs", err)
+		} else {
+			for _, result := range similarResults {
+				if result.Job != nil {
+					similarJobs = append(similarJobs, result.Job)
+				}
+			}
+			uc.log.Infof("Found %d similar JDs for evaluation context", len(similarJobs))
+		}
+	}
+
+	// Call evaluate service with target JD and similar JDs
+	var evaluateResp *EvaluateResponse
+	if len(similarJobs) > 0 {
+		evaluateResp, err = uc.parserClient.EvaluateResumeWithSimilarJDs(ctx, resume.ResumeDetail, job, similarJobs)
+	} else {
+		evaluateResp, err = uc.parserClient.EvaluateResumeWithJD(ctx, resume.ResumeDetail, job)
+	}
 	if err != nil {
 		uc.log.Errorf("Failed to evaluate resume with JD: %v", err)
 		return nil, nil, errors.InternalServer("EVALUATE_FAILED", "Failed to evaluate resume")
@@ -896,7 +921,7 @@ func (uc *ResumeUseCase) EvaluateWithJD(ctx context.Context, resumeID, jobID, us
 		Strengths:       evaluateResp.Strengths,
 		Weaknesses:      evaluateResp.Weaknesses,
 		Recommendations: evaluateResp.Recommendations,
-		JobsAnalyzed:    1,
+		JobsAnalyzed:    1 + len(similarJobs),
 		EvaluatedAt:     time.Now(),
 		Type:            "manual",
 		JobID:           jobID,

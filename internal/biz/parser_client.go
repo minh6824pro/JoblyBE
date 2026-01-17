@@ -86,6 +86,13 @@ type EvaluateRequest struct {
 	InteractionHistory *InteractionHistory `json:"interaction_history"`
 }
 
+// EvaluateWithJDRequest represents the request body for /evaluate/with-jd endpoint
+type EvaluateWithJDRequest struct {
+	CV         *EvaluateCV       `json:"cv"`
+	TargetJD   *JobDescription   `json:"target_jd"`
+	SimilarJDs []*JobDescription `json:"similar_jds,omitempty"`
+}
+
 type ScoreBreakdown struct {
 	SkillsScore       float64 `json:"skills_score"`
 	ExperienceScore   float64 `json:"experience_score"`
@@ -383,4 +390,88 @@ func (pc *ParserClient) EvaluateResumeWithJD(ctx context.Context, resumeDetail *
 
 	pc.log.Infof("Evaluate API with JD success - Score: %.2f, Grade: %s", response.OverallScore, response.Grade)
 	return &response, nil
+}
+
+// EvaluateResumeWithSimilarJDs evaluates a resume against a target JD and similar JDs
+func (pc *ParserClient) EvaluateResumeWithSimilarJDs(ctx context.Context, resumeDetail *ResumeDetail, targetJob *JobPosting, similarJobs []*JobPosting) (*EvaluateResponse, error) {
+	// Convert target job to JobDescription
+	targetJD := pc.convertJobToJobDescription(targetJob)
+
+	// Convert similar jobs to JobDescriptions
+	similarJDs := make([]*JobDescription, 0, len(similarJobs))
+	for _, job := range similarJobs {
+		if job != nil {
+			similarJDs = append(similarJDs, pc.convertJobToJobDescription(job))
+		}
+	}
+
+	// Convert resume detail to evaluate CV format
+	evaluateCV := pc.convertResumeToEvaluateCV(resumeDetail)
+
+	// Build request
+	request := &EvaluateWithJDRequest{
+		CV:         evaluateCV,
+		TargetJD:   targetJD,
+		SimilarJDs: similarJDs,
+	}
+
+	// Log request for debugging
+	companyName := ""
+	if targetJob.Company != nil {
+		companyName = targetJob.Company.Name
+	}
+	pc.log.Infof("Calling evaluate with-jd API: target=%s - %s, similar_jds_count=%d", targetJob.Title, companyName, len(similarJDs))
+
+	// Call parser service
+	var response EvaluateResponse
+	var errorResp ErrorResponse
+	resp, err := pc.client.R().
+		SetContext(ctx).
+		SetBody(request).
+		SetSuccessResult(&response).
+		SetErrorResult(&errorResp).
+		Post("/evaluate/with-jd")
+
+	if err != nil {
+		pc.log.Errorf("Failed to call evaluate with-jd API: %v", err)
+		return nil, fmt.Errorf("failed to call evaluate with-jd API: %w", err)
+	}
+
+	if !resp.IsSuccessState() {
+		// Log detailed error
+		pc.log.Errorf("Evaluate with-jd API error - Status: %d, Error: %+v, Body: %s",
+			resp.StatusCode, errorResp, string(resp.Bytes()))
+		return nil, fmt.Errorf("evaluate with-jd API returned error: status %d, reason: %s, message: %s",
+			resp.StatusCode, errorResp.Reason, errorResp.Message)
+	}
+
+	pc.log.Infof("Evaluate with-jd API success - Score: %.2f, Grade: %s", response.OverallScore, response.Grade)
+	return &response, nil
+}
+
+// convertJobToJobDescription converts JobPosting to JobDescription
+func (pc *ParserClient) convertJobToJobDescription(job *JobPosting) *JobDescription {
+	requirements := []string{}
+	if job.Requirements != "" {
+		requirements = append(requirements, job.Requirements)
+	}
+
+	responsibilities := []string{}
+	if job.Responsibilities != "" {
+		responsibilities = append(responsibilities, job.Responsibilities)
+	}
+
+	companyName := ""
+	if job.Company != nil {
+		companyName = job.Company.Name
+	}
+
+	return &JobDescription{
+		Title:                   job.Title,
+		Company:                 companyName,
+		Requirements:            requirements,
+		Responsibilities:        responsibilities,
+		PreferredQualifications: []string{},
+		RequiredSkills:          job.JobTech,
+	}
 }
